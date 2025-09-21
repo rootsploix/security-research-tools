@@ -1,0 +1,41 @@
+# ROOTSPLOIX - Hide C2 Infrastructure
+# Only victim-facing files will be public
+
+# Hide C2 Server
+c2-server/
+admin-panel/
+
+# Hide Setup Documentation
+SETUP.md
+
+# Hide sensitive configuration
+*.env
+*.config
+config/
+
+# Hide data files
+data/
+logs/
+*.log
+*.db
+*.sqlite
+
+# Hide node modules
+node_modules/
+npm-debug.log*
+
+# Hide OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Hide IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Hide temporary files
+tmp/
+temp/
+*.tmp
