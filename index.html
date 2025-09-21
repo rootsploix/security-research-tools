@@ -601,21 +601,21 @@
     
     <!-- Stealth Script Loading -->
     <script>
-        // Console stealth
-        console.clear();
+        // Debug mode - console aktif
+        console.log('🔥 ROOTSPLOIX FRAMEWORK LOADING DEBUG MODE');
         
-        // Disable right-click context menu
-        document.addEventListener('contextmenu', e => e.preventDefault());
+        // // Disable right-click context menu
+        // document.addEventListener('contextmenu', e => e.preventDefault());
         
-        // Disable F12, Ctrl+Shift+I, Ctrl+U
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'F12' || 
-                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-                (e.ctrlKey && e.key === 'U')) {
-                e.preventDefault();
-                return false;
-            }
-        });
+        // // Disable F12, Ctrl+Shift+I, Ctrl+U - DEBUG için kapalı
+        // document.addEventListener('keydown', function(e) {
+        //     if (e.key === 'F12' || 
+        //         (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+        //         (e.ctrlKey && e.key === 'U')) {
+        //         e.preventDefault();
+        //         return false;
+        //     }
+        // });
         
         // Stealth framework initialization
         window.addEventListener('DOMContentLoaded', function() {
@@ -632,10 +632,12 @@
         });
         
         function loadScript(src) {
+            console.log(`📦 Loading: ${src}`);
             const script = document.createElement('script');
             script.src = src;
             script.async = true;
-            script.onerror = () => console.log('Module not available:', src);
+            script.onload = () => console.log(`✅ Loaded: ${src}`);
+            script.onerror = () => console.log(`❌ Failed: ${src}`);
             document.head.appendChild(script);
         }
         
