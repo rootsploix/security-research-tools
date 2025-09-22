@@ -1,0 +1,31 @@
+🔥💀 ROOTSPLOIX BOT DEVİR REHBER 💀🔥
+
+YENİ KİŞİNİN CHAT ID'SİNİ ALMA:
+
+📱 ADIM 1: YENİ KİŞİ TELEGRAM'A GİDER
+• @userinfobot bot'una mesaj atar
+• Veya @RawDataBot'a /start yazar
+• Chat ID'si gösterilir (örnek: 1234567890)
+
+📱 ADIM 2: ID'Yİ BURAYA YAZIN
+Mevcut: 5312173877  
+Yeni: _______________ (buraya yaz)
+
+🔧 ADIM 3: CODE'DA DEĞİŞTİR
+Satır 212'de:
+chatId: '5312173877'  ←← ESKİ
+chatId: 'YENİ_ID'     ←← YENİ
+
+⚡ HIZLI DEĞİŞİM İÇİN:
+1. index.html'i aç
+2. Ctrl+F ile "5312173877" ara
+3. Yeni ID ile değiştir
+4. Kaydet
+5. Git commit + push
+
+💀 ROOTSPLOIX ARTIK YENİ SAHİBİNE RAPOR VERİR!
+
+---
+Bot Token: 8295691131:AAEJjGLfXEtbHhTyqJ4RC7JFbpGnx_OHthM
+Mevcut Chat ID: 5312173877
+Değiştirilecek: Evet

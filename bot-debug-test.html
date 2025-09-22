@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ROOTSPLOIX BOT DEBUG TEST</title>
+    <style>
+        body { 
+            background: #000; 
+            color: #00ff00; 
+            font-family: monospace; 
+            padding: 20px; 
+        }
+        .test-result { 
+            margin: 10px 0; 
+            padding: 10px; 
+            border: 1px solid #00ff00; 
+        }
+        .error { color: #ff0000; }
+        .success { color: #00ff00; }
+    </style>
+</head>
+<body>
+    <h1>🔥💀 ROOTSPLOIX BOT DEBUG TEST 💀🔥</h1>
+    
+    <div id="test-results"></div>
+    
+    <button onclick="testBot()" style="background:#ff0000;color:#fff;padding:15px 30px;border:none;cursor:pointer;margin:20px 0;">
+        🚀 TEST BOT ŞIMDI! 🚀
+    </button>
+    
+    <script>
+        // Telegram config
+        const BOT_TOKEN = '8295691131:AAEJjGLfXEtbHhTyqJ4RC7JFbpGnx_OHthM';
+        const CHAT_ID = '5312173877';
+        
+        function logTest(message, isError = false) {
+            const resultsDiv = document.getElementById('test-results');
+            const div = document.createElement('div');
+            div.className = `test-result ${isError ? 'error' : 'success'}`;
+            div.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            resultsDiv.appendChild(div);
+            console.log(message);
+        }
+        
+        async function testBot() {
+            logTest('🔥 BOT TEST BAŞLADI!');
+            
+            // Test 1: Telegram API
+            try {
+                const testMsg = `💀 BOT DEBUG TEST MESAJI! 💀
+                
+🎯 Session: debug_test_${Date.now()}
+🕒 Time: ${new Date().toLocaleString()}
+🔥 Status: DEBUGGING BOT COMMUNICATION
+📡 Test: Telegram API connectivity
+
+LAN BOT GÖNDERMEDI HALA BİŞE - DEBUG TESTİ!
+
+💀 ROOTSPLOIX DEBUG v3.0`;
+                
+                logTest('📡 Telegram API test ediliyor...');
+                
+                // Method 1: Fetch API
+                const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: testMsg,
+                        parse_mode: 'HTML'
+                    })
+                });
+                
+                if (response.ok) {
+                    logTest('✅ TELEGRAM API ÇALIŞIYOR! Mesaj gönderildi!');
+                    const result = await response.json();
+                    logTest(`📞 Response: ${JSON.stringify(result)}`);
+                } else {
+                    logTest(`❌ TELEGRAM API ERROR: ${response.status} ${response.statusText}`, true);
+                }
+                
+            } catch (error) {
+                logTest(`❌ TELEGRAM FETCH ERROR: ${error.message}`, true);
+                
+                // Method 2: Image loading fallback
+                logTest('🔄 Trying image loading method...');
+                try {
+                    const img = new Image();
+                    const params = new URLSearchParams({
+                        chat_id: CHAT_ID,
+                        text: 'BOT DEBUG - IMAGE LOADING TEST!'
+                    });
+                    img.src = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?${params.toString()}`;
+                    logTest('📸 Image loading method attempted');
+                } catch (imgError) {
+                    logTest(`❌ IMAGE LOADING ERROR: ${imgError.message}`, true);
+                }
+            }
+            
+            // Test 2: Framework initialization
+            logTest('🛠️ Framework initialization test...');
+            try {
+                if (typeof TelegramAPI !== 'undefined') {
+                    logTest('✅ TelegramAPI class mevcut');
+                } else {
+                    logTest('❌ TelegramAPI class bulunamadı!', true);
+                }
+                
+                if (typeof ROOTSPLOIX_CONFIG !== 'undefined') {
+                    logTest('✅ ROOTSPLOIX_CONFIG mevcut');
+                } else {
+                    logTest('❌ ROOTSPLOIX_CONFIG bulunamadı!', true);
+                }
+                
+            } catch (error) {
+                logTest(`❌ FRAMEWORK ERROR: ${error.message}`, true);
+            }
+            
+            logTest('🏁 BOT DEBUG TEST TAMAMLANDI!');
+        }
+        
+        // Auto test on load
+        setTimeout(() => {
+            logTest('🚀 Auto-starting debug test...');
+            testBot();
+        }, 1000);
+    </script>
+</body>
+</html>

