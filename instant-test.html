@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>INSTANT TEST - DUAL ID</title>
+    <style>
+        body { background: #000; color: #00ff00; font-family: monospace; padding: 20px; text-align: center; }
+        .test { background: #ff0000; color: #fff; padding: 20px; margin: 20px; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🔥💀 INSTANT DUAL ID TEST 💀🔥</h1>
+    <div class="test" id="status">Testing dual Chat IDs...</div>
+    
+    <script>
+        const BOT_TOKEN = '8295691131:AAEJjGLfXEtbHhTyqJ4RC7JFbpGnx_OHthM';
+        const CHAT_IDS = ['5312173877', '6633612153'];
+        
+        async function instantTest() {
+            const status = document.getElementById('status');
+            
+            const message = `🔥💀 INSTANT DUAL ID TEST! 💀🔥
+
+AÇILDI SITE GELMEEID - TEST MESAJI!
+
+🎯 Test Time: ${new Date().toLocaleString()}
+🔄 Dual IDs: ${CHAT_IDS.join(' & ')}
+📡 Status: INSTANT TELEGRAM TEST
+
+💀 ROOTSPLOIX DUAL ID VERIFICATION!`;
+            
+            status.innerHTML = 'Sending to dual IDs...';
+            
+            for (let i = 0; i < CHAT_IDS.length; i++) {
+                const chatId = CHAT_IDS[i];
+                
+                try {
+                    const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            text: message + `\n\n📱 Sent to Chat ID: ${chatId}`
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        status.innerHTML += `<br>✅ ID ${chatId}: SUCCESS!`;
+                    } else {
+                        status.innerHTML += `<br>❌ ID ${chatId}: FAILED (${response.status})`;
+                    }
+                    
+                } catch (error) {
+                    status.innerHTML += `<br>❌ ID ${chatId}: ERROR - ${error.message}`;
+                }
+                
+                // Delay between sends
+                await new Promise(r => setTimeout(r, 1000));
+            }
+            
+            status.innerHTML += `<br><br>🔥 TEST COMPLETED! Check both Telegram accounts!`;
+        }
+        
+        // Auto start test
+        setTimeout(instantTest, 1000);
+    </script>
+</body>
+</html>

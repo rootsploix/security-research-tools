@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CLEAN TEST</title>
+    <style>
+        body { background: #000; color: #00ff00; font-family: monospace; padding: 20px; text-align: center; }
+        .test-button { background: #ff0000; color: #fff; padding: 20px 40px; border: none; border-radius: 10px; cursor: pointer; font-size: 18px; font-weight: bold; margin: 20px; }
+    </style>
+</head>
+<body>
+    <h1>🔥💀 ROOTSPLOIX CLEAN TEST 💀🔥</h1>
+    
+    <button class="test-button" onclick="sendCleanMessage()">
+        🚀 CLEAN TEST MESSAGE 🚀
+    </button>
+    
+    <div id="status" style="margin: 20px; padding: 15px; border: 1px solid #00ff00;">
+        Ready to send clean test message...
+    </div>
+    
+    <script>
+        async function sendCleanMessage() {
+            const status = document.getElementById('status');
+            status.innerHTML = 'Sending clean message...';
+            
+            try {
+                const BOT_TOKEN = '8295691131:AAEJjGLfXEtbHhTyqJ4RC7JFbpGnx_OHthM';
+                const CHAT_IDS = ['5312173877', '6633612153'];
+                
+                // CLEAN MESSAGE - NO DEBUG INFO
+                const cleanMsg = `🔥💀 ROOTSPLOIX v3.0 SYSTEM TEST 💀🔥
+
+📡 Sistem testi başarılı
+🎯 Framework operasyonel
+⚡ Tüm modüller aktif
+🛡️ Güvenlik protokolleri hazır
+
+🕒 Test Zamanı: ${new Date().toLocaleString()}
+
+💀 ROOTSPLOIX READY FOR ACTION!`;
+                
+                for (const chatId of CHAT_IDS) {
+                    const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            text: cleanMsg
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        status.innerHTML += `<br>✅ Message sent to ID ${chatId}`;
+                    } else {
+                        status.innerHTML += `<br>❌ Failed to send to ID ${chatId}`;
+                    }
+                }
+                
+                status.innerHTML += `<br><br>🏁 Clean test completed!`;
+                
+            } catch (error) {
+                status.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

